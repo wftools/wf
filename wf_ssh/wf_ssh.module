@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the wf_ssh feature. Drupal requires this blank file.
+ */
+
+require_once 'wf_ssh.features.inc';

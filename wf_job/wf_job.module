@@ -1,0 +1,1178 @@
+<?php
+
+/**
+ * @file
+ * Workflow job module functions.
+ */
+
+include_once 'wf_job.features.inc';
+
+/**
+ * Implements hook_entity_info().
+ */
+function wf_job_entity_info() {
+  $info = array();
+
+  $info['wf_job'] = array(
+    'label' => t('Workflow Job'),
+    'entity class' => 'WfJob',
+    'controller class' => 'WfJobController',
+    'base table' => 'wf_job',
+    'revision table' => 'wf_job_revision',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+      'bundle' => 'bundle',
+      'id' => 'jid',
+      'revision' => 'vid',
+      'label' => 'job',
+      'uuid' => 'uuid',
+      'revision uuid' => 'vuuid',
+    ),
+    'bundle keys' => array(
+      'bundle' => 'bundle',
+    ),
+    'bundles' => array(),
+    'load hook' => 'wf_job_load',
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Full Job'),
+        'custom settings' =>  FALSE,
+      ),
+    ),
+    'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
+    'module' => 'wf_job',
+    'uuid' => TRUE,
+    'access callback' => 'wf_job_access',
+    'views controller class' => 'WfJobViewsController',
+  );
+
+  $info['wf_job_bundle'] = array(
+    'label' => t('Job Type'),
+    'entity class' => 'Entity',
+    'controller class' => 'EntityAPIControllerExportable',
+    'base table' => 'wf_job_bundle',
+    'fieldable' => FALSE,
+    'bundle of' => 'wf_job',
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'bundle',
+      'name' => 'bundle',
+      'label' => 'label',
+      'status' => 'status',
+      'module' => 'module',
+    ),
+    'module' => 'wf_job',
+    'admin ui' => array(
+      'path' => 'admin/structure/job-types',
+      'file' => 'includes/wf_job.admin.inc',
+    ),
+    'access callback' => 'wf_job_type_access',
+  );
+
+  foreach (wf_job_load_bundles() as $name => $bundle) {
+    $info['wf_job']['bundles'][$name] = array(
+      'label' => $bundle->label,
+      'admin' => array(
+        'path' => 'admin/structure/job-types/manage/%',
+        'real path' => 'admin/structure/job-types/manage/' . $name,
+        'bundle argument' => 4,
+        'access arguments' => array('administer jobs'),
+      ),
+    );
+  }
+
+  return $info;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function wf_job_menu() {
+  $items = array();
+  $items['job/add'] = array(
+    'title' => 'New job',
+    'access arguments' => array('manage jobs'),
+    'page callback' => 'wf_job_page_add',
+    'file' => 'includes/wf_job.pages.inc',
+  );
+
+  foreach (array_keys(wf_job_load_bundles()) as $bundle) {
+    $items['job/add/' . $bundle] = array(
+      'title' => 'New job',
+      'page callback' => 'wf_job_add',
+      'page arguments' => array(2),
+      'access callback' => 'entity_access',
+      'access arguments' => array('create', 'wf_job', $bundle),
+      'file' => 'includes/wf_job.pages.inc',
+    );
+  }
+
+  $items['job/%wf_job'] = array(
+    'title callback' => 'wf_job_page_title',
+    'title arguments' => array(1),
+    'access arguments' => array('access jobs'),
+    'page callback' => 'wf_job_view',
+    'page arguments' => array(1),
+    'file' => 'includes/wf_job.pages.inc',
+  );
+  $items['job/%wf_job/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['job/%wf_job/edit'] = array(
+    'title' => 'Edit',
+    'access arguments' => array('manage jobs'),
+    'page callback' => 'wf_job_edit',
+    'page arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/wf_job.pages.inc',
+  );
+  $items['job/%wf_job/login'] = array(
+    'title' => 'Login to dev sandbox',
+    'access arguments' => array('access jobs'),
+    'page callback' => 'wf_job_sandbox_login',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+  $items['job/%wf_job/start'] = array(
+    'title callback' => 'wf_job_action_title',
+    'title arguments' => array(1, 'start'),
+    'access callback' => 'wf_job_action_allowed',
+    'access arguments' => array(1, 'start'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_job_action_start_form', 1),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'includes/wf_job.admin.inc',
+  );
+  $items['job/%wf_job/propose'] = array(
+    'title callback' => 'wf_job_action_title',
+    'title arguments' => array(1, 'propose'),
+    'access callback' => 'wf_job_action_allowed',
+    'access arguments' => array(1, 'propose'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_job_action_propose_form', 1),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'includes/wf_job.admin.inc',
+  );
+  $items['job/%wf_job/review'] = array(
+    'title callback' => 'wf_job_action_title',
+    'title arguments' => array(1, 'review'),
+    'access callback' => 'wf_job_action_allowed',
+    'access arguments' => array(1, 'review'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_job_action_review_form', 1),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'includes/wf_job.admin.inc',
+  );
+  $items['job/%wf_job/delete'] = array(
+    'title' => 'Delete',
+    'access arguments' => array('delete jobs'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_job_delete_form', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/wf_job.pages.inc',
+    'weight' => 10,
+  );
+  $items['admin/content/jobs/drush-aliases'] = array(
+    'title' => 'Download drush aliases',
+    'description' => 'Admin page for exporting drush wf.aliases.drushrc.php file',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_job_export_drush_aliases_form'),
+    'access arguments' => array('export job aliases'),
+    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
+    'file' => 'includes/wf_job.pages.inc',
+  );
+  $items['admin/structure/job-types/manage/%wf_job_type'] = array(
+    'title' => 'Edit example type',
+    'access arguments' => array('administer jobs'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bundle_key_form', 4),
+    'type' => MENU_CALLBACK,
+    'file' => 'example.admin.inc',
+  );
+  $items['admin/structure/job-types/manage/%wf_job_type/edit'] = array(
+    'title' => 'Edit',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function wf_job_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add action link to 'job/add' on 'admin/content/jobs' page.
+  if ($root_path == 'admin/content/jobs') {
+    $item = menu_get_item('job/add');
+    if ($item['access']) {
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function wf_job_admin_paths() {
+  $paths = array(
+    'job/*/edit' => TRUE,
+    'job/*/delete' => TRUE,
+    'job/*/revisions' => TRUE,
+    'job/add' => TRUE,
+  );
+  return $paths;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function wf_job_permission() {
+  $perms = array();
+
+  $perms['access jobs'] = array(
+    'title' => t('View jobs.'),
+  );
+
+  $perms['administer jobs'] = array(
+    'title' => t('Manage configuration for jobs.'),
+  );
+
+  $perms['delete jobs'] = array(
+    'title' => t('Delete jobs'),
+  );
+
+  $perms['deploy jobs'] = array(
+    'title' => t('Deploy jobs through environments'),
+  );
+
+  $perms['manage jobs'] = array(
+    'title' => t('Create and update jobs.'),
+  );
+
+  $perms['review others jobs'] = array(
+    'title' => t('Review jobs owned by others.'),
+  );
+
+  $perms['review own jobs'] = array(
+    'title' => t('Review own jobs.'),
+  );
+
+  return $perms;
+}
+
+/**
+ * Implements hook_entity_property_info().
+ */
+function wf_job_entity_property_info() {
+
+  $info = array();
+  $properties = array();
+
+  $properties['jid'] = array(
+    'label' => t('ID'),
+    'type' => 'integer',
+    'description' => t('The unique job identifier.'),
+    'schema field' => 'jid',
+  );
+
+  $properties['vid'] = array(
+    'label' => t('Revision ID'),
+    'type' => 'integer',
+    'description' => t('The unique job revision identifier.'),
+    'schema field' => 'vid',
+  );
+
+  $properties['uuid'] = array(
+    'label' => t('UUID'),
+    'type' => 'integer',
+    'description' => t('The universally unique job identifier.'),
+    'schema field' => 'uuid',
+  );
+
+  $properties['vuuid'] = array(
+    'label' => t('Revision UUID'),
+    'type' => 'integer',
+    'description' => t('The universally unique job revision identifier.'),
+    'schema field' => 'vuuid',
+  );
+
+  $properties['bundle'] = array(
+    'label' => t('Bundle'),
+    'type' => 'text',
+    'description' => t('The job bundle.  This value is always job.'),
+    'schema field' => 'bundle',
+  );
+
+  $properties['title'] = array(
+    'label' => t('Title'),
+    'type' => 'text',
+    'description' => t('The name of the job.'),
+    'schema field' => 'title',
+  );
+
+  $properties['reference'] = array(
+    'label' => t('External Reference'),
+    'type' => 'text',
+    'description' => t('A reference identifier for the job in another system.'),
+    'schema field' => 'reference',
+  );
+
+  $properties['details'] = array(
+    'label' => t('Details'),
+    'type' => 'text',
+    'description' => t('Detailed notes about the job.'),
+    'schema field' => 'reference',
+  );
+
+  $properties['jsid'] = array(
+    'label' => t('Status'),
+    'type' => 'integer',
+    'description' => t('The current status of the job.'),
+    'options list' => 'wf_job_status_list',
+    'schema field' => 'jsid',
+  );
+
+  $properties['owner'] = array(
+    'label' => t('Owner'),
+    'type' => 'user',
+    'description' => t('The user who owns the job.'),
+    'schema field' => 'owner',
+  );
+
+  $properties['assigned'] = array(
+    'label' => t('Assignee'),
+    'type' => 'user',
+    'description' => t('The user who the job is currently assigned to.'),
+    'schema field' => 'assigned',
+  );
+
+  $properties['eid'] = array(
+    'label' => t('Environment'),
+    'type' => 'wf_environment',
+    'description' => t('The current environment for the job.'),
+    'schema field' => 'eid',
+  );
+
+  $properties['created'] = array(
+    'label' => t('Created'),
+    'type' => 'date',
+    'description' => 'Date when the job was created',
+    'schema field' => 'created',
+  );
+
+  $properties['modified'] = array(
+    'label' => t('Modified'),
+    'type' => 'date',
+    'description' => 'Date when the job was last modified',
+    'schema field' => 'created',
+  );
+
+  $properties['url'] = array(
+    'label' => t('URL'),
+    'description' => t("The URL of the job's view page."),
+    'getter callback' => 'wf_job_entity_metadata_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+  );
+
+  $properties['edit_url'] = array(
+    'label' => t('Edit URL'),
+    'description' => t("The URL of the job's edit page."),
+    'getter permission' => 'manage jobs',
+    'getter callback' => 'wf_job_entity_metadata_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+  );
+
+  $info['wf_job'] = array('properties' => $properties);
+  $info['wf_job_bundle'] = array('properties' => array());
+
+  return $info;
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ */
+function wf_job_field_extra_fields() {
+
+  $fields = array('form' => array(), 'display' => array());
+  $exclude_display = array('uuid', 'vid', 'vuuid');
+  $exclude_form = array('jid', 'bundle') + $exclude_display;
+  $weight = -50;
+
+  $info = wf_job_entity_property_info();
+  foreach($info['wf_job']['properties'] as $key => $values) {
+    if (!in_array($key, $exclude_display)) {
+      $fields['display'][$key] = array(
+        'label' => $values['label'],
+        'description' => $values['description'],
+        'weight' => $weight,
+      );
+    }
+    if (!in_array($key, $exclude_form)) {
+      $fields['form'][$key] = array(
+        'label' => $values['label'],
+        'description' => $values['description'],
+        'weight' => $weight,
+      );
+    }
+    ++$weight;
+  }
+
+  $entities = array();
+  foreach (array_keys(wf_job_load_bundles()) as $bundle) {
+    $entities[$bundle] = $fields;
+  }
+
+  return array('wf_job' => $entities);
+}
+
+/**
+ * Checks if a bundle exists.
+ *
+ * @param $name
+ *   The bundle to look up.
+ *
+ * @return bool
+ *   Does the bundle exist?
+ */
+function wf_job_bundle_exists($name) {
+  $bundles = wf_job_load_bundles();
+  return isset($bundles[$name]);
+}
+
+/**
+ * Returns all defined job bundles.
+ *
+ * @return array
+ */
+function wf_job_load_bundles() {
+  $cache = &drupal_static(__FUNCTION__);
+
+  if (!isset($cache)) {
+    $cache = db_select('wf_job_bundle', 'wjb')
+      ->fields('wjb')
+      ->orderBy('bundle')
+      ->execute()
+      ->fetchAllAssoc('bundle');
+  }
+
+  return $cache;
+}
+
+// Entity CRUD
+
+/**
+ * Creates a new job object.
+ */
+function entityform_create($values = array()) {
+  return entity_get_controller('wf_job')->create($values);
+}
+
+/**
+ * Deletes a job object.
+ */
+function wf_job_delete(WfJob $job) {
+  $job->delete();
+}
+
+/**
+ * Deletes multiple jobs.
+ *
+ * @param $ids array
+ *   A list of job ids to delete.
+ */
+function entityform_delete_multiple(array $ids) {
+  entity_get_controller('wf_job')->delete($ids);
+}
+
+/**
+ * Loads a job object.
+ */
+function wf_job_load($id = NULL, $reset = FALSE) {
+  $ids = (isset($id) ? array($id) : array());
+  $job = wf_job_load_multiple($ids, $reset);
+  return $job ? reset($job) : FALSE;
+}
+
+/**
+ * Loads one or more job objects.
+ */
+function wf_job_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wf_job', $ids, $conditions, $reset);
+}
+
+
+/**
+ * Saves a job.
+ *
+ * @param $job WfJob
+ * The job to save.
+ */
+function wf_job_save($job) {
+  $job->modified = REQUEST_TIME;
+  if (empty($job->jid) || !empty($job->is_new)) {
+    $job->created = REQUEST_TIME;
+    $job->uid = $GLOBALS['user']->uid;
+  }
+  entity_get_controller('wf_job')->save($job);
+}
+
+// /Entity CRUD
+
+/**
+ * Look up a job id using the reference value.
+ *
+ * @param $ref string
+ *  The reference to look up.
+ *
+ * @return array
+ *   List of ids found.
+ */
+function wf_job_id_by_reference($ref) {
+  $query = new EntityFieldQuery();
+  $jobs = $query->entityCondition('entity_type', 'wf_job')
+    ->propertyCondition('reference', $ref)
+    ->execute();
+
+  return $jobs;
+}
+
+/**
+ * Fetches a list of job status values.
+ *
+ * @return array
+ *   List of job statuses.
+ */
+function wf_job_status_list() {
+  $statuses = &drupal_static(__FUNCTION__);
+  if (empty($statuses)) {
+    $cached = cache_get('wf_job_status_list');
+    if ($cached) {
+      $statuses = $cached->data;
+    }
+    else {
+      $statuses = db_select('wf_job_status', 'wfs')
+        ->fields('wfs')
+        ->orderBy('jsid')
+        ->execute()
+        ->fetchAllKeyed();
+      cache_set('wf_job_status_list', $statuses, 'cache');
+    }
+  }
+  return $statuses;
+}
+
+function wf_job_preprocess_wf_job(&$variables) {
+  $sanitize = array(
+    'jid',
+    'title',
+    'reference',
+    'details',
+  );
+  foreach ($sanitize as $var) {
+    $variables['elements']['#job']->{$var} = check_plain($variables['elements']['#job']->{$var});
+  }
+
+  $variables['elements']['owner_name'] = theme('username', array('account' => user_load($variables['elements']['#job']->owner)));
+  $variables['elements']['assigned_name'] = theme('username', array('account' => user_load($variables['elements']['#job']->assigned)));
+  $variables['elements']['created_date'] = format_date($variables['elements']['#job']->created);
+}
+
+/**
+ * Provides a job sandbox uri.
+ *
+ * @param $job WfJob
+ * The job for which a sandbox URI is sought
+ */
+function wf_job_sandbox_uri($job, $path = '') {
+  $slug = wf_job_slug($job->jid);
+  $dev_env = wf_environment_dev();
+  return wf_environment_app_uri($dev_env, $job);
+}
+
+/**
+ * Provides the drush aliases for all current jobs.
+ *
+ * @return array
+ * An array of aliases
+ */
+function wf_job_drush_aliases() {
+  $query = new EntityFieldQuery();
+  $jids = $query->entityCondition('entity_type', 'wf_job')
+        ->propertyOrderBy('jid')
+        ->execute();
+
+  $jobs = array();
+  if (!empty($jids['wf_job'])) {
+    $jobs = entity_load('wf_job', array_keys($jids['wf_job']));
+  }
+
+  $aliases = array(
+    'job' => array(
+      'remote-host' => variable_get('wf_sandbox_remote_host', 'localhost'),
+    ),
+  );
+
+  foreach ($jobs as $job) {
+    $job_uri = wf_job_sandbox_uri($job);
+    $slug = wf_job_slug($job->jid);
+    $aliases[$slug] = array(
+      'parent' => '@job',
+      'uri' => preg_replace('#^https?://#', '', $job_uri['path']),
+      'root' => variable_get('wf_sandbox_basepath', '/srv/www') . "/$slug/",
+    );
+    $aliases[$job->reference] = array(
+      'parent' => "@$slug",
+    );
+  }
+
+  drupal_alter('wf_job_drush_aliases', $aliases);
+  return $aliases;
+}
+
+/**
+ * Access callback for the entity API.
+ *
+ * @param $op
+ *   The operation being performed. One of 'view', 'update', 'create', 'delete'
+ *   or just 'edit' (being the same as 'create' or 'update').
+ * @param $profile
+ *   (optional) A profile to check access for. If nothing is given, access for
+ *   all profiles is determined.
+ * @param $account
+ *   (optional) The user to check for. Leave it to NULL to check for the global user.
+ *
+ * @return boolean
+ *   Whether access is allowed or not.
+ */
+function wf_job_access($op, $type = NULL, $account = NULL) {
+  $perm = 'manage jobs';
+  if ('view' == $op) {
+    $perm = 'access jobs';
+  }
+  elseif ('deploy' == $op) {
+    $perm = 'deploy jobs';
+  }
+
+  return user_access($perm, $account);
+}
+
+/**
+ * Access callback for the entity API.
+ *
+ * @param $op
+ *   The operation being performed. One of 'view', 'update', 'create', 'delete'
+ *   or just 'edit' (being the same as 'create' or 'update').
+ * @param $profile
+ *   (optional) A profile to check access for. If nothing is given, access for
+ *   all profiles is determined.
+ * @param $account
+ *   (optional) The user to check for. Leave it to NULL to check for the global user.
+ *
+ * @return boolean
+ *   Whether access is allowed or not.
+ */
+function wf_job_type_access($op, $type = NULL, $account = NULL) {
+  return user_access('administer jobs', $account);
+}
+
+/**
+ * Implements hook_theme().
+ */
+function wf_job_theme() {
+  $themes = array();
+  $templates = drupal_get_path('module', 'wf_job') . '/includes';
+
+  $themes['wf_job_add_list'] = array(
+    'file' => 'wf_job.theme.inc',
+    'variables' => array('content' => NULL),
+    'path' => $templates,
+  );
+
+  $themes['wf_job_drush_aliases'] = array(
+    'file' => 'wf_job.theme.inc',
+    'variables' => array(
+      'aliases' => array(),
+    ),
+    'path' => $templates,
+  );
+
+  $themes['wf_job'] = array(
+    'file' => 'wf_job.theme.inc',
+    'render element' => 'elements',
+    'template' => 'wf_job',
+    'path' => $templates,
+  );
+
+  $themes['reply'] = array(
+    'file' => 'wf_job.theme.inc',
+    'render element' => 'elements',
+    'path' => $templates,
+    'template' => 'reply',
+  );
+
+  $themes['replies'] = array(
+    'file' => 'wf_job.theme.inc',
+    'render element' => 'elements',
+    'template' => 'replies',
+    'path' => $templates,
+  );
+
+  return $themes;
+}
+
+/**
+ * Returns whether the current user is allowed to perform the $action on the given $job at this time.
+ *
+ * @param WfJob $job
+ * @param string $action
+ * @return bool
+ */
+function wf_job_action_allowed($job, $action) {
+  return wf_job_action_allowed_by_user($job, $action) && wf_job_action_allowed_in_current_state($job, $action);
+}
+
+/**
+ * Returns whether the current user is allowed to perform the $action on the given $job
+ *
+ * @param WfJob $job
+ * @param string $action
+ * @return bool
+ */
+function wf_job_action_allowed_by_user($job, $action) {
+  global $user;
+
+  $is_admin = user_access('administer jobs');
+
+  switch ($action) {
+    default:
+      return FALSE;
+
+    case 'change_environment':
+    case 'change_status':
+      return $is_admin;
+
+    case 'change_owner':
+    case 'assign':
+      return TRUE;
+
+    case 'start':
+    case 'propose':
+      return $job->owner == $user->uid;
+
+    case 'review':
+    case 'approve':
+    case 'reject':
+      return $job->assigned == $user->uid;
+  }
+}
+
+/**
+ * Returns whether the $action is allowed for the $job in its current state.
+ *
+ * @param WfJob $job
+ * @param string $action
+ * @return bool
+ */
+function wf_job_action_allowed_in_current_state($job, $action) {
+  $statuses = wf_job_status_list();
+  $status = $statuses[empty($job->jsid) ? 1 : $job->jsid];
+  $env = wf_environment_load($job->eid);
+  $has_next_env = !empty($env->next_env_id);
+
+  switch ($action) {
+    default:
+      return FALSE;
+
+    case 'change_environment':
+    case 'change_status':
+      return TRUE;
+
+    case 'change_owner':
+    case 'assign':
+      return TRUE;
+
+    case 'start':
+      return $has_next_env && $status == 'New';
+    case 'propose':
+      return $has_next_env && $status == 'Started';
+
+    case 'review':
+    case 'approve':
+    case 'reject':
+      return $has_next_env && $status == 'In Review';
+  }
+}
+
+/**
+ * Returns the names of the fields used for reply commenting.
+ */
+function wf_job_reply_fields() {
+  $fields = array(
+    'title' => 'field_comment_title',
+    'body' => 'field_comment_body',
+    'entity' => 'field_comment',
+  );
+
+  drupal_alter('wf_job_reply_fields', $fields);
+  return $fields;
+}
+
+/**
+ * Provides the names of all users.
+ *
+ * @param string key
+ *   A key into the 'job_users' view to select different lists of users. If
+ *   omitted the default list is for all active users. Supported values include:
+ *   - review_others
+ *
+ * @return array
+ */
+function wf_job_users($permission = 'manage jobs') {
+
+  // Load the view and apply the filter.
+  $view = views_get_view('job_users');
+  $view->set_display('block');
+  $view->exposed_input['permission'] = $permission;
+
+  // Run the view
+  $view->pre_execute();
+  $view->execute();
+
+  $users = array();
+  foreach ($view->result as $result) {
+    $users[$result->uid] = $result->realname_realname;
+  }
+  return $users;
+}
+
+
+/**
+ * Provides the title of a menu callback.
+ */
+function wf_job_action_title($job, $action) {
+  switch ($action) {
+    case 'propose':
+    case 'approve':
+      $env = wf_environment_load($job->eid);
+      if (empty($env->next_env_id)) {
+        drupal_set_message(t("There is no next environment after @env", array('@env' => $env->env)), 'error');
+      }
+      else {
+        $next_env = wf_environment_load($env->next_env_id);
+        return t('@action for @environment', array('@action' => ucfirst($action), '@environment' => $next_env->env));
+      }
+    default:
+      return t(ucfirst($action));
+  }
+}
+
+/**
+ * Save a reply against a job.
+ */
+function wf_job_reply_save($job, $title, $body, array $extra_values = array()) {
+  global $user;
+  $reply_fields = wf_job_reply_fields();
+  $entity_field_name = $reply_fields['entity'];
+  $field = reset(_field_invoke_get_instances('wf_job', 'job', array('deleted' => FALSE, 'field_name' => $entity_field_name)));
+  $field_info = field_info_field($entity_field_name);
+
+  $reply_values = array(
+    'id' => NULL,
+    'uid' => $user->uid,
+    'bundle' => $field_info['settings']['bundle'],
+    'position' => NULL,
+    'parent' => NULL,
+    'entity_type' => 'wf_job',
+    'entity_id' => $job->jid,
+    'instance_id' => $field['id'],
+    'created' => REQUEST_TIME,
+    'language' => isset($entity->language) ? $entity->language : LANGUAGE_NONE,
+    'depth' => 0,
+    'hostname' => ip_address(),
+    'redirect' => entity_uri('wf_job', $job),
+    'status' => 1,
+    'deleted' => 0,
+    $reply_fields['title'] => array(LANGUAGE_NONE => array(array('value' => $title))),
+    $reply_fields['body'] => array(LANGUAGE_NONE => array(array('value' => $body))),
+  ) + $extra_values;
+
+  $reply = entity_get_controller('reply')->create($reply_values);
+  reply_save($reply);
+
+  return $reply;
+}
+
+/**
+ * Trigger event notifications for job actions.
+ */
+function wf_job_action_event_invoke($event, $job, $reply) {
+  $owner = user_load($job->owner);
+  $assigned = user_load($job->assigned);
+  $env = wf_environment_load($job->eid);
+  $next_env = FALSE;
+
+  if (!empty($env->next_env_id)) {
+    $next_env = wf_environment_load($env->next_env_id);
+  }
+
+  if (empty($next_env)) {
+    $next_env = entity_get_controller('wf_environment')->create(array('env' => 'None'));
+  }
+
+  rules_invoke_event_by_args("wf_job_$event", array(
+    'reply' => $reply,
+    'job' => $job,
+    'environment' => $env,
+    'next_environment' => $next_env,
+    'owner' => $owner,
+    'assigned' => $assigned,
+  ));
+}
+
+/**
+ * Records the outcome of a deployment.
+ *
+ * @param object $job
+ *   The WfJob
+ * @param bool $succeeded
+ *   Whether the deployment succeeded
+ * @param string $message
+ *   A comment about the deployment outcome.
+ * @return
+ *   TRUE
+ */
+function wf_job_deployment($job, $succeeded, $message) {
+  $env = wf_environment_load($job->eid);
+  $next_env = wf_environment_load($env->next_env_id);
+
+  if ($succeeded) {
+    $job->eid = $env->next_env_id;
+    if ($next_env->next_env_id) {
+      $job->setStatusName('Started');
+      $log_summary = "Deployed to @env";
+      $rules_event = 'deployed';
+    }
+    else {
+      $job->setStatusName('Completed');
+      $log_summary = "Deployed to @env and completed";
+      $rules_event = 'completed';
+    }
+  }
+  else {
+    $job->setStatusName('Needs Attention');
+    $log_summary = "Deployment to @env failed";
+    $rules_event = 'deployment_failed';
+  }
+
+  $job->rules_event = $rules_event;
+  $job->log_summary = t($log_summary, array('@env' => $next_env->label()));
+  $job->log = filter_xss_admin($message);
+
+  wf_job_save($job);
+
+  return TRUE;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function wf_job_block_info() {
+  $blocks = array();
+
+  $blocks['wf_job_env_status'] = array(
+    'info' => t('Job environment status'),
+  );
+
+  $blocks['wf_job_changes'] = array(
+    'info' => t('Job changes'),
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function wf_job_block_view($delta) {
+  switch ($delta) {
+    case 'wf_job_env_status':
+      return wf_job_env_status_block();
+    case 'wf_job_changes':
+      return wf_job_changes_block();
+  }
+}
+
+/**
+ * Returns a the wf_job_env_status block.
+ */
+function wf_job_env_status_block() {
+  $items = array();
+
+  $job = menu_get_object('wf_job');
+  if (empty($job)) {
+    return array();
+  }
+
+  $statuses = wf_job_status_list();
+  $status = $statuses[$job->jsid];
+  $class = array('passed');
+
+  foreach(wf_environment_list() as $id => $env) {
+    if ($job->eid == $id) {
+      $class = array('current', preg_replace('/[^a-z0-1]+/', '-', strtolower($status)));
+      $items[] = array('data' => t('@env: @status', array('@env' => $env->env, '@status' => $status)), 'class' => $class);
+      $class = array('future');
+      continue;
+    }
+    $items[] = array('data' => $env->env, 'class' => $class);
+  }
+
+  return array(
+    'subject' => t('Job progress'),
+    'content' => array(
+      '#theme' => 'item_list',
+      '#items' => $items,
+      '#attributes' => array('class' => array('job-env-status')),
+    ),
+  );
+}
+
+/**
+ * Returns a wf_job_changes block.
+ */
+function wf_job_changes_block() {
+  $job = menu_get_object('wf_job');
+  if (empty($job)) {
+    return array();
+  }
+
+  $content_url = wf_job_content_changes_link($job);
+  $job_uri = entity_uri('wf_job', $job);
+  return array(
+    '#wf_job' => $job,
+    'subject' => t('Job changes'),
+    'content' => array(
+      '#theme' => 'links',
+      '#links' => array(
+        array('title' => 'Login to dev sandbox', 'href' => $job_uri['path'] . '/login', 'attributes' => array('target' => '_blank')),
+        array('title' => 'Review content changes', 'href' => $content_url['path'], 'options' => $content_url['options'], 'attributes' => array('target' => '_blank')),
+      ),
+    ),
+  );
+}
+
+/**
+ * Provides a structured link array for use with the url() function
+ */
+function wf_job_content_changes_link($job) {
+  $dev_env = wf_environment_dev();
+  $merge_env = wf_environment_merge();
+
+  $current_env = wf_environment_load($job->eid);
+  if ($current_env == $dev_env) {
+    $content_url = wf_environment_app_uri($dev_env, $job, 'admin/content/deploy/plan/' . wf_job_slug($job->jid));
+  }
+  else {
+    $content_url = wf_environment_app_uri($merge_env, $job, 'admin/content/deploy/plan/' . wf_job_slug($job->jid));
+  }
+
+  return $content_url;
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function wf_job_entity_insert($entity, $entity_type) {
+  wf_job_entity_update($entity, $entity_type);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function wf_job_entity_update($entity, $entity_type) {
+  if ('wf_job' == $entity_type) {
+    $reply = wf_job_reply_save($entity, $entity->log_summary, $entity->log);
+    if (!empty($entity->rules_event)) {
+      wf_job_action_event_invoke($entity->rules_event, $entity, $reply);
+    }
+  }
+}
+
+/**
+ * Returns a slug for the given job id.
+ *
+ * @param int $job_id
+ */
+function wf_job_slug($jid) {
+  // wf_job_slug_pattern must contain a @jid placeholder for the jid.
+  $slug_pattern = variable_get('wf_job_slug_pattern', t('job@jid', array('@jid' => $jid)));
+  return sprintf($slug_pattern, $jid);
+}
+
+/**
+ * Callback for getting properties of an entity.
+ */
+function wf_job_entity_metadata_get_properties($entity, array $options, $name, $entity_type) {
+  switch ($name){
+    case 'url':
+      $return = entity_uri($entity_type, $entity);
+      return url($return['path'], $return['options'] + $options);
+
+    case 'edit_url':
+      $return = entity_uri($entity_type, $entity);
+      return url($return['path'] . '/edit', $return['options'] + $options);
+
+  }
+}
+
+/**
+ * Sets a warning if there are conflicts with the given job.
+ *
+ * @param WfJob $job
+ */
+function wf_job_report_conflicts($job) {
+  $env = wf_environment_load($job->eid);
+  $merge_env = wf_environment_merge();
+  if ($env == $merge_env) {
+    if (wf_job_get_deploy_conflicts($job) > 0) {
+      $plan_url = wf_environment_app_uri($env, $job, 'admin/content/deploy/plan/' . wf_job_slug($job->jid));
+      $plan_url['options'] = array_merge($plan_url['options'], array('attributes' => array('target' => '_blank')));
+      drupal_set_message(
+        t('<strong>Warning</strong>: Content changes in this job may conflict with changes in other jobs. !review', array(
+          '!review' => l('Review Conflicts', $plan_url['path'], $plan_url['options'])
+        )),
+        'warning',
+        FALSE
+      );
+    }
+  }
+}
+
+/**
+ * Returns the number of deploy conflicts this job has in it's current environment.
+ */
+function wf_job_get_deploy_conflicts($job) {
+  $env = wf_environment_load($job->eid);
+  $alias = $env->drush_alias;
+  $plan_name = wf_job_slug($job->jid);
+
+  $shell = new Shell();
+  $result = $shell->run("drush @$alias deploy-conflict-count", array(), array($plan_name));
+  $data = drupal_json_decode($result);
+  if (FALSE === $result || FALSE === $data) {
+    drupal_set_message(t('Could not check for conflicts'), 'error');
+    watchdog('wf_job', t('Could not check for conflicts: @error', array('@error' => $shell->getError())), NULL, WATCHDOG_ERROR);
+    return 0;
+  }
+  else {
+    return $data['conflicts'];
+  }
+}

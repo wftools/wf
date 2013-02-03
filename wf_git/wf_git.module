@@ -1,0 +1,96 @@
+<?php
+/**
+ * @file
+ *  Workflow Gitolite Module
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function wf_git_menu() {
+  $items = array();
+
+  $items['admin/config/development/git/diff'] = array(
+    'title' => t('Job Diff Settings'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_git_settings_form'),
+    'access arguments' => array('administer worklow git'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'wf_git.admin.inc',
+    'weight' => 10,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function wf_git_permission() {
+  $perms = array();
+
+  $perms['administer worklow git'] = array(
+    'title' => t('Administer workflow git'),
+  );
+
+  return $perms;
+}
+
+/**
+ * Implements hook_form_FORM_alter().
+ */
+function wf_git_form_wf_job_action_review_form_alter(&$form, &$form_state) {
+  $job = reset($form_state['build_info']['args']);
+  $link = wf_git_job_code_review_link($job);
+  if (!empty($link)) {
+    $form['changes']['links']['#links'][] = $link;
+  }
+}
+
+/**
+ * Implements hook_block_view_MODULE_DELTA_alter().
+ */
+function wf_git_block_view_wf_job_wf_job_changes_alter(&$data, $block) {
+  if (empty($data['#wf_job'])) {
+    return;
+  }
+
+  $job = $data['#wf_job'];
+  $link = wf_git_job_code_review_link($job);
+  if (!empty($link)) {
+    $link['title'] = t('Review code changes');
+    $data['content']['#links'][] = $link;
+  }
+}
+
+/**
+ * Return a link render array for the theme_links hook.
+ *
+ * @param WfJob $job
+ * @return array ('title' => '...', 'href' => '...', 'attributes' => array(...))
+ */
+function wf_git_job_code_review_link($job) {
+  static $job_links = array();
+
+  if (empty($job_links[$job->jid])) {
+    $path = variable_get('wf_git_diff_path', NULL);
+    $repo = variable_get('wf_git_diff_repository', NULL);
+    $secure = variable_get('wf_git_diff_secure', NULL);
+
+    if (empty($path) || empty($repo)) {
+      return;
+    }
+
+    $protocol = empty($secure) ? 'http' : 'https';
+    $host = git_repository_load($repo)->server()->host;
+    $path = ltrim(t($path, array('@branch' => wf_job_slug($job->jid))), '/');
+
+    $job_links[$job->jid] = array(
+      'title' => t('Review code changes'),
+      'href' => "{$protocol}://$host/$path",
+      'attributes' => array('target' => '_blank')
+    );
+  }
+
+  return $job_links[$job->jid];
+}

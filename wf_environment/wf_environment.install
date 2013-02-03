@@ -1,0 +1,234 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function wf_environment_schema() {
+  $schema = array();
+  $schema['wf_env'] = array(
+    'description' => 'Environments managed by workflow system.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Unique id.',
+      ),
+      'vid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The current version identifier.',
+      ),
+      'uuid' => array(
+        'type' => 'char',
+        'length' => 36,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The Universally Unique Identifier.',
+      ),
+      'bundle' => array(
+        'description' => 'The bundle type for the environment.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'env' => array(
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'description' => 'The name of the environment.',
+      ),
+      'drush_alias' => array(
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'description' => 'The drush alias for the environment.',
+      ),
+      'next_env_id' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The id of the next environment in the chain.',
+      ),
+      'notes' => array(
+        'type' => 'text',
+        'description' => 'Details about the environments.',
+      ),
+      'active' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'default' => 1,
+        'description' => 'Is the record active?',
+      ),
+      'created' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The Unix timestamp when the example was created.',
+      ),
+      'changed' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The Unix timestamp when the example was most recently saved.',
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The user who made the latest change',
+      ),
+    ),
+    'primary key' => array('id'),
+    'unique keys' => array(
+      'uuid' => array('uuid'),
+      'vid' => array('vid'),
+    ),
+    'foreign keys' => array(
+      'wf_env_revision' => array(
+        'table' => 'wf_env_revision',
+        'columns' => array('vid' => 'vid'),
+      ),
+    ),
+    'indexes' => array(
+      'env' => array('env'),
+      'bundle' => array('bundle'),
+      'active' => array('active'),
+    ),
+  );
+  $schema['wf_env_revision'] = array(
+    'description' => 'Revision history for environments managed by workflow system.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unique id.',
+      ),
+      'vid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The version identifier.',
+      ),
+      'vuuid' => array(
+        'type' => 'char',
+        'length' => 36,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The Universally Unique Identifier for the revision.',
+      ),
+      'bundle' => array(
+        'description' => 'The bundle type for the environment.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'env' => array(
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'description' => 'The name of the environment.',
+      ),
+      'drush_alias' => array(
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'description' => 'The drush alias for the environment.',
+      ),
+      'next_env_id' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The id of the next environment in the chain.',
+      ),
+      'notes' => array(
+        'type' => 'text',
+        'description' => 'Details about the environments.',
+      ),
+      'active' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'default' => 1,
+        'description' => 'Is the record active?',
+      ),
+      'changed' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The Unix timestamp when the example was most recently saved.',
+      ),
+      'log' => array(
+        'type' => 'text',
+        'description' => 'Log message for this revision.',
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The user who made this change',
+      ),
+    ),
+    'primary key' => array('vid'),
+    'unique keys' => array('vuuid' => array('vuuid')),
+    'indexes' => array(
+      'id' => array('id'),
+    ),
+  );
+
+  $schema['wf_env_bundle'] = array(
+    'description' => 'Stores information about all defined wf_env bundles.',
+    'fields' => array(
+      'bundle' => array(
+        'description' => 'The machine-readable name of this wf_env type.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'The human-readable name of this wf_env type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0x01,
+        'size' => 'tiny',
+        'description' => 'The exportable status of the entity.',
+      ),
+      'module' => array(
+        'description' => 'The name of the providing module if the entity has been defined in code.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('bundle'),
+    'unique keys' => array(),
+  );
+
+  return $schema;
+}
+
+/**
+ * Add bundle table.
+ */
+function wf_environment_update_7000($sandbox) {
+  $name = 'wf_env_bundle';
+  $schema = wf_environment_schema();
+  $table = $schema[$name];
+  db_create_table($name, $table);
+}
+

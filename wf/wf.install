@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * @file
+ * Workflow installation functions.
+ */
+
+/**
+ * Enable TEC module.
+ */
+function wf_update_7000($sandbox) {
+  $modules = array('tec');
+  module_enable($modules);
+}

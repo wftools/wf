@@ -1,0 +1,790 @@
+<?php
+
+/**
+ * @file
+ *   Workflow Environment Management functions.
+ */
+
+/**
+ * Implements hook_entity_info().
+ */
+function wf_environment_entity_info() {
+  $info = array();
+
+  $info['wf_environment'] = array(
+    'label' => t('Workflow Environment'),
+    'entity class' => 'WfEnvironment',
+    'controller class' => 'WfEnvironmentController',
+    'base table' => 'wf_env',
+    'revision table' => 'wf_env_revision',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+      'bundle' => 'bundle',
+      'id' => 'id',
+      'revision' => 'vid',
+      'label' => 'env',
+      'uuid' => 'uuid',
+      'revision uuid' => 'vuuid',
+    ),
+    'bundle keys' => array(
+      'bundle' => 'bundle',
+    ),
+    'bundles' => array(),
+    'load hook' => 'wf_environment_load',
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Full Environment'),
+        'custom settings' =>  FALSE,
+      ),
+    ),
+    'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
+    'module' => 'wf_environment',
+    'uuid' => TRUE,
+    'access callback' => 'wf_job_access',
+  );
+
+  $info['wf_environment_bundle'] = array(
+    'label' => t('Environment Type'),
+    'entity class' => 'Entity',
+    'controller class' => 'EntityAPIControllerExportable',
+    'base table' => 'wf_env_bundle',
+    'fieldable' => FALSE,
+    'bundle of' => 'wf_environment',
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'bundle',
+      'name' => 'bundle',
+      'label' => 'label',
+      'status' => 'status',
+      'module' => 'module',
+    ),
+    'module' => 'wf_environment',
+    'admin ui' => array(
+      'path' => 'admin/structure/env-types',
+      'file' => 'includes/wf_environment.admin.inc',
+    ),
+    'access callback' => 'wf_environment_type_access',
+  );
+
+  foreach (wf_environment_load_bundles() as $name => $bundle) {
+    $info['wf_environment']['bundles'][$name] = array(
+      'label' => $bundle->label,
+      'admin' => array(
+        'path' => 'admin/structure/env-types/manage/%',
+        'real path' => 'admin/structure/env-types/manage/' . $name,
+        'bundle argument' => 4,
+        'access arguments' => array('administer environments'),
+      ),
+    );
+  }
+
+  return $info;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function wf_environment_menu() {
+  $items = array();
+
+  $items['environment/%wf_environment'] = array(
+    'title callback' => 'wf_environment_page_title',
+    'title arguments' => array(1),
+    'access arguments' => array('access environments'),
+    'page callback' => 'wf_environment_view',
+    'page arguments' => array(1),
+  );
+  $items['environment/%wf_environment/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['environment/%wf_environment/edit'] = array(
+    'title' => 'Edit',
+    'access arguments' => array('manage environments'),
+    'page callback' => 'wf_environment_edit',
+    'page arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['environment/add'] = array(
+    'title' => 'Add new environment',
+    'access arguments' => array('manage environments'),
+    'page callback' => 'wf_environment_page_add',
+    'access arguments' => array('manage environments'),
+  );
+  foreach (wf_environment_load_bundles() as $name => $bundle) {
+    $items['environment/add/' . $name] = array(
+      'title' => 'Add new environment',
+      'access arguments' => array('manage environments'),
+      'page callback' => 'wf_environment_add',
+      'page arguments' => array(2),
+      'access arguments' => array('manage environments'),
+    );
+  }
+  $items['admin/content/environments'] = array(
+    'title' => 'Environments',
+    'description' => 'Manage environments.',
+    'page callback' => 'wf_environment_admin_list',
+    'access arguments' => array('manage environments'),
+    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
+    'file' => 'includes/wf_environment.admin.inc',
+  );
+  $items['admin/structure/env-types/manage/%wf_environment_bundle'] = array(
+    'title' => 'Edit example type',
+    'access arguments' => array('administer environments'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bundle_key_form', 4),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/wf_environment.admin.inc',
+  );
+  $items['admin/structure/job-types/manage/%wf_environment_bundle/edit'] = array(
+    'title' => 'Edit',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function wf_environment_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add action link to 'environment/add' on 'admin/content/environments' page.
+  if ($root_path == 'admin/content/environments') {
+    $item = menu_get_item('environment/add');
+    if ($item['access']) {
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function wf_environment_admin_paths() {
+  $paths = array(
+    'environment/*/edit' => TRUE,
+    'environment/*/delete' => TRUE,
+    'environment/*/revisions' => TRUE,
+    'environment/*/revisions/*/revert' => TRUE,
+    'environment/*/revisions/*/delete' => TRUE,
+    'environment/add' => TRUE,
+  );
+  return $paths;
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+function wf_environment_permission() {
+  $perms = array();
+
+  $perms['administer environments'] = array(
+    'title' => t('Manage configuration for environments.'),
+  );
+
+  $perms['access environments'] = array(
+    'title' => t('View environments.'),
+  );
+
+  $perms['manage environments'] = array(
+    'title' => t('Create and update environments.'),
+  );
+
+  return $perms;
+}
+
+/**
+ * Implements hook_entity_property_info().
+ */
+function wf_environment_entity_property_info() {
+  $info = array();
+  $properties = array();
+
+  $properties['id'] = array(
+    'label' => t('Environment ID'),
+    'description' => t('The unique environment identifier.'),
+    'type' => 'integer',
+    'schema field' => 'id',
+  );
+
+  $properties['vid'] = array(
+    'label' => t('Revision ID'),
+    'description' => t('The unique environment revision identifier.'),
+    'type' => 'integer',
+    'schema field' => 'vid',
+  );
+
+  $properties['uuid'] = array(
+    'label' => t('Job UUID'),
+    'type' => 'integer',
+    'description' => t('The universally unique job identifier.'),
+    'schema field' => 'uuid',
+  );
+
+  $properties['vuuid'] = array(
+    'label' => t('Job Revision UUID'),
+    'type' => 'integer',
+    'description' => t('The universally unique job revision identifier.'),
+    'schema field' => 'vuuid',
+  );
+
+  $properties['bundle'] = array(
+    'label' => t('Environment Type'),
+    'type' => 'token',
+    'description' => t('The environment type.'),
+    'schema field' => 'bundle',
+  );
+
+  $properties['env'] = array(
+    'label' => t('Environment Name'),
+    'type' => 'text',
+    'description' => t('The name of the environment.'),
+    'schema field' => 'env',
+  );
+
+  $properties['drush_alias'] = array(
+    'label' => t('Drush Alias Name'),
+    'type' => 'text',
+    'description' => t('The drush alias for the environment.'),
+    'schema field' => 'drush_alias',
+  );
+
+  $properties['next_env_id'] = array(
+    'label' => t('Next Environment'),
+    'type' => 'wf_environment',
+    'description' => t('The unique environment identifier of the next environment in the chain.'),
+    'schema field' => 'next_env_id',
+  );
+
+  $properties['notes'] = array(
+    'label' => t('Notes'),
+    'type' => 'text',
+    'description' => t('Notes about the environment.'),
+    'schema field' => 'notes',
+  );
+
+  $properties['active'] = array(
+    'label' => t('Environment is Active'),
+    'type' => 'boolean',
+    'description' => t('Is the environment active?'),
+    'schema field' => 'active',
+  );
+
+  $properties['created'] = array(
+    'label' => t('Date Created'),
+    'type' => 'date',
+    'description' => t('The date the environment was created.'),
+    'schema field' => 'created',
+  );
+
+  $properties['changed'] = array(
+    'label' => t('Date Changed'),
+    'type' => 'date',
+    'description' => t('The date the environment was last modified.'),
+    'schema field' => 'changed',
+  );
+
+  $properties['uid'] = array(
+    'label' => t('User ID'),
+    'type' => 'user',
+    'description' => t('The user who created the environment.'),
+    'schema field' => 'uid',
+  );
+
+  $info['wf_environment'] = array('properties' => $properties);
+  return $info;
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ */
+function wf_environment_field_extra_fields() {
+
+  $fields = array('form' => array(), 'display' => array());
+  $exclude_display = array();
+  $exclude_form = array_merge($exclude_display, array('id', 'bundle', 'created', 'changed'));
+  $weight = -50;
+
+  $info = wf_environment_entity_property_info();
+  foreach($info['wf_environment']['properties'] as $key => $values) {
+    if (!in_array($key, $exclude_display)) {
+      $fields['display'][$key] = array(
+        'label' => $values['label'],
+        'description' => $values['description'],
+        'weight' => $weight,
+      );
+    }
+    if (!in_array($key, $exclude_form)) {
+      $fields['form'][$key] = array(
+        'label' => $values['label'],
+        'description' => $values['description'],
+        'weight' => $weight,
+      );
+    }
+    ++$weight;
+  }
+
+  $entities = array();
+  foreach (array_keys(wf_environment_load_bundles()) as $bundle) {
+    $entities[$bundle] = $fields;
+  }
+
+  return array('wf_environment' => $entities);
+}
+
+/**
+ * Generates the edit form
+ */
+function wf_environment_edit($env) {
+  return drupal_get_form('wf_environment_edit_form', $env);
+}
+
+function wf_environment_add($bundle) {
+  $args = array(
+    'bundle' => $bundle,
+    'log' => t('Initial content'),
+    'active' => TRUE,
+    'is_new' => TRUE,
+  );
+
+  $env = new WfEnvironment($args);
+  return drupal_get_form('wf_environment_edit_form', $env);
+}
+
+function wf_environment_edit_form($form, $form_state, $env) {
+
+  $form['bundle'] = array(
+    '#type' => 'value',
+    '#value' => $env->bundle,
+  );
+
+  if (!empty($env->id)) {
+    $id = $env->id;
+    $form['id'] = array(
+      '#type' => 'value',
+      '#value' => $id,
+    );
+    $form['vid'] = array(
+      '#type' => 'value',
+      '#value' => $env->vid,
+    );
+    $env->log = '';
+  }
+  else {
+    $id = NULL;
+    $form['is_new'] = array(
+      '#type' => 'value',
+      '#value' => TRUE,
+    );
+  }
+
+  $form['env'] = array(
+    '#title' => t('Name'),
+    '#type' => 'textfield',
+    '#default_value' => $env->env,
+    '#required' => TRUE,
+    '#maxlength' => 100,
+  );
+
+  $form['drush_alias'] = array(
+    '#title' => t('Drush Alias'),
+    '#type' => 'textfield',
+    '#default_value' => $env->drush_alias,
+    '#maxlength' => 100,
+  );
+
+  $environments = wf_environment_list_names(TRUE, $id);
+  $empty_option = t('Final');
+  if (!count($environments)) {
+    $empty_option = t('- None -');
+  }
+  $form['next_env_id'] = array(
+    '#title' => t('Next Environment'),
+    '#type' => 'select',
+    '#default_value' => $env->next_env_id,
+    '#options' => $environments,
+    '#empty_option' => $empty_option,
+  );
+
+  $form['notes'] = array(
+    '#title' => t('Notes'),
+    '#type' => 'textarea',
+    '#default_value' => $env->notes,
+  );
+
+  $form['active'] = array(
+    '#title' => t('Status'),
+    '#type' => 'select',
+    '#default_value' => $env->active,
+    '#options' => array(0 => t('Disabled'), 1 => t('Enabled')),
+    '#required' => TRUE,
+  );
+
+  field_attach_form('wf_environment', $env, $form, $form_state);
+
+  $form['log'] = array(
+    '#title' => t('Change log message'),
+    '#type' => 'textarea',
+    '#default_value' => $env->log,
+    '#required' => TRUE,
+  );
+
+  $form['actions'] = array(
+    '#weight' => 1000,
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Save')
+    ),
+  );
+  // TODO implement delete support.
+  // if (!empty($env->id)) {
+  if (FALSE) {
+    $form['actions']['delete'] = array(
+      '#type' => 'submit',
+      '#value' => t('Delete'),
+      '#submit' => 'wf_environment_form_delete_submit',
+    );
+  }
+
+  return $form;
+}
+
+function wf_environment_edit_form_validate($form, &$form_state) {
+  $env = (object) $form_state['values'];
+  field_attach_form_validate('wf_environment', $env, $form, $form_state);
+}
+
+/**
+ * Handles submission of the environment edit form.
+ */
+function wf_environment_edit_form_submit($form, &$form_state) {
+  $env = (object) $form_state['values'];
+  field_attach_submit('wf_environment', $env, $form, $form_state);
+  $saved_env = wf_environment_save($env);
+  $form_state['redirect'] = "environment/$saved_env->id";
+}
+
+/**
+ * Saves an environment.
+ */
+function wf_environment_save($env) {
+  global $user;
+
+  $env->uid = $user->uid;
+  $env->changed = REQUEST_TIME;
+  if (!empty($env->is_new)) {
+    $env->created = REQUEST_TIME;
+  }
+  else {
+    $env->revision = TRUE;
+  }
+
+  entity_get_controller('wf_environment')->save($env);
+
+  return $env;
+}
+
+/**
+ * Delete button callback
+ */
+function wf_environment_form_delete_submit($form, &$form_state) {
+  $destination = array();
+  if (isset($_GET['destination'])) {
+    $destination = drupal_get_destination();
+    unset($_GET['destination']);
+  }
+
+  $form_state['redirect'] = array('environment/' . ((int) $form_state['values']['id']) . '/delete', array('query' => $destination));
+}
+
+/**
+ * Load a environment object.
+ */
+function wf_environment_load($id = NULL, $reset = FALSE) {
+  $ids = (isset ($id) ? array($id) : array());
+  $env = wf_environment_load_multiple($ids, $reset);
+  return $env ? reset($env) : FALSE;
+}
+
+/**
+ * Loads one or more environment objects.
+ */
+function wf_environment_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wf_environment', $ids, $conditions, $reset);
+}
+
+/**
+ * Provides workflow environment entity URI callback.
+ */
+function wf_environment_uri($env) {
+  return array(
+    'path' => 'environment/' . $env->id,
+  );
+}
+
+/**
+ * Provides the uri for the environment app.
+ */
+function wf_environment_app_uri($env, $job, $path = '') {
+  try {
+    if (empty($env->drush_alias)) {
+      throw new Exception(t("No drush alias for environment @env", array('@env' => entity_label('wf_environment', $env))));
+    }
+    $shell = new Shell();
+    $result = $shell->run("drush sa @{$env->drush_alias} --component=uri");
+
+    if (FALSE === $result) {
+      throw new Exception(t("Could not get remote-host for environment @env", array('@env' => entity_label('wf_environment', $env))));
+    }
+
+    $host = trim($result);
+    $dev_env = wf_environment_dev();
+    if ($env == $dev_env) {
+      $host = wf_job_slug($job->jid) . ".$host";
+    }
+
+    $path = !empty($path) ? '/' . trim($path, '/') : '';
+
+    $protocol = 'http';
+    $secure = !empty($_SERVER['HTTPS']);
+    if ($secure) {
+      $protocol .= 's';
+    }
+
+    $uri = array(
+      'path' => "$protocol://{$host}{$path}",
+      'options' => array('absolute' => TRUE, 'https' => $secure),
+    );
+
+    drupal_alter('wf_environment_app_uri', $uri, $env);
+    return $uri;
+  }
+  catch (Exception $e) {
+    drupal_set_message($e->getMessage(), 'error');
+    watchdog_exception('wf_environment', $e);
+    return array('path' => '', 'options' => array());
+  }
+}
+
+/**
+ * Page view callback.
+ */
+function wf_environment_view(WfEnvironment $env, $view_mode = 'full') {
+  drupal_set_title(wf_environment_page_title($env));
+  return entity_view('wf_environment', array(entity_id('wf_environment', $env) => $env), $view_mode);
+}
+
+/**
+ * Generate the page title.
+ */
+function wf_environment_page_title($env) {
+  return t('Environment: @env', array('@env' => $env->env));
+}
+
+/**
+ * Fetches a list of workflow environments.
+ *
+ * @param $only_active bool
+ *   Should the list only include active environments?
+ *
+ * @return array
+ *   The list of environments.
+ */
+function wf_environment_list_names($only_active = TRUE, $exclude_id = NULL) {
+  $envs = wf_environment_list($only_active, $exclude_id);
+  $list = array();
+  foreach ($envs as $id => $env) {
+    $list[$id] = $env->env;
+  }
+  return $list;
+}
+
+/**
+ * Fetches a list of workflow environments.
+ *
+ * @param $only_active bool
+ *   Should the list only include active environments?
+ * @param $exclude_id bool
+ *
+ * @return array
+ *   The list of environment wf_env entities.
+ */
+function wf_environment_list($only_active = TRUE, $exclude_id = NULL) {
+  static $environments;
+
+  if (empty($environments)) {
+    $environments = entity_load('wf_environment');
+    $environments = _wf_environment_sort_by_next($environments);
+
+    if (!is_null($exclude_id) && isset($environments[$exclude_id])) {
+      unset($environments[$exclude_id]);
+    }
+    if ($only_active) {
+      $environments = array_filter($environments, function($env) {
+        return (bool) $env->active;
+      });
+    }
+  }
+  return $environments;
+}
+
+/**
+ * Returns an array of environments sorted by their deploy order.
+ *
+ * @param array $envs The wf_env objects to sort.
+ * @return array of sorted wf_env objects.
+ */
+function _wf_environment_sort_by_next($envs) {
+  $sorted = array();
+  $env_before = array();
+
+  foreach ($envs as $env) {
+    $env_before[$env->next_env_id] = $env;
+  }
+
+  // Find the last environment, then work backwards.
+  foreach ($envs as $env) {
+    if (empty($env->next_env_id)) {
+      $first_env = $env;
+      break;
+    }
+  }
+
+  while ($first_env) {
+    $sorted[$first_env->id] = $first_env;
+    $first_env = isset($env_before[$first_env->id]) ? $env_before[$first_env->id] : NULL;
+  }
+
+  return array_reverse($sorted, TRUE);
+}
+
+/**
+ * Checks if a bundle exists.
+ *
+ * @param $name
+ *   The bundle to look up.
+ *
+ * @return bool
+ *   Does the bundle exist?
+ */
+function wf_environment_bundle_exists($name) {
+  $bundles = wf_environment_load_bundles();
+  return isset($bundles[$name]);
+}
+
+/**
+ * Returns all defined environment bundles.
+ *
+ * @return array
+ */
+function wf_environment_load_bundles() {
+  $cache = &drupal_static(__FUNCTION__);
+
+  if (!isset($cache)) {
+    $cache = db_select('wf_env_bundle', 'web')
+      ->fields('web')
+      ->orderBy('bundle')
+      ->execute()
+      ->fetchAllAssoc('bundle');
+  }
+
+  return $cache;
+}
+
+/**
+ * Access callback for the entity API.
+ *
+ * @param $op
+ *   The operation being performed. One of 'view', 'update', 'create', 'delete'
+ *   or just 'edit' (being the same as 'create' or 'update').
+ * @param $profile
+ *   (optional) A profile to check access for. If nothing is given, access for
+ *   all profiles is determined.
+ * @param $account
+ *   (optional) The user to check for. Leave it to NULL to check for the global user.
+ *
+ * @return boolean
+ *   Whether access is allowed or not.
+ */
+function wf_environment_access($op, $type = NULL, $account = NULL) {
+  $perm = 'manage environments';
+  if ('view' == $op) {
+    $perm = 'access environments';
+  }
+
+  return user_access($perm, $account);
+}
+
+/**
+ * Access callback for the entity API.
+ *
+ * @param $op
+ *   The operation being performed. One of 'view', 'update', 'create', 'delete'
+ *   or just 'edit' (being the same as 'create' or 'update').
+ * @param $profile
+ *   (optional) A profile to check access for. If nothing is given, access for
+ *   all profiles is determined.
+ * @param $account
+ *   (optional) The user to check for. Leave it to NULL to check for the global user.
+ *
+ * @return boolean
+ *   Whether access is allowed or not.
+ */
+function wf_environment_type_access($op, $type = NULL, $account = NULL) {
+  return user_access('administer environments', $account);
+}
+
+/**
+ * List job types that can be created.
+ */
+function wf_environment_page_add() {
+  $bundles = wf_environment_load_bundles();
+
+  switch (count($bundles)) {
+    case 1:
+      $bundle = array_shift($bundles);
+      drupal_goto("environment/add/{$bundle->bundle}");
+    break;
+
+    case 0:
+      return '<p>' . t('You have not created any environment types yet.') . '</p>';
+
+    default:
+      return theme('wf_evironment_add_list', array('content' => $bundles));
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function wf_environment_theme() {
+  $themes = array();
+
+  $themes['wf_evironment_add_list'] = array(
+    'file' => 'includes/wf_environment.theme.inc',
+    'variables' => array('content' => NULL),
+  );
+
+  return $themes;
+}
+
+function wf_environment_merge() {
+  $merge_alias = variable_get('wf_merge_env_alias', 'stage');
+  $environments = wf_environment_load_multiple(FALSE, array('drush_alias' => $merge_alias));
+  $merge_env = reset($environments);
+  return $merge_env;
+}
+
+function wf_environment_dev() {
+  $dev_alias = variable_get('wf_dev_env_alias', 'dev');
+  $environments = wf_environment_load_multiple(FALSE, array('drush_alias' => $dev_alias));
+  $dev_env = reset($environments);
+  return $dev_env;
+}

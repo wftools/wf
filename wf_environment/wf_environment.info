@@ -1,0 +1,16 @@
+name = WF Environment
+description = WF Environments Management
+core = 7.x
+package = WF
+version = 7.x-1.0-dev
+project = wf_environment
+dependencies[] = features
+dependencies[] = shell_client
+dependencies[] = uuid
+features[features_api][] = api:1
+features[user_permission][] = access environments
+features[user_permission][] = administer environments
+features[user_permission][] = manage environments
+
+files[] = includes/wf_environment.controller.inc
+files[] = includes/wf_environment.class.inc

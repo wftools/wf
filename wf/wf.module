@@ -1,0 +1,74 @@
+<?php
+/**
+ * @file
+ *   Workflow module
+ */
+
+require_once 'wf.features.inc';
+
+define('WF_CODE_INDENT_SPACES', 2);
+
+/**
+ * Implements hook_theme().
+ */
+function wf_theme() {
+  return array(
+    'php_array' => array(
+      'function' => 'wf_theme_php_array',
+      'variables' => array(
+        'array' => array(),
+        'indent' => 0,
+      ),
+    ),
+  );
+}
+
+/**
+ * Theme hook implementation for php_array.
+ */
+function wf_theme_php_array($variables) {
+  $array = $variables['array'];
+  $indent = $variables['indent'];
+  $indent_prefix = str_repeat(' ', $indent * WF_CODE_INDENT_SPACES);
+  $php = $indent_prefix . "array(\n";
+  foreach ($array as $key => $value) {
+    if (is_array($value)) {
+      $output_value = theme('php_array', array('array' => $value, 'indent' => $indent + 1));
+    }
+    elseif (is_string($value)) {
+      $output_value = "'" . addslashes($value) . "'";
+    }
+    elseif (is_scalar($value)) {
+      $output_value = $value;
+    }
+    else {
+      // No serialization for non-arrays / non-scalars.
+      continue;
+    }
+
+    if (is_string($key)) {
+      $output_key = "'" . addslashes($key) . "'";
+    }
+    else {
+      $output_key = $key;
+    }
+
+    $php .= "$indent_prefix  $output_key => $output_value,\n";
+  }
+  $php .= "$indent_prefix)";
+
+  return $php;
+}
+
+/**
+ * Implements hook_shell_client_command_alter().
+ */
+function wf_shell_client_command_alter(&$variables) {
+  if ('ssh' == $variables['command']) {
+    $variables['options']['-q'] = NULL;
+    $variables['options']['-l'] = 'deployer';
+  }
+  if ('scp' == $variables['command']) {
+    $variables['options']['-o'] = 'User=deployer';
+  }
+}

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Workflow User feature.
+ */
+
+include_once 'wf_user.features.inc';

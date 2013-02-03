@@ -1,0 +1,325 @@
+<?php
+
+/**
+ * @file
+ * Workflow job module installation functions.
+ */
+
+function wf_job_schema() {
+  $schema = array();
+
+  $schema['wf_job'] = array(
+    'description' => 'Workflow Jobs',
+    'fields' => array(
+      'jid' => array(
+        'description' => 'Primary key.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'vid' => array(
+        'description' => 'The current version identifier.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+
+        'default' => 0,
+      ),
+      'uuid' => array(
+        'description' => 'The Universally Unique Identifier.',
+        'type' => 'char',
+        'length' => 36,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bundle' => array(
+        'description' => 'The bundle type for the job.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'title' => array(
+        'description' => 'The job title.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'reference' => array(
+        'description' => 'Reference number for the job.',
+        'type' => 'varchar',
+        'length' => '50',
+        'not null' => TRUE,
+      ),
+      'details' => array(
+        'description' => 'Detailed information about the job.',
+        'type' => 'text',
+      ),
+      'jsid' => array(
+        'description' => 'Job status.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'owner' => array(
+        'description' => 'Owner of the job.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'assigned' => array(
+        'description' => 'User job is currently assigned to.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'eid' => array(
+        'description' => 'Current environment for the job.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'created' => array(
+        'description' => 'Job creation timestamp.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'modified' => array(
+        'description' => 'Job last modified timestamp.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('jid'),
+    'unique keys' => array(
+      'uuid' => array('uuid'),
+      'reference' => array('reference'),
+    ),
+    'indexes' => array(
+      'bundle' => array('bundle'),
+      'environment' => array('eid'),
+      'myjobs' => array('owner', 'assigned'),
+      'status' => array('jsid'),
+    ),
+  );
+  
+  $schema['wf_job_revision'] = array(
+    'description' => 'Workflow Job Revisions',
+    'fields' => array(
+      'jid' => array(
+        'description' => 'Primary key.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'vid' => array(
+        'description' => 'The current version identifier.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'vuuid' => array(
+        'description' => 'The Universally Unique Identifier for this revision.',
+        'type' => 'char',
+        'length' => 36,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bundle' => array(
+        'description' => 'The bundle type for the job.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'title' => array(
+        'description' => 'The job title.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'reference' => array(
+        'description' => 'Reference number for the job.',
+        'type' => 'varchar',
+        'length' => '50',
+        'not null' => TRUE,
+      ),
+      'details' => array(
+        'description' => 'Detailed information about the job.',
+        'type' => 'text',
+      ),
+      'jsid' => array(
+        'description' => 'Job revision status.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'owner' => array(
+        'description' => 'Owner of the job revision.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'assigned' => array(
+        'description' => 'User job revision was assigned to.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'eid' => array(
+        'description' => 'Environment for this revision.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'modified' => array(
+        'description' => 'Timestamp for this revision.',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'log' => array(
+        'description' => 'Log message for this revision.',
+        'type' => 'text',
+      ),
+      'log_summary' => array(
+        'description' => 'Summary of log message for this revision.',
+        'type' => 'text',
+      ),
+      'uid' => array(
+        'description' => 'The user who made the change.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('vid'),
+    'unique keys' => array(
+      'vuuid' => array('vuuid'),
+    ),
+    'indexes' => array(
+      'jid' => array('jid'),
+      'myjobs' => array('owner', 'assigned'),
+      'status' => array('jsid'),
+      'environment' => array('eid'),
+    ),
+  );
+
+  $schema['wf_job_bundle'] = array(
+    'description' => 'Stores information about all defined wf_job bundles.',
+    'fields' => array(
+      'bundle' => array(
+        'description' => 'The machine-readable name of this wf_job type.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'The human-readable name of this wf_job type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0x01,
+        'size' => 'tiny',
+        'description' => 'The exportable status of the entity.',
+      ),
+      'module' => array(
+        'description' => 'The name of the providing module if the entity has been defined in code.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('bundle'),
+    'unique keys' => array(),
+  );
+
+  $schema['wf_job_status'] = array (
+    'description' => 'Workflow Job Status',
+    'fields' => array(
+      'jsid' => array(
+        'description' => 'Primary key.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'status' => array(
+        'description' => 'The job title.',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('jsid'),
+    'unique keys' => array(
+      'status' => array('status'),
+    ),
+    'indexes' => array(),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function wf_job_install() {
+  _wf_job_set_default_statuses('wf_job_status');
+}
+
+/**
+ * Create and populate the job status table.
+ */
+function wf_job_update_7001($sandbox) {
+  $name = 'wf_job_status';
+  $schema = wf_job_schema();
+  $table = $schema[$name];
+  db_create_table($name, $table);
+
+  _wf_job_set_default_statuses($name);
+}
+
+/**
+ * Add bundle table
+ */
+function wf_job_update_7002($sandbox) {
+  $name = 'wf_job_bundle';
+  $schema = wf_job_schema();
+  $table = $schema[$name];
+  db_create_table($name, $table);
+}
+
+/**
+ * Create default job status records.
+ *
+ * @param $table_name string
+ *   The name of the table to insert the records into.
+ */
+function _wf_job_set_default_statuses($table_name) {
+  $rows = array(
+    'New',
+    'Started',
+    'In Review',
+    'Approved',
+    'Completed',
+    'Needs Attention',
+  );
+
+  foreach ($rows as $status) {
+    $record = array('status' => $status);
+    drupal_write_record($table_name, $record);
+  }
+
+  // Hack for translation support.
+  t('New');
+  t('Started');
+  t('In Review');
+  t('Approved');
+  t('Completed');
+  t('Needs Attention');
+}
