@@ -644,6 +644,7 @@ function wf_environment_list($only_active = TRUE, $exclude_id = NULL) {
 function _wf_environment_sort_by_next($envs) {
   $sorted = array();
   $env_before = array();
+  $first_env = NULL;
 
   foreach ($envs as $env) {
     $env_before[$env->next_env_id] = $env;
