@@ -6,6 +6,7 @@ version = 7.x-1.0-dev
 project = wf_environment
 dependencies[] = features
 dependencies[] = shell_client
+dependencies[] = tec
 dependencies[] = uuid
 features[features_api][] = api:1
 features[user_permission][] = access environments
