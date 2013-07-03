@@ -173,6 +173,7 @@ function wf_environment_admin_paths() {
     'environment/*/revisions/*/revert' => TRUE,
     'environment/*/revisions/*/delete' => TRUE,
     'environment/add' => TRUE,
+    'environment/add/*' => TRUE,
   );
   return $paths;
 }
