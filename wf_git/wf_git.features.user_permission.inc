@@ -14,7 +14,7 @@ function wf_git_user_default_permissions() {
   $permissions['administer git repositories'] = array(
     'name' => 'administer git repositories',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'git_repository',
   );
@@ -23,7 +23,7 @@ function wf_git_user_default_permissions() {
   $permissions['administer git servers'] = array(
     'name' => 'administer git servers',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'git_server',
   );
