@@ -14,7 +14,7 @@ function wf_user_user_default_permissions() {
   $permissions['access administration pages'] = array(
     'name' => 'access administration pages',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'system',
   );
@@ -23,7 +23,7 @@ function wf_user_user_default_permissions() {
   $permissions['access site in maintenance mode'] = array(
     'name' => 'access site in maintenance mode',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'system',
   );
@@ -32,7 +32,7 @@ function wf_user_user_default_permissions() {
   $permissions['access site reports'] = array(
     'name' => 'access site reports',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'system',
   );
@@ -41,8 +41,8 @@ function wf_user_user_default_permissions() {
   $permissions['access user profiles'] = array(
     'name' => 'access user profiles',
     'roles' => array(
-      0 => 'admin',
-      1 => 'authenticated user',
+      'admin' => 'admin',
+      'authenticated user' => 'authenticated user',
     ),
     'module' => 'user',
   );
@@ -51,7 +51,7 @@ function wf_user_user_default_permissions() {
   $permissions['administer actions'] = array(
     'name' => 'administer actions',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'system',
   );
@@ -60,7 +60,7 @@ function wf_user_user_default_permissions() {
   $permissions['administer modules'] = array(
     'name' => 'administer modules',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'system',
   );
@@ -69,7 +69,7 @@ function wf_user_user_default_permissions() {
   $permissions['administer permissions'] = array(
     'name' => 'administer permissions',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'user',
   );
@@ -78,7 +78,7 @@ function wf_user_user_default_permissions() {
   $permissions['administer realname'] = array(
     'name' => 'administer realname',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'realname',
   );
@@ -87,7 +87,7 @@ function wf_user_user_default_permissions() {
   $permissions['administer site configuration'] = array(
     'name' => 'administer site configuration',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'system',
   );
@@ -96,7 +96,7 @@ function wf_user_user_default_permissions() {
   $permissions['administer software updates'] = array(
     'name' => 'administer software updates',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'system',
   );
@@ -105,7 +105,7 @@ function wf_user_user_default_permissions() {
   $permissions['administer themes'] = array(
     'name' => 'administer themes',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'system',
   );
@@ -114,7 +114,7 @@ function wf_user_user_default_permissions() {
   $permissions['administer users'] = array(
     'name' => 'administer users',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'user',
   );
@@ -123,7 +123,7 @@ function wf_user_user_default_permissions() {
   $permissions['administer uuid'] = array(
     'name' => 'administer uuid',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'uuid',
   );
@@ -132,7 +132,7 @@ function wf_user_user_default_permissions() {
   $permissions['block IP addresses'] = array(
     'name' => 'block IP addresses',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'system',
   );
@@ -141,7 +141,7 @@ function wf_user_user_default_permissions() {
   $permissions['cancel account'] = array(
     'name' => 'cancel account',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'user',
   );
@@ -150,7 +150,7 @@ function wf_user_user_default_permissions() {
   $permissions['change own username'] = array(
     'name' => 'change own username',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'user',
   );
@@ -159,7 +159,7 @@ function wf_user_user_default_permissions() {
   $permissions['select account cancellation method'] = array(
     'name' => 'select account cancellation method',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'user',
   );
@@ -168,7 +168,7 @@ function wf_user_user_default_permissions() {
   $permissions['view the administration theme'] = array(
     'name' => 'view the administration theme',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'system',
   );
