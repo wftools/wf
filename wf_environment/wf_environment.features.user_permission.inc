@@ -14,9 +14,9 @@ function wf_environment_user_default_permissions() {
   $permissions['access environments'] = array(
     'name' => 'access environments',
     'roles' => array(
-      0 => 'admin',
-      1 => 'deployer',
-      2 => 'editor',
+      'admin' => 'admin',
+      'deployer' => 'deployer',
+      'editor' => 'editor',
     ),
     'module' => 'wf_environment',
   );
@@ -25,7 +25,7 @@ function wf_environment_user_default_permissions() {
   $permissions['administer environments'] = array(
     'name' => 'administer environments',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'wf_environment',
   );
@@ -34,8 +34,8 @@ function wf_environment_user_default_permissions() {
   $permissions['manage environments'] = array(
     'name' => 'manage environments',
     'roles' => array(
-      0 => 'admin',
-      1 => 'deployer',
+      'admin' => 'admin',
+      'deployer' => 'deployer',
     ),
     'module' => 'wf_environment',
   );
