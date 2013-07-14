@@ -8,6 +8,7 @@ project = wf_job
 dependencies[] = context
 dependencies[] = ctools
 dependencies[] = features
+dependencies[] = realname
 dependencies[] = reply
 dependencies[] = rules
 dependencies[] = shell_client
