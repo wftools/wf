@@ -14,7 +14,7 @@ function wf_jenkins_user_default_permissions() {
   $permissions['administer jenkins requests'] = array(
     'name' => 'administer jenkins requests',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'jenkins',
   );
@@ -23,7 +23,7 @@ function wf_jenkins_user_default_permissions() {
   $permissions['update job sandbox code'] = array(
     'name' => 'update job sandbox code',
     'roles' => array(
-      0 => 'developer',
+      'developer' => 'developer',
     ),
     'module' => 'wf_jenkins',
   );
