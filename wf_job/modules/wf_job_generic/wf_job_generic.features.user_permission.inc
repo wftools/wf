@@ -14,7 +14,7 @@ function wf_job_generic_user_default_permissions() {
   $permissions['delete job_comments reply'] = array(
     'name' => 'delete job_comments reply',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'reply',
   );
@@ -23,7 +23,7 @@ function wf_job_generic_user_default_permissions() {
   $permissions['delete own job_comments reply'] = array(
     'name' => 'delete own job_comments reply',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'reply',
   );
@@ -32,7 +32,7 @@ function wf_job_generic_user_default_permissions() {
   $permissions['edit job_comments reply'] = array(
     'name' => 'edit job_comments reply',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'reply',
   );
@@ -41,7 +41,7 @@ function wf_job_generic_user_default_permissions() {
   $permissions['edit own job_comments reply'] = array(
     'name' => 'edit own job_comments reply',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'reply',
   );
@@ -50,8 +50,8 @@ function wf_job_generic_user_default_permissions() {
   $permissions['post job_comments reply'] = array(
     'name' => 'post job_comments reply',
     'roles' => array(
-      0 => 'admin',
-      1 => 'editor',
+      'admin' => 'admin',
+      'editor' => 'editor',
     ),
     'module' => 'reply',
   );
@@ -60,8 +60,8 @@ function wf_job_generic_user_default_permissions() {
   $permissions['view job_comments reply'] = array(
     'name' => 'view job_comments reply',
     'roles' => array(
-      0 => 'admin',
-      1 => 'editor',
+      'admin' => 'admin',
+      'editor' => 'editor',
     ),
     'module' => 'reply',
   );
