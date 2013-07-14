@@ -14,7 +14,7 @@ function wf_ssh_user_default_permissions() {
   $permissions['administer SSH public keys'] = array(
     'name' => 'administer SSH public keys',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'sshkey',
   );
@@ -23,8 +23,8 @@ function wf_ssh_user_default_permissions() {
   $permissions['administer ssh'] = array(
     'name' => 'administer ssh',
     'roles' => array(
-      0 => 'admin',
-      1 => 'editor',
+      'admin' => 'admin',
+      'editor' => 'editor',
     ),
     'module' => 'sshid',
   );
@@ -33,7 +33,7 @@ function wf_ssh_user_default_permissions() {
   $permissions['manage any SSH public keys'] = array(
     'name' => 'manage any SSH public keys',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'sshkey',
   );
@@ -42,8 +42,8 @@ function wf_ssh_user_default_permissions() {
   $permissions['manage own SSH public keys'] = array(
     'name' => 'manage own SSH public keys',
     'roles' => array(
-      0 => 'admin',
-      1 => 'editor',
+      'admin' => 'admin',
+      'editor' => 'editor',
     ),
     'module' => 'sshkey',
   );
@@ -52,8 +52,8 @@ function wf_ssh_user_default_permissions() {
   $permissions['upload private ssh key'] = array(
     'name' => 'upload private ssh key',
     'roles' => array(
-      0 => 'admin',
-      1 => 'editor',
+      'admin' => 'admin',
+      'editor' => 'editor',
     ),
     'module' => 'sshid',
   );
@@ -62,8 +62,8 @@ function wf_ssh_user_default_permissions() {
   $permissions['use ssh'] = array(
     'name' => 'use ssh',
     'roles' => array(
-      0 => 'admin',
-      1 => 'editor',
+      'admin' => 'admin',
+      'editor' => 'editor',
     ),
     'module' => 'sshid',
   );
@@ -72,7 +72,7 @@ function wf_ssh_user_default_permissions() {
   $permissions['view any SSH public keys'] = array(
     'name' => 'view any SSH public keys',
     'roles' => array(
-      0 => 'admin',
+      'admin' => 'admin',
     ),
     'module' => 'sshkey',
   );
@@ -81,8 +81,8 @@ function wf_ssh_user_default_permissions() {
   $permissions['view own SSH public keys'] = array(
     'name' => 'view own SSH public keys',
     'roles' => array(
-      0 => 'admin',
-      1 => 'editor',
+      'admin' => 'admin',
+      'editor' => 'editor',
     ),
     'module' => 'sshkey',
   );
