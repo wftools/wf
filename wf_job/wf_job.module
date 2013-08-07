@@ -129,13 +129,6 @@ function wf_job_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/wf_job.pages.inc',
   );
-  $items['job/%wf_job/login'] = array(
-    'title' => 'Login to dev sandbox',
-    'access arguments' => array('access jobs'),
-    'page callback' => 'wf_job_sandbox_login',
-    'page arguments' => array(1),
-    'type' => MENU_CALLBACK,
-  );
   $items['job/%wf_job/start'] = array(
     'title callback' => 'wf_job_action_title',
     'title arguments' => array(1, 'start'),
@@ -991,10 +984,6 @@ function wf_job_block_info() {
     'info' => t('Job environment status'),
   );
 
-  $blocks['wf_job_changes'] = array(
-    'info' => t('Job changes'),
-  );
-
   return $blocks;
 }
 
@@ -1005,8 +994,6 @@ function wf_job_block_view($delta) {
   switch ($delta) {
     case 'wf_job_env_status':
       return wf_job_env_status_block();
-    case 'wf_job_changes':
-      return wf_job_changes_block();
   }
 }
 
@@ -1041,30 +1028,6 @@ function wf_job_env_status_block() {
       '#theme' => 'item_list',
       '#items' => $items,
       '#attributes' => array('class' => array('job-env-status')),
-    ),
-  );
-}
-
-/**
- * Returns a wf_job_changes block.
- */
-function wf_job_changes_block() {
-  $job = menu_get_object('wf_job');
-  if (empty($job)) {
-    return array();
-  }
-
-  $content_url = wf_job_content_changes_link($job);
-  $job_uri = entity_uri('wf_job', $job);
-  return array(
-    '#wf_job' => $job,
-    'subject' => t('Job changes'),
-    'content' => array(
-      '#theme' => 'links',
-      '#links' => array(
-        array('title' => 'Login to dev sandbox', 'href' => $job_uri['path'] . '/login', 'attributes' => array('target' => '_blank')),
-        array('title' => 'Review content changes', 'href' => $content_url['path'], 'options' => $content_url['options'], 'attributes' => array('target' => '_blank')),
-      ),
     ),
   );
 }
