@@ -1,5 +1,10 @@
 <?php
 /**
+ * @file
+ * Workflow job rules.
+ */
+
+/**
  * Implements hook_rules_event_info().
  */
 function wf_job_rules_event_info() {
@@ -46,6 +51,18 @@ function wf_job_rules_event_info() {
     'wf_job_completed' => $defaults + array(
       'label' => t('After a job is deployed to the final environment'),
       'variables' => $default_variables,
+    ),
+    'wf_job_update_code_submit' => $defaults + array(
+      'label' => t('When a user clicks the Update code button.'),
+      'variables' => array('job' => array('type' => 'wf_job', 'label' => t('The job affected'))),
+    ),
+    'wf_job_start_update_code' => $defaults + array(
+      'label' => t('When a code update is started for a job.'),
+      'variables' => array('job' => array('type' => 'wf_job', 'label' => t('The job affected'))),
+    ),
+    'wf_job_updated_code' => $defaults + array(
+      'label' => t('After a job\'s code has been updated.'),
+      'variables' => array('job' => array('type' => 'wf_job', 'label' => t('The job affected'))),
     ),
   );
 }

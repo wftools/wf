@@ -9,7 +9,7 @@
  */
 function wf_job_drush_command() {
   $items = array();
-  
+
   $items['job-drush-aliases'] = array(
     'description' => 'Render aliases.drushrc.php file contents',
     'examples' => array(
