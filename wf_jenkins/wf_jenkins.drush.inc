@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- *  Drush command for Workflow Jenkins
+ * Drush command for Workflow Jenkins
  */
 
 /**
@@ -9,7 +9,7 @@
  */
 function wf_jenkins_drush_command() {
   $items = array();
-  
+
   $items['jenkins-updated-code'] = array(
     'description' => dt('Informs Drupal that Jenkins has updated the code for a given job'),
     'examples' => array(
