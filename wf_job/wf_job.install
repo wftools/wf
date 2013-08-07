@@ -6,8 +6,10 @@
  */
 
 function wf_job_schema() {
-  $schema = array();
+  module_load_include('install', 'uuid', 'uuid');
 
+  $uuid_field = uuid_schema_field_definition();
+  $schema = array();
   $schema['wf_job'] = array(
     'description' => 'Workflow Jobs',
     'fields' => array(
@@ -25,13 +27,7 @@ function wf_job_schema() {
 
         'default' => 0,
       ),
-      'uuid' => array(
-        'description' => 'The Universally Unique Identifier.',
-        'type' => 'char',
-        'length' => 36,
-        'not null' => TRUE,
-        'default' => '',
-      ),
+      'uuid' => $uuid_field,
       'bundle' => array(
         'description' => 'The bundle type for the job.',
         'type' => 'varchar',
@@ -119,13 +115,7 @@ function wf_job_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-      'vuuid' => array(
-        'description' => 'The Universally Unique Identifier for this revision.',
-        'type' => 'char',
-        'length' => 36,
-        'not null' => TRUE,
-        'default' => '',
-      ),
+      'vuuid' => $uuid_field,
       'bundle' => array(
         'description' => 'The bundle type for the job.',
         'type' => 'varchar',

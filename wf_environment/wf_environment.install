@@ -4,6 +4,9 @@
  * Implements hook_schema().
  */
 function wf_environment_schema() {
+  module_load_include('install', 'uuid', 'uuid');
+
+  $uuid_field = uuid_schema_field_definition();
   $schema = array();
   $schema['wf_env'] = array(
     'description' => 'Environments managed by workflow system.',
@@ -21,13 +24,7 @@ function wf_environment_schema() {
         'default' => 0,
         'description' => 'The current version identifier.',
       ),
-      'uuid' => array(
-        'type' => 'char',
-        'length' => 36,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'The Universally Unique Identifier.',
-      ),
+      'uuid' => $uuid_field,
       'bundle' => array(
         'description' => 'The bundle type for the environment.',
         'type' => 'varchar',
@@ -117,13 +114,7 @@ function wf_environment_schema() {
         'not null' => TRUE,
         'description' => 'The version identifier.',
       ),
-      'vuuid' => array(
-        'type' => 'char',
-        'length' => 36,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'The Universally Unique Identifier for the revision.',
-      ),
+      'vuuid' => $uuid_field,
       'bundle' => array(
         'description' => 'The bundle type for the environment.',
         'type' => 'varchar',
