@@ -2,7 +2,7 @@
 
 /**
  * @file
- *   Workflow Environment Management functions.
+ * Workflow Environment Management functions.
  */
 
 /**
@@ -14,7 +14,7 @@ function wf_environment_entity_info() {
   $info['wf_environment'] = array(
     'label' => t('Workflow Environment'),
     'entity class' => 'WfEnvironment',
-    'controller class' => 'WfEnvironmentController',
+    'controller class' => 'EntityAPIController',
     'base table' => 'wf_env',
     'revision table' => 'wf_env_revision',
     'fieldable' => TRUE,
@@ -34,7 +34,7 @@ function wf_environment_entity_info() {
     'view modes' => array(
       'full' => array(
         'label' => t('Full Environment'),
-        'custom settings' =>  FALSE,
+        'custom settings' => FALSE,
       ),
     ),
     'label callback' => 'entity_class_label',
@@ -42,6 +42,7 @@ function wf_environment_entity_info() {
     'module' => 'wf_environment',
     'uuid' => TRUE,
     'access callback' => 'wf_job_access',
+    'default_revision' => TRUE,
   );
 
   $info['wf_environment_bundle'] = array(
@@ -352,6 +353,7 @@ function wf_environment_add($bundle) {
     'log' => t('Initial content'),
     'active' => TRUE,
     'is_new' => TRUE,
+    'default_revision' => TRUE,
   );
 
   $env = new WfEnvironment($args);
@@ -359,7 +361,6 @@ function wf_environment_add($bundle) {
 }
 
 function wf_environment_edit_form($form, $form_state, $env) {
-
   $form['bundle'] = array(
     '#type' => 'value',
     '#value' => $env->bundle,
@@ -454,6 +455,11 @@ function wf_environment_edit_form($form, $form_state, $env) {
     );
   }
 
+  $form['default_revision'] = array(
+    '#type' => 'value',
+    '#value' => $env->default_revision,
+  );
+
   return $form;
 }
 
@@ -468,6 +474,7 @@ function wf_environment_edit_form_validate($form, &$form_state) {
 function wf_environment_edit_form_submit($form, &$form_state) {
   $env = (object) $form_state['values'];
   field_attach_submit('wf_environment', $env, $form, $form_state);
+
   $saved_env = wf_environment_save($env);
   $form_state['redirect'] = "environment/$saved_env->id";
 }
@@ -487,7 +494,7 @@ function wf_environment_save($env) {
     $env->revision = TRUE;
   }
 
-  entity_get_controller('wf_environment')->save($env);
+  entity_save('wf_environment', $env);
 
   return $env;
 }

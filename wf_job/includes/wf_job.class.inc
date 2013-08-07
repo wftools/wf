@@ -34,6 +34,8 @@ class WfJob extends Entity {
 
   public $uid;
 
+  public $default_revision = TRUE;
+
   /**
    * Creates a new entity.
    *
@@ -43,7 +45,6 @@ class WfJob extends Entity {
     parent::__construct($values, 'wf_job');
   }
 
-  
   /**
    * Generates the URI for the entity.
    */

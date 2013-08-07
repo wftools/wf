@@ -28,15 +28,13 @@ function wf_job_entity_info() {
       'uuid' => 'uuid',
       'revision uuid' => 'vuuid',
     ),
-    'bundle keys' => array(
-      'bundle' => 'bundle',
-    ),
+    'bundle keys' => array('bundle' => 'bundle'),
     'bundles' => array(),
     'load hook' => 'wf_job_load',
     'view modes' => array(
       'full' => array(
         'label' => t('Full Job'),
-        'custom settings' =>  FALSE,
+        'custom settings' => FALSE,
       ),
     ),
     'label callback' => 'entity_class_label',
@@ -45,6 +43,7 @@ function wf_job_entity_info() {
     'uuid' => TRUE,
     'access callback' => 'wf_job_access',
     'views controller class' => 'WfJobViewsController',
+    'default_revision' => TRUE,
   );
 
   $info['wf_job_bundle'] = array(
@@ -465,7 +464,7 @@ function wf_job_load_bundles() {
  * Creates a new job object.
  */
 function entityform_create($values = array()) {
-  return entity_get_controller('wf_job')->create($values);
+  return entity_create('wf_job', $values);
 }
 
 /**
@@ -482,7 +481,7 @@ function wf_job_delete(WfJob $job) {
  *   A list of job ids to delete.
  */
 function entityform_delete_multiple(array $ids) {
-  entity_get_controller('wf_job')->delete($ids);
+  entity_delete('wf_job', $ids);
 }
 
 /**
@@ -514,7 +513,7 @@ function wf_job_save($job) {
     $job->created = REQUEST_TIME;
     $job->uid = $GLOBALS['user']->uid;
   }
-  entity_get_controller('wf_job')->save($job);
+  entity_save('wf_job', $job);
 }
 
 // /Entity CRUD
@@ -897,7 +896,7 @@ function wf_job_reply_save($job, $title, $body, array $extra_values = array()) {
     $reply_fields['body'] => array(LANGUAGE_NONE => array(array('value' => $body))),
   ) + $extra_values;
 
-  $reply = entity_get_controller('reply')->create($reply_values);
+  $reply = entity_create('reply', $reply_values);
   reply_save($reply);
 
   return $reply;
@@ -917,7 +916,7 @@ function wf_job_action_event_invoke($event, $job, $reply) {
   }
 
   if (empty($next_env)) {
-    $next_env = entity_get_controller('wf_environment')->create(array('env' => 'None'));
+    $next_env = entity_create('wf_environment', array('env' => 'None'));
   }
 
   rules_invoke_event_by_args("wf_job_$event", array(

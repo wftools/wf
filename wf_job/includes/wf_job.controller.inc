@@ -5,7 +5,7 @@
  * Workflow job controller class.
  */
 
-class WfJobController extends TecController {
+class WfJobController extends EntityAPIController {
 
   /**
    * Builds a structured array representing the entity's content.

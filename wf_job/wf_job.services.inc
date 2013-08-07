@@ -209,7 +209,7 @@ function wf_job_services_retrieve($jid) {
  *   Unique identifier for the job (jid) or errors if there was a problem.
  */
 function wf_job_services_create($job) {
-  $job = entity_get_controller('wf_job')->create($job);
+  $job = entity_create('wf_job', $job);
   unset($job->jid);
 
   try {
@@ -236,7 +236,7 @@ function wf_job_services_create($job) {
  *   Unique identifier for the job (jid) or FALSE if there was a problem.
  */
 function wf_job_services_update($jid, $job) {
-  $job = entity_get_controller('wf_job')->create($job);
+  $job = entity_create('wf_job', $job);
   $job->jid = $jid;
   try {
     wf_job_save($job);

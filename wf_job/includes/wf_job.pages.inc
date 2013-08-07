@@ -29,11 +29,9 @@ function wf_job_page_add() {
  * Job add menu callback.
  */
 function wf_job_add($bundle) {
-  $info = array(
-    'bundle' => $bundle,
-  );
+  $info = array('bundle' => $bundle);
 
-  $job = entity_get_controller('wf_job')->create($info);
+  $job = entity_create('wf_job', $info);
 
   return drupal_get_form('wf_job_edit_form', $job);
 }
@@ -52,7 +50,6 @@ function wf_job_edit($job = NULL) {
  * Job edit form.
  */
 function wf_job_edit_form($form, $form_state, $job) {
-
   // Set some sane default values.
   $is_new = FALSE;
   $status_type = 'select';
@@ -72,6 +69,11 @@ function wf_job_edit_form($form, $form_state, $job) {
   }
 
   $form = array();
+
+  $form['default_revision'] = array(
+    '#type' => 'value',
+    '#value' => $job->default_revision,
+  );
 
   $form['bundle'] = array(
     '#type' => 'value',
@@ -174,9 +176,8 @@ function wf_job_edit_form($form, $form_state, $job) {
     '#required' => TRUE,
   );
 
-  $form['actions'] = array(
-    '#weight' => 99,
-  );
+  $form['actions'] = array('#weight' => 99);
+
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -197,7 +198,7 @@ function wf_job_edit_form($form, $form_state, $job) {
 }
 
 /**
- * Default implementation for accessing a job sandbox
+ * Default implementation for accessing a job sandbox.
  */
 function wf_job_sandbox_login($job = NULL) {
   $uri = wf_job_sandbox_uri($job);
