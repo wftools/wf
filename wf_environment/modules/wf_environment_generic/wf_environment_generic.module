@@ -1,7 +1,0 @@
-<?php
-/**
- * @file
- * Code for the Generic Environment feature.
- */
-
-include_once 'wf_environment_generic.features.inc';
