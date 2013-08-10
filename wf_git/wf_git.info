@@ -1,11 +1,6 @@
 name = WF Gitolite
-description = WF git settings.
+description = WF gitolite integration.
 core = 7.x
 package = WF
 project = wf_git
-dependencies[] = features
-dependencies[] = git_repository
 dependencies[] = gitolite
-features[features_api][] = api:2
-features[user_permission][] = administer git repositories
-features[user_permission][] = administer git servers

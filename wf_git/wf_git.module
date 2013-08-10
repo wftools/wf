@@ -73,9 +73,9 @@ function wf_git_job_code_review_link($job) {
   static $job_links = array();
 
   if (empty($job_links[$job->jid])) {
-    $path = variable_get('wf_git_diff_path', NULL);
-    $repo = variable_get('wf_git_diff_repository', NULL);
-    $secure = variable_get('wf_git_diff_secure', NULL);
+    $path = variable_get('wf_git_diff_path');
+    $repo = variable_get('wf_git_diff_repository');
+    $secure = variable_get('wf_git_diff_secure', FALSE);
 
     if (empty($path) || empty($repo)) {
       return;
