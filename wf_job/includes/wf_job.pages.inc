@@ -107,7 +107,7 @@ function wf_job_edit_form($form, $form_state, $job) {
     '#type' => 'textfield',
     '#title' => t('External Reference'),
     '#default_value' => $job->reference,
-    '#required' => TRUE,
+    '#required' => FALSE,
     '#maxlength' => 50,
   );
 

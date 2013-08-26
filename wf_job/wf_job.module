@@ -600,9 +600,26 @@ function wf_job_preprocess_wf_job(&$variables) {
   $sanitize = array(
     'jid',
     'title',
-    'reference',
     'details',
   );
+
+  $external_reference = $variables['elements']['#job']->reference;
+  $job = $variables['elements']['#job'];
+  drupal_alter('wf_job_external_ref', $external_reference, $job);
+
+  if (!is_array($external_reference)) {
+    $external_reference = array(
+      'reference' => $external_reference,
+      'escaped' => FALSE,
+    );
+  }
+
+  if (FALSE === $external_reference['escaped']) {
+    $sanitize[] = 'reference';
+  }
+
+  $variables['elements']['#job']->reference = $external_reference['reference'];
+
   foreach ($sanitize as $var) {
     $variables['elements']['#job']->{$var} = check_plain($variables['elements']['#job']->{$var});
   }

@@ -45,7 +45,7 @@ function wf_job_schema() {
         'description' => 'Reference number for the job.',
         'type' => 'varchar',
         'length' => '50',
-        'not null' => TRUE,
+        'not null' => FALSE,
       ),
       'details' => array(
         'description' => 'Detailed information about the job.',
@@ -312,4 +312,18 @@ function _wf_job_set_default_statuses($table_name) {
   t('Approved');
   t('Completed');
   t('Needs Attention');
+}
+
+/**
+ * Change the external field on schema.
+ */
+function wf_job_update_7003($sandbox) {
+  $spec = array(
+    'description' => 'Reference number for the job.',
+    'type' => 'varchar',
+    'length' => '50',
+    'not null' => FALSE,
+  );
+
+  db_change_field('wf_job', 'reference', 'reference', $spec);
 }
