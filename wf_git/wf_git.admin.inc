@@ -6,7 +6,7 @@
 
 /**
  * Settings form for workflow git module.
- */ 
+ */
 function wf_git_settings_form($form, &$form_state) {
   $git_repos = entity_load('git_repository');
   $repos = array();

@@ -66,7 +66,7 @@ function wf_job_action_attach_comment_inputs(&$form, &$form_state, $job) {
   );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit'),
+    '#value' => t('Save'),
     '#weight' => 5,
   );
 }

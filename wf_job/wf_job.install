@@ -98,7 +98,7 @@ function wf_job_schema() {
       'status' => array('jsid'),
     ),
   );
-  
+
   $schema['wf_job_revision'] = array(
     'description' => 'Workflow Job Revisions',
     'fields' => array(
@@ -229,7 +229,7 @@ function wf_job_schema() {
     'unique keys' => array(),
   );
 
-  $schema['wf_job_status'] = array (
+  $schema['wf_job_status'] = array(
     'description' => 'Workflow Job Status',
     'fields' => array(
       'jsid' => array(

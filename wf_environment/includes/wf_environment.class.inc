@@ -299,7 +299,7 @@ class WfEnvironment extends Entity {
     return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
     return parent::buildContent($view_mode, $langcode, $content);
   }
-  
+
   /**
    * Generates the URI for the entity.
    */

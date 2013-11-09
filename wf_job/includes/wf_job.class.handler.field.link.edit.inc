@@ -15,7 +15,7 @@ class WfJobHandlerFieldLinkEdit extends WfJobHandlerFieldLink {
   }
 
   function render($values) {
-     $type = 'wf_job';
+    $type = 'wf_job';
     $dummy_wf_job = (object) array('type' => $type);
     if (!wf_job_access('edit', $dummy_wf_job)) {
       return;

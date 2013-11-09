@@ -6,7 +6,7 @@
 function wf_drush_command() {
   $items = array();
 
-  $items['wf-sql-db-create'] = array (
+  $items['wf-sql-db-create'] = array(
     'callback' => 'wf_sql_db_create',
     'description' => 'Creates a new database. Currently only supports MySQL.',
     'aliases' => array('sql-db-create', 'sql-create'),
