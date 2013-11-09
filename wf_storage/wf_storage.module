@@ -1,0 +1,111 @@
+<?php
+
+/**
+ * WF Storage module functions.
+ */
+
+/**
+ * Persists a storage record.
+ *
+ * @param string $key
+ *   The identifier for the data to store.
+ * @param mixed $data
+ *   The data to store.
+ */
+function wf_storage_put($key, $data) {
+  $found = db_select('wf_storage', 'wfs')
+    ->fields('wfs', array('skid'))
+    ->condition('skid', $key)
+    ->execute()
+    ->fetchField();
+
+  $record = array(
+    'skid' => $key,
+    'data' => $data,
+    'updated' => REQUEST_TIME,
+  );
+
+  $pk = array();
+
+  if ($found) {
+    $pk = 'skid';
+  }
+
+  return drupal_write_record('wf_storage', $record, $pk);
+}
+
+/**
+ * Retreieves data.
+ *
+ * @param string $key
+ *   The identifier for the data.
+ *
+ * @return mixed
+ *   The stored data structure or NULL if not found.
+ */
+function wf_storage_get($key) {
+  $data = db_select('wf_storage', 'wfs')
+    ->fields('wfs',  array('data'))
+    ->condition('skid', $key)
+    ->execute()
+    ->fetchField();
+
+  if ($data) {
+    return unserialize($data);
+  }
+
+  return NULL;
+}
+
+/**
+ * Deletes an entry from the storage.
+ *
+ * @param string $key
+ *   The key for the data being deleted.
+ */
+function wf_storage_delete($key) {
+  return db_delete('wf_storage')
+    ->condition('skid', $key)
+    ->execute();
+}
+
+/**
+ * Deletes all subkey data for a key.
+ *
+ * @param string $key
+ *   The key or subkey to delete.
+ */
+function wf_storage_delete_wildcard($key) {
+  $parts = explode(':', $key);
+  switch (count($parts)) {
+    case 2:
+      $lookup = implode(':', $parts) . ':';
+      break;
+    case 3:
+      $lookup = "{$parts[0]}:{$parts[1]}:%";
+      break;
+    default:
+      throw new Exception('Invalid key');
+  }
+
+  return db_delete('wf_storage')
+    ->condition('skid', $lookup, 'LIKE')
+    ->execute();
+}
+
+/**
+ * Generates a key.
+ *
+ * @param string $type
+ *   The entity type to use for generating the key.
+ * @param int $id
+ *   The id of the entity the data relates to.
+ * @param string $sub
+ *   The subset identifier for the data.
+ *
+ * @return string
+ *   The generated key.
+ */
+function wf_storage_generate_key($type, $id, $sub) {
+  return "{$type}:{$id}:{$sub}";
+}

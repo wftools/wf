@@ -1,0 +1,113 @@
+<?php
+
+/**
+ * @file
+ * WF Storage module tests.
+ */
+
+class WfStorageUnitTest extends DrupalUnitTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'WF Storage unit tests',
+      'description' => 'Test that WF Storage works properly.',
+      'group' => 'WF Storage',
+    );
+  }
+
+  /**
+   * Tests generating a storage key.
+   */
+  public function testGenerateKey() {
+    $key = wf_storage_generate_key('test', 1, 'test');
+    $this->assertEqual($key, 'test:1:test');
+  }
+}
+
+class WfStorageTest extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'WF Storage tests',
+      'description' => 'Test that WF Storage works properly.',
+      'group' => 'WF Storage',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp('wf_storage');
+  }
+
+  /**
+   * Tests storing data.
+   */
+  public function testPut() {
+    $key = wf_storage_generate_key('test', 1, 'test');
+
+    $value = $this->randomString();
+    $this->assertTrue(wf_storage_put($key, $value));
+
+    $count = $this->getDbCount($key);
+    $this->assertEqual($count, 1);
+  }
+
+  /**
+   * Tests retreiving data.
+   */
+  public function testGet() {
+    $key = wf_storage_generate_key('test', 2, 'test');
+
+    $value = $this->randomString();
+    wf_storage_put($key, $value);
+
+    $stored_value = wf_storage_get($key);
+    $this->assertEqual($value, $stored_value);
+  }
+
+  /**
+   * Tests deleting data.
+   */
+  function testDelete() {
+    $key = wf_storage_generate_key('test', 3, 'test');
+
+    $value = $this->randomString();
+    wf_storage_put($key, $value);
+
+    $this->assertTrue(wf_storage_delete($key));
+
+    $count = $this->getDbCount($key);
+    $this->assertEqual($count, 0);
+  }
+
+  /**
+   * Tests wildcard deleting of data.
+   */
+  function testDeleteWildcard() {
+    $base_key = 'test:4:';
+    $count = 3;
+
+    for ($i = 0; $i < $count; ++$i) {
+      $key = $base_key . $this->randomString(5);
+      wf_storage_put($key, $this->randomString());
+    }
+
+    $delete_key = "{$base_key}%";
+
+    $exists = $this->getDbCount($delete_key);
+    $this->assertEqual($exists, $count);
+
+    $this->assertTrue(wf_storage_delete_wildcard($delete_key));
+
+    $exists = $this->getDbCount($delete_key);
+    $this->assertEqual($exists, 0);
+  }
+
+  /**
+   * Counts wf_storage records by key.
+   */
+  protected function getDbCount($key) {
+    return db_select('wf_storage', 'wfs')
+      ->fields('wfs')
+      ->condition('skid', $key, 'LIKE')
+      ->execute()
+      ->rowCount();
+  }
+}

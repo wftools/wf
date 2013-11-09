@@ -1,0 +1,6 @@
+name = WF Storage
+description = Persistent key/value storage for WF
+
+core = 7.x
+
+files[] = wf_storage.test

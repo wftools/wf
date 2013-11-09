@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * WF Storage module install functions.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function wf_storage_install() {
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function wf_storage_uninstall() {
+}
+
+/**
+ * Implements hook_schema().
+ */
+function wf_storage_schema() {
+  $schema = array();
+
+  $schema['wf_storage'] = array(
+    'description' => 'WF Storage',
+    'fields' => array(
+      'skid' => array(
+        'description' => 'The storage key id.',
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => 'Serialized data structure to be stored.',
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+      'updated' => array(
+        'description' => 'A Unix timestamp indicating when the data was stored.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('skid'),
+    'indexes' => array(
+      'updated' => array('updated'),
+    ),
+  );
+
+  return $schema;
+}
