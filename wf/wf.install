@@ -12,3 +12,17 @@ function wf_update_7000($sandbox) {
   $modules = array('tec');
   module_enable($modules);
 }
+
+/**
+ * Implements hook_uninstall().
+ */
+function wf_uninstall() {
+  $variables = array(
+    'wf_sandbox_basepath',
+    'wf_sandbox_remote_host',
+  );
+
+  foreach ($variable as $variable) {
+    variable_del($variable);
+  }
+}
