@@ -1,0 +1,21 @@
+name = WF Log
+description = WF Log Management
+core = 7.x
+package = WF
+version = 7.x-1.0
+project = wf_log
+
+dependencies[] = wf_job
+dependencies[] = entity
+dependencies[] = views
+dependencies[] = rules
+dependencies[] = uuid
+dependencies[] = wf
+
+files[] = includes/wf_log.class.inc
+files[] = includes/wf_log.controller.inc
+files[] = views/wf_log.views.controller.inc
+files[] = views/wf_log.class.handler.field.link.inc
+files[] = views/wf_log.class.handler.field.link.delete.inc
+files[] = views/wf_log.class.handler.field.link.edit.inc
+files[] = views/wf_log.class.handler.field.link.entity.inc

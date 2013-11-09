@@ -1,0 +1,135 @@
+<?php
+
+/**
+ * @file
+ * WF Log install.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function wf_log_schema() {
+  module_load_include('install', 'uuid', 'uuid');
+  $uuid_field = uuid_schema_field_definition();
+
+  $schema = array();
+
+  $schema['wf_log'] = array(
+    'description' => 'Logs managed by workflow system.',
+    'fields' => array(
+      'lid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Log ID, unique id.',
+      ),
+      'entity_type' => array(
+        'description' => 'The entity type that this log belongs.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'entity' => array(
+        'description' => 'The entity that this log belongs.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'size' => 'big',
+      ),
+      'uuid' => $uuid_field,
+      'bundle' => array(
+        'description' => 'The bundle of the related log.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'message_summary' => array(
+        'description' => 'Message log summary.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => FALSE,
+      ),
+      'message_body' => array(
+        'description' => 'Message log details.',
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+      'message_type' => array(
+        'description' => 'The type of the log message.',
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => FALSE,
+      ),
+      'uid' => array(
+        'description' => 'User ID.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the Log was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('lid'),
+    'unique keys' => array(
+      'uuid' => array('uuid'),
+    ),
+  );
+
+  $schema['wf_log_bundle'] = array(
+    'description' => 'Stores information about all defined wf_log bundles.',
+    'fields' => array(
+      'bundle' => array(
+        'description' => 'The machine-readable name of this wf_log type.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'The human-readable name of this wf_log type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0x01,
+        'size' => 'tiny',
+        'description' => 'The exportable status of the entity.',
+      ),
+      'module' => array(
+        'description' => 'The name of the providing module if the entity has been defined in code.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('bundle'),
+    'unique keys' => array(),
+  );
+
+  return $schema;
+}
+
+/**
+ * Change the entity field type on wf_job table.
+ */
+function wf_log_update_7001(&$sandbox) {
+  $entity = array(
+    'description' => 'The entity that this log belongs.',
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => FALSE,
+    'size' => 'big',
+  );
+
+  db_change_field('wf_log', 'entity', 'entity', $new_field);
+}

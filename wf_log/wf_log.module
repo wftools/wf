@@ -1,0 +1,635 @@
+<?php
+/**
+ * @file
+ * WF Log module hooks.
+ */
+
+define('WF_LOG_DEFAULT_VIEWS_LIST_LOGS', 'log_list');
+define('WF_LOG_LIST_URL', 'admin/content/wf-logs');
+
+module_load_include('inc', 'wf_log', 'includes/wf_log.rules');
+
+/**
+ * Implements hook_entity_info().
+ */
+function wf_log_entity_info() {
+  $info = array();
+
+  $info['wf_log'] = array(
+    'label' => t('Workflow Log'),
+    'entity class' => 'WfLog',
+    'controller class' => 'WfLogController',
+    'base table' => 'wf_log',
+    'entity keys' => array(
+      'id' => 'lid',
+      'bundle' => 'bundle',
+      'label' => 'log',
+      'uuid' => 'uuid',
+    ),
+    'bundle keys' => array('bundle' => 'bundle'),
+    'bundles' => array(),
+    'fieldable' => TRUE,
+    'load hook' => 'wf_log_load',
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Full Workflow Log'),
+        'custom settings' => FALSE,
+      ),
+    ),
+    'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
+    'module' => 'wf_log',
+    'uuid' => TRUE,
+    'access callback' => 'wf_log_access',
+    'views controller class' => 'WfLogViewsController',
+  );
+
+  $info['wf_log_bundle'] = array(
+    'label' => t('Log Type'),
+    'entity class' => 'Entity',
+    'controller class' => 'EntityAPIControllerExportable',
+    'base table' => 'wf_log_bundle',
+    'fieldable' => FALSE,
+    'bundle of' => 'wf_log',
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'bundle',
+      'name' => 'bundle',
+      'label' => 'label',
+      'status' => 'status',
+      'module' => 'module',
+    ),
+    'module' => 'wf_log',
+    'admin ui' => array(
+      'path' => 'admin/structure/wf-log-types',
+      'file' => 'includes/wf_log.pages.inc',
+    ),
+    'access callback' => 'wf_log_bundle_access',
+  );
+
+  return $info;
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function wf_log_entity_info_alter(&$entity_info) {
+  foreach (wf_log_bundles() as $type => $info) {
+    $entity_info['wf_log']['bundles'][$type] = array(
+      'label' => $info->label,
+      'admin' => array(
+        'path' => 'admin/structure/wf-log-types/manage/%',
+        'real path' => 'admin/structure/wf-log-types/manage/' . $type,
+        'bundle argument' => 4,
+      ),
+    );
+  }
+}
+
+/**
+ * Implements hook_entity_property_info().
+ */
+function wf_log_entity_property_info() {
+  $properties = array();
+
+  $properties['lid'] = array(
+    'label' => t('Log ID'),
+    'type' => 'integer',
+    'description' => t('The unique log identifier.'),
+    'schema field' => 'lid',
+    'wf_extra_fields' => array('display'),
+  );
+
+  $properties['entity_type'] = array(
+    'label' => t('Entity type'),
+    'type' => 'text',
+    'description' => t('The entity type of the log entry.'),
+    'schema field' => 'entity_type',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $properties['entity'] = array(
+    'label' => t('Entity'),
+    'type' => 'integer',
+    'description' => t('The entity of the log entry.'),
+    'schema field' => 'entity',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $properties['uuid'] = array(
+    'label' => t('UUID'),
+    'type' => 'integer',
+    'description' => t('The universally unique log identifier.'),
+    'schema field' => 'uuid',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $properties['message_summary'] = array(
+    'label' => t('Message summary'),
+    'type' => 'text',
+    'description' => t('The message summary of the related Log.'),
+    'schema field' => 'message_summary',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $properties['message_body'] = array(
+    'label' => t('Message body'),
+    'type' => 'text',
+    'description' => t('The message details of the related Log.'),
+    'schema field' => 'message_body',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $properties['message_type'] = array(
+    'label' => t('Message type'),
+    'type' => 'text',
+    'description' => t('The message type of the related Log.'),
+    'schema field' => 'message_type',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $properties['uid'] = array(
+    'label' => t('Owner'),
+    'type' => 'user',
+    'description' => t('The user owner.'),
+    'schema field' => 'uid',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $properties['created'] = array(
+    'label' => t('Timestamp'),
+    'type' => 'date',
+    'description' => t('The Unix timestamp when the Log was created.'),
+    'schema field' => 'created',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $info = array();
+  $info['wf_log'] = array('properties' => $properties);
+  $info['wf_log_bundle'] = array('properties' => array());
+
+  return $info;
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ */
+function wf_log_field_extra_fields() {
+  return wf_generate_extra_fields('wf_log');
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function wf_log_views_api() {
+  return array("version" => "3.0");
+}
+
+/**
+ * Implements hook_theme().
+ */
+function wf_log_theme() {
+  $themes = array();
+
+  $themes['wf_log_add_list'] = array(
+    'file' => 'includes/wf_log.theme.inc',
+    'variables' => array('content' => NULL),
+  );
+
+  return $themes;
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function wf_log_admin_paths() {
+  $paths = array(
+    'wf-log/*/edit' => TRUE,
+    'wf-log/*/delete' => TRUE,
+    'wf-log/add' => TRUE,
+    'wf-log/add/*' => TRUE,
+  );
+
+  return $paths;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function wf_log_menu() {
+  $items = array();
+
+  $items['wf-log/add'] = array(
+    'title' => 'New Log',
+    'page callback' => 'wf_log_page_add',
+    'access arguments' => array('administer workflow log entities'),
+    'file' => 'includes/wf_log.pages.inc',
+    'type' => MENU_LOCAL_ACTION,
+  );
+
+  $log_uri = 'wf-log/%wf_log';
+
+  $items[$log_uri] = array(
+    'title callback' => 'wf_log_get_view_page_title',
+    'title arguments' => array(1),
+    'page callback' => 'wf_log_view',
+    'page arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'wf_log', 1),
+  );
+
+  $items[$log_uri . '/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+  );
+
+  $items[$log_uri . '/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_log_admin_form', 1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('edit', 'wf_log', 1),
+    'file' => 'includes/wf_log.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  );
+
+  $items[$log_uri . '/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_log_delete_form', 1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('delete', 'wf_log', 1),
+    'file' => 'includes/wf_log.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3,
+  );
+
+  foreach (wf_log_bundles() as $log => $info) {
+    $items['wf-log/add/' . $log] = array(
+      'title' => 'Add new entry Log',
+      'page callback' => 'wf_log_add',
+      'page arguments' => array(2),
+      'access callback' => 'entity_access',
+      'access arguments' => array('create', 'wf_log', $log),
+      'file' => 'includes/wf_log.pages.inc',
+    );
+  }
+
+  $items['admin/structure/wf-log-types/%/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('example_task_type_form_delete_confirm', 4),
+    'access arguments' => array('administer example_task types'),
+    'weight' => 1,
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'example_task.pages.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Helper function to create wf_log permission list for a given wf_log bundle.
+ *
+ * @param string $bundle
+ *   The machine-readable name of the wf_log log.
+ *
+ * @return array
+ *   An array of permission names and descriptions.
+ */
+function wf_log_list_permissions($bundle) {
+  // Build standard list of wf_log permissions for this wf_log bundle.
+  $actions = array('add', 'view', 'edit', 'delete');
+
+  $perms = array();
+  $perms["create $bundle log"] = array(
+    'title' => t(
+      '%type_name: Create new log',
+      array('%type_name' => $bundle)
+    ),
+  );
+  foreach ($actions as $action) {
+    $perms["$action own $bundle log"] = array(
+      'title' => t(
+        '%type_name: %action own log', array(
+          '%action' => ucfirst($action),
+          '%type_name' => $bundle,
+        )
+      ),
+    );
+    $perms["$action any $bundle log"] = array(
+      'title' => t(
+        '%type_name: %action any log', array(
+          '%action' => ucfirst($action),
+          '%type_name' => $bundle,
+        )
+      ),
+    );
+  }
+
+  return $perms;
+}
+
+/**
+ * Returns the page title of a Log page.
+ */
+function wf_log_get_view_page_title($log) {
+  return entity_label($log->entity_type, $log);
+}
+
+/**
+ * Load a Log.
+ */
+function wf_log_load($log_id = NULL, $reset = FALSE) {
+  $ids = (isset($log_id) ? array($log_id) : array());
+  $log = wf_log_load_multiple($ids, $reset);
+
+  return $log ? reset($log) : FALSE;
+}
+
+/**
+ * Load multiple logs based on certain conditions.
+ */
+function wf_log_load_multiple($log_ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wf_log', $log_ids, $conditions, $reset);
+}
+
+/**
+ * Page view callback.
+ */
+function wf_log_view(WfLog $log, $view_mode = 'full') {
+  $out = entity_view('wf_log', array($log));
+  if (!is_array($out)) {
+    return t('Unable to render log.');
+  }
+
+  return reset($out['wf_log']);
+}
+
+/**
+ * Save Log.
+ */
+function wf_log_save($log) {
+  return entity_save('wf_log', $log);
+}
+
+/**
+ * Delete single log.
+ */
+function wf_log_delete($log) {
+  entity_delete('wf_log', entity_id('wf_log', $log));
+}
+
+/**
+ * Delete multiple Logs.
+ */
+function wf_log_delete_multiple($log_ids) {
+  entity_delete_multiple('wf_log', $log_ids);
+}
+
+/**
+ * Access callback for Log.
+ */
+function wf_log_access($op, $log, $account = NULL, $entity_type = NULL) {
+  global $user;
+
+  if (!isset($account)) {
+    $account = $user;
+  }
+  switch ($op) {
+    case 'create':
+      return user_access('administer workflow log entities', $account)
+          || user_access('create workflow log entities', $account);
+
+    case 'view':
+      return user_access('administer workflow log entities', $account)
+          || user_access('view workflow log entities', $account);
+
+    case 'delete':
+      return user_access('administer workflow log entities', $account)
+          || user_access('delete workflow log entities', $account);
+
+    case 'edit':
+      return user_access('administer workflow log entities')
+          || user_access('edit any workflow log entities')
+          || (user_access('edit own workflow log entities') && ($log->uid == $account->uid));
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function wf_log_permission() {
+  $permissions = array(
+    'administer workflow log entities' => array(
+      'title' => t('Administer Workflow Logs'),
+      'description' => t('Allows users to configure workflow logs and their fields.'),
+      'restrict access' => TRUE,
+    ),
+    'create workflow log entities' => array(
+      'title' => t('Create Workflow Logs'),
+      'description' => t('Allows users to create Workflow Logs.'),
+      'restrict access' => TRUE,
+    ),
+    'view workflow log entities' => array(
+      'title' => t('View Workflow Logs'),
+      'description' => t('Allows users to view Workflow Logs.'),
+      'restrict access' => TRUE,
+    ),
+    'edit any workflow log entities' => array(
+      'title' => t('Edit any Workflow Logs'),
+      'description' => t('Allows users to edit Workflow Logs.'),
+      'restrict access' => TRUE,
+    ),
+    'edit own workflow log entities' => array(
+      'title' => t('Edit own Workflow Logs'),
+      'description' => t('Allows users to edit own Logs.'),
+      'restrict access' => TRUE,
+    ),
+    'delete workflow log entities' => array(
+      'title' => t('Delete Workflow Logs'),
+      'description' => t('Allows users to delete the Logs.'),
+      'restrict access' => TRUE,
+    ),
+    'manage workflow logs' => array(
+      'title' => t('Manage log creation, updating and deleting'),
+    ),
+  );
+
+  foreach (array_keys(wf_log_bundles()) as $bundle) {
+    $permissions = array_merge($permissions, wf_log_list_permissions($bundle));
+  }
+
+  return $permissions;
+}
+
+/**
+ * Check if the user has all permissions.
+ *
+ * @return boolean
+ *   Whether access is allowed or not.
+ */
+function wf_log_manage_logs_access() {
+  $args = func_get_args();
+
+  foreach ($args as $perm) {
+    if (!user_access($perm)) {
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
+/**
+ * Access callback for the entity API.
+ *
+ * @param string $op
+ *   The operation being performed. One of 'view', 'update', 'create', 'delete'
+ *   or just 'edit' (being the same as 'create' or 'update').
+ * @param string $type
+ *   (optional) The bundle type.
+ * @param object $account
+ *   (optional) The user to check for. Leave it to NULL to check for the global
+ *    user.
+ *
+ * @return boolean
+ *   Whether access is allowed or not.
+ */
+function wf_log_bundle_access($op, $type = NULL, $account = NULL) {
+  return user_access('administer workflow log entities', $account);
+}
+
+/**
+ * Load Log Bundle.
+ */
+function wf_log_bundle_load($log_bundle) {
+  return wf_log_bundles($log_bundle);
+}
+
+/**
+ * List of Log Bundles.
+ */
+function wf_log_bundles($log_name = NULL) {
+  $logs = entity_load_multiple_by_name('wf_log_bundle', isset($log_name) ? array($log_name) : FALSE);
+  return isset($log_name) ? reset($logs) : $logs;
+}
+
+/**
+ * Save Log bundle entity.
+ */
+function wf_log_bundle_save($log_bundle) {
+  entity_save('wf_log_bundle', $log_bundle);
+}
+
+/**
+ * Delete single Log Bundle.
+ */
+function wf_log_bundle_delete($log_bundle) {
+  entity_delete('wf_log_bundle', entity_id('wf_log_bundle', $log_bundle));
+}
+
+/**
+ * Delete multiple Log bundles.
+ */
+function wf_log_bundle_delete_multiple($log_bundle_ids) {
+  entity_delete_multiple('wf_log_bundle', $log_bundle_ids);
+}
+
+/**
+ * Checks if a bundle exists.
+ *
+ * @param string $name
+ *   The bundle to look up.
+ *
+ * @return bool
+ *   Does the bundle exist?
+ */
+function wf_log_bundle_exists($name) {
+  $bundles = wf_log_bundles();
+  return isset($bundles[$name]);
+}
+
+/**
+ * Returns all log types that were implemented by hook_wf_log_info().
+ *
+ * @see hook_wf_log_info()
+ *
+ * @return array
+ *   An array containing the logs information.
+ */
+function wf_log_get_logs_info() {
+  return module_invoke_all('wf_log_info');
+}
+
+/**
+ * Adds new log entry.
+ *
+ * @param array $values
+ *   An array containing the the values that you want to save in a new entry.
+ */
+function wf_log_add_log_entry($values) {
+  $log = entity_get_controller('wf_log')->create($values);
+  return wf_log_save($log);
+}
+
+/**
+ * Returns the information value of a given log.
+ *
+ * @param string $log_key
+ *   The given log that you want to get a information.
+ *
+ * @param string $info
+ *   The index of the information.
+ *
+ * @return string
+ *   An array containing the information of a log.
+ */
+function wf_log_get_log_info($log_key, $info) {
+  $log_info = NULL;
+
+  $logs_info = wf_log_get_logs_info();
+  if (!empty($logs_info[$log_key])) {
+    $log_info = $logs_info[$log_key]['title'];
+  }
+
+  return $log_info;
+}
+
+/**
+ * Returns the title relates to a log.
+ *
+ * @param string $log_key
+ *   The machine name (array key) of the log info.
+ */
+function wf_log_get_log_info_title($log_key) {
+  return wf_log_get_log_info($log_key, 'title');
+}
+
+/**
+ * Returns the description relates of a log.
+ *
+ * @param string $log_key
+ *   The machine name (array key) of the log info.
+ */
+function wf_log_get_log_info_description($log_key) {
+  return wf_log_get_log_info($log_key, 'description');
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function wf_log_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add action link to 'log/add' on 'admin/content/wf-log' page.
+  if ($root_path == WF_LOG_LIST_URL) {
+    $item = menu_get_item('wf-log/add');
+    if ($item['access']) {
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
+}
