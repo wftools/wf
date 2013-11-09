@@ -9,6 +9,23 @@ require_once 'wf.features.inc';
 define('WF_CODE_INDENT_SPACES', 2);
 
 /**
+ * Implements hook_menu().
+ */
+function wf_menu() {
+  $items['admin/config/development/wf'] = array(
+    'title' => 'WF Base',
+    'description' => t('Configure base settings for WF.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_settings_form'),
+    'access arguments' => array('administer'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'wf.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
  * Implements hook_theme().
  */
 function wf_theme() {
