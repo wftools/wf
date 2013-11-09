@@ -15,6 +15,13 @@ class WfStorageUnitTest extends DrupalUnitTestCase {
   }
 
   /**
+   *  {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp('wf_storage');
+  }
+
+  /**
    * Tests generating a storage key.
    */
   public function testGenerateKey() {
@@ -32,6 +39,9 @@ class WfStorageTest extends DrupalWebTestCase {
     );
   }
 
+  /**
+   *  {@inheritdoc}
+   */
   public function setUp() {
     parent::setUp('wf_storage');
   }
