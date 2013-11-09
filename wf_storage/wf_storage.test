@@ -18,7 +18,8 @@ class WfStorageUnitTest extends DrupalUnitTestCase {
    *  {@inheritdoc}
    */
   public function setUp() {
-    parent::setUp('wf_storage');
+    drupal_load('module', 'wf_storage');
+    parent::setUp();
   }
 
   /**
