@@ -110,7 +110,6 @@ function drush_wf_job_job_drush_aliases() {
 /**
  * Services wrappers
  */
-
 function wf_job_drush_services_invoke($command) {
   module_load_include('inc', 'wf_job', 'wf_job.services');
   module_load_include('inc', 'services', 'services.runtime');
