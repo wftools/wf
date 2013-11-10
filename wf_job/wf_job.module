@@ -1254,3 +1254,19 @@ function wf_job_wf_log_info() {
 
   return $logs;
 }
+
+/**
+ * Update the status of a job.
+ */
+function wf_job_update_status(WfJob $job, $status_id) {
+  $job->jsid = $status_id;
+  wf_job_save($job);
+}
+
+/**
+ * Update the environment for a job.
+ */
+function wf_job_update_environment(WfJob $job, $env_id) {
+  $job->eid = $env_id;
+  wf_job_save($job);
+}

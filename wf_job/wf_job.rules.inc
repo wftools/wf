@@ -63,7 +63,62 @@ function wf_job_rules_event_info() {
       'label' => t('After a job\'s code has been updated.'),
       'variables' => array('job' => array('type' => 'wf_job', 'label' => t('The job affected'))),
     ),
+    'wf_job_sandbox_built' => $defaults + array(
+      'label' => t('After a job sandbox is created'),
+      'variables' => array('job' => array('type' => 'wf_job', 'label' => t('The job affected'))),
+    ),
+    'wf_job_sandbox_fail' => $defaults + array(
+      'label' => t('After a job sandbox is fails to be created'),
+      'variables' => array('job' => array('type' => 'wf_job', 'label' => t('The job affected'))),
+    ),
+    'wf_job_updated_code_fail' => $defaults + array(
+      'label' => t("After a job's code has failed to update."),
+      'variables' => array('job' => array('type' => 'wf_job', 'label' => t('The job affected'))),
+    ),
   );
+}
+
+/**
+ * Implements hook_rules_action_info().
+ */
+function wf_job_rules_action_info() {
+  $actions = array();
+
+  $actions['wf_job_update_status'] = array(
+    'group' => t('Workflow Job'),
+    'label' => t('Update job status'),
+    'base' => 'wf_job_update_status',
+    'parameter' => array(
+      'job' => array(
+        'type' => 'wf_job',
+        'label' => t('Job'),
+      ),
+      'status' => array(
+        'type' => 'integer',
+        'options list' => 'wf_job_status_list',
+        'label' => t('New status'),
+      ),
+    ),
+  );
+
+  $actions['wf_job_update_environment'] = array(
+    'group' => t('Workflow Job'),
+    'label' => t('Update job environment'),
+    'base' => 'wf_job_update_environment',
+    'parameter' => array(
+      'job' => array(
+        'type' => 'wf_job',
+        'label' => t('Job'),
+      ),
+      'status' => array(
+        'type' => 'integer',
+        'options list' => 'wf_environment_list_names',
+        'label' => t('New environment'),
+      ),
+    ),
+  );
+
+  return $actions;
 }
 
 /**
