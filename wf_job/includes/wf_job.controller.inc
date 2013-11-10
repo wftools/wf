@@ -2,10 +2,24 @@
 
 /**
  * @file
- * Workflow job controller class.
+ * WF job controller class.
  */
 
+/**
+ * WF Job Entity Controller class.
+ */
 class WfJobController extends EntityAPIController {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function create(array $values = array()) {
+    $values += array(
+      'eid' => wf_environment_get_default(),
+    );
+
+    return parent::create($values);
+  }
 
   /**
    * Builds a structured array representing the entity's content.
@@ -16,7 +30,7 @@ class WfJobController extends EntityAPIController {
    * @param $entity
    *   An entity object.
    * @param $view_mode
-   *   View mode, e.g. 'full', 'teaser'...
+   *   View mode, for example 'full', 'teaser'...
    * @param $langcode
    *   (optional) A language code to use for rendering. Defaults to the global
    *   content language of the current request.
