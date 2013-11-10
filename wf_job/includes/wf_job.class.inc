@@ -81,6 +81,15 @@ class WfJob extends Entity {
     parent::save();
   }
 
+  /**
+   * Set the status of the job by name.
+   *
+   * @param string $status_name
+   *   The name of the status to set for the job.
+   *
+   * @return bool
+   *  Returns TRUE if the status name is valid, otherwise FALSE.
+   */
   public function setStatusName($status_name) {
     $statuses = array_flip(wf_job_status_list());
     if (isset($statuses[$status_name])) {
