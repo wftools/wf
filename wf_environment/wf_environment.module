@@ -211,6 +211,41 @@ function wf_environment_permission() {
 }
 
 /**
+ * Fetches the id of the default environment that jobs should start off in.
+ *
+ * @return int
+ *   The id of the default environment.
+ */
+function wf_environment_get_default() {
+  return (int) variable_get('wf_environment_default');
+}
+
+/**
+ * Implements hook_strongarm_export_value_alter().
+ */
+function wf_environment_strongarm_export_value_alter(&$value, $name) {
+  if ('wf_environment_default' == $name) {
+    $env = wf_environment_load($value);
+    if ($env) {
+      $value = $env->uuid;
+    }
+  }
+}
+
+/**
+ * Implements hook_strongarm_import_value_alter().
+ */
+function wf_environment_strongarm_import_value_alter(&$value, $name) {
+  if ('wf_environment_default' == $name) {
+    $env = entity_uuid_load('wf_environment', array($value));
+    $value = NULL;
+    if ($env) {
+      $value = $env->id;
+    }
+  }
+}
+
+/**
  * Implements hook_entity_property_info().
  */
 function wf_environment_entity_property_info() {
