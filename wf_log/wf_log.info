@@ -2,8 +2,7 @@ name = WF Log
 description = WF Log Management
 core = 7.x
 package = WF
-version = 7.x-1.0
-project = wf_log
+project = wf
 
 dependencies[] = wf_job
 dependencies[] = entity
