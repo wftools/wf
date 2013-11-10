@@ -1,7 +1,12 @@
 <?php
 
 /**
- * Workflow Job Views Controller.
+ * @file
+ * WF Job views controller.
+ */
+
+/**
+ * WF Job Views Controller.
  */
 class WfJobViewsController extends EntityDefaultViewsController {
 
