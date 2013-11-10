@@ -257,6 +257,7 @@ function wf_environment_entity_property_info() {
     'description' => t('The unique environment identifier.'),
     'type' => 'integer',
     'schema field' => 'id',
+    'wf_extra_fields' => array('display'),
   );
 
   $properties['vid'] = array(
@@ -264,6 +265,7 @@ function wf_environment_entity_property_info() {
     'description' => t('The unique environment revision identifier.'),
     'type' => 'integer',
     'schema field' => 'vid',
+    'wf_extra_fields' => array('form', 'display'),
   );
 
   $properties['uuid'] = array(
@@ -271,6 +273,7 @@ function wf_environment_entity_property_info() {
     'type' => 'integer',
     'description' => t('The universally unique job identifier.'),
     'schema field' => 'uuid',
+    'wf_extra_fields' => array('form', 'display'),
   );
 
   $properties['vuuid'] = array(
@@ -278,6 +281,7 @@ function wf_environment_entity_property_info() {
     'type' => 'integer',
     'description' => t('The universally unique job revision identifier.'),
     'schema field' => 'vuuid',
+    'wf_extra_fields' => array('form', 'display'),
   );
 
   $properties['bundle'] = array(
@@ -285,6 +289,7 @@ function wf_environment_entity_property_info() {
     'type' => 'token',
     'description' => t('The environment type.'),
     'schema field' => 'bundle',
+    'wf_extra_fields' => array('display'),
   );
 
   $properties['env'] = array(
@@ -292,6 +297,7 @@ function wf_environment_entity_property_info() {
     'type' => 'text',
     'description' => t('The name of the environment.'),
     'schema field' => 'env',
+    'wf_extra_fields' => array('form', 'display'),
   );
 
   $properties['drush_alias'] = array(
@@ -299,6 +305,7 @@ function wf_environment_entity_property_info() {
     'type' => 'text',
     'description' => t('The drush alias for the environment.'),
     'schema field' => 'drush_alias',
+    'wf_extra_fields' => array('form', 'display'),
   );
 
   $properties['next_env_id'] = array(
@@ -306,6 +313,7 @@ function wf_environment_entity_property_info() {
     'type' => 'wf_environment',
     'description' => t('The unique environment identifier of the next environment in the chain.'),
     'schema field' => 'next_env_id',
+    'wf_extra_fields' => array('form', 'display'),
   );
 
   $properties['notes'] = array(
@@ -313,6 +321,7 @@ function wf_environment_entity_property_info() {
     'type' => 'text',
     'description' => t('Notes about the environment.'),
     'schema field' => 'notes',
+    'wf_extra_fields' => array('form', 'display'),
   );
 
   $properties['active'] = array(
@@ -320,6 +329,7 @@ function wf_environment_entity_property_info() {
     'type' => 'boolean',
     'description' => t('Is the environment active?'),
     'schema field' => 'active',
+    'wf_extra_fields' => array('form', 'display'),
   );
 
   $properties['created'] = array(
@@ -327,6 +337,7 @@ function wf_environment_entity_property_info() {
     'type' => 'date',
     'description' => t('The date the environment was created.'),
     'schema field' => 'created',
+    'wf_extra_fields' => array('display'),
   );
 
   $properties['changed'] = array(
@@ -334,6 +345,7 @@ function wf_environment_entity_property_info() {
     'type' => 'date',
     'description' => t('The date the environment was last modified.'),
     'schema field' => 'changed',
+    'wf_extra_fields' => array('display'),
   );
 
   $properties['uid'] = array(
@@ -341,6 +353,7 @@ function wf_environment_entity_property_info() {
     'type' => 'user',
     'description' => t('The user who created the environment.'),
     'schema field' => 'uid',
+    'wf_extra_fields' => array('form', 'display'),
   );
 
   $info['wf_environment'] = array('properties' => $properties);
@@ -351,37 +364,7 @@ function wf_environment_entity_property_info() {
  * Implements hook_field_extra_fields().
  */
 function wf_environment_field_extra_fields() {
-
-  $fields = array('form' => array(), 'display' => array());
-  $exclude_display = array();
-  $exclude_form = array_merge($exclude_display, array('id', 'bundle', 'created', 'changed'));
-  $weight = -50;
-
-  $info = wf_environment_entity_property_info();
-  foreach($info['wf_environment']['properties'] as $key => $values) {
-    if (!in_array($key, $exclude_display)) {
-      $fields['display'][$key] = array(
-        'label' => $values['label'],
-        'description' => $values['description'],
-        'weight' => $weight,
-      );
-    }
-    if (!in_array($key, $exclude_form)) {
-      $fields['form'][$key] = array(
-        'label' => $values['label'],
-        'description' => $values['description'],
-        'weight' => $weight,
-      );
-    }
-    ++$weight;
-  }
-
-  $entities = array();
-  foreach (array_keys(wf_environment_load_bundles()) as $bundle) {
-    $entities[$bundle] = $fields;
-  }
-
-  return array('wf_environment' => $entities);
+  return wf_generate_extra_fields('wf_environment');
 }
 
 /**
