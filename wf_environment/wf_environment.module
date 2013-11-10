@@ -682,7 +682,7 @@ function _wf_environment_sort_by_next($envs) {
   $first_env = NULL;
 
   foreach ($envs as $env) {
-    $env_before[$env->next_env_id] = $env;
+    $env_before[(int) $env->next_env_id] = $env;
   }
 
   // Find the last environment, then work backwards.
