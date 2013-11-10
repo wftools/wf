@@ -142,34 +142,33 @@ function wf_job_edit_form($form, $form_state, $job) {
   );
 
   $envs = wf_environment_list_names();
-  $default_environment = $job->eid ? $job->eid : variable_get('wf_job_default_environment', 1);
   $form['eid'] = array(
     '#type' => 'select',
     '#title' => t('Current Environment'),
     '#options' => $envs,
-    '#default_value' => $default_environment,
+    '#default_value' => $job->eid,
     '#required' => TRUE,
     '#disabled' => !wf_job_action_allowed($job, 'change_environment'),
   );
 
   field_attach_form('wf_job', $job, $form, $form_state);
 
-  $reply_fields = wf_job_reply_fields();
-  if (isset($form[$reply_fields['entity']])) {
-    $form[$reply_fields['entity']]['#access'] = user_access('administer jobs');
-  }
-
-  $form['log_summary'] = array(
-    '#type' => 'value',
-    '#value' => $log_summary,
-  );
-
   $form['log'] = array(
     '#type' => 'textarea',
     '#title' => t('Log Message'),
-    '#default_value' => !empty($job->is_new) ? t('Creating job.') : '',
+    '#default_value' => '',
     '#required' => TRUE,
   );
+
+  // Fix a few things if this is a new job.
+  if (!empty($job->is_new)) {
+    foreach (array('assigned', 'eid') as $field) {
+      $form[$field]['#type'] = 'value';
+      $form[$field]['#value'] = $form[$field]['#default_value'];
+    }
+    $form['log']['#type'] = 'value';
+    $form['log']['#value'] =  t('Job created by @user.', array('@user' => $GLOBALS['user']->name));
+  }
 
   $form['actions'] = array('#weight' => 99);
 
@@ -178,6 +177,13 @@ function wf_job_edit_form($form, $form_state, $job) {
     '#value' => t('Save'),
     '#weight' => 5,
   );
+
+  if (!empty($job->is_new)) {
+    $form['actions']['create_and_start'] = array(
+      '#type' => 'submit',
+      '#value' => t('Create and Start'),
+    );
+  }
 
   if (!empty($job->jid) && user_access('delete jobs')) {
     $job_uri = entity_uri('wf_job', $job);
@@ -204,9 +210,14 @@ function wf_job_sandbox_login($job = NULL) {
  * Job edit form validation callback.
  */
 function wf_job_edit_form_validate($form, &$form_state) {
+  // Hack to set the assigned value to the owner.
+  if ($form_state['values']['is_new']) {
+    $form_state['values']['assigned'] = $form_state['values']['owner'];
+  }
+
   $ref = $form_state['values']['reference'];
   $existing = wf_job_id_by_reference($ref);
-  if (!empty($existing['wf_job'])
+  if (!empty($ref) && !empty($existing['wf_job'])
     && !isset($existing['wf_job'][$form_state['values']['jid']])) {
 
     $uri = reset(entity_load('wf_job', array_keys($existing['wf_job'])))->uri();
@@ -222,13 +233,21 @@ function wf_job_edit_form_submit($form, &$form_state) {
   $job = new WfJob($form_state['values']);
   wf_job_save($job);
   $form_state['redirect'] = $job->uri();
+
+  if ($form_state['values']['op'] == t('Create and Start')) {
+    $job->revision = TRUE;
+    $job->log = t('Job started by @user', array('@user' => $GLOBALS['user']->realname));
+    $job->rules_event = 'wf_job_started';
+    $job->setStatusName('Started');
+    wf_job_save($job);
+    rules_invoke_event('wf_job_started', $job, $job->eid, $job->eid, $job->owner, $job->assigned);
+  }
 }
 
 /**
  * Displays a job.
  */
 function wf_job_view($job) {
-  wf_job_report_conflicts($job);
   $out = entity_view('wf_job', array($job));
   if (!is_array($out)) {
     return t('Unable to render job.');
@@ -298,3 +317,4 @@ function wf_job_delete_form_submit($form, &$form_state) {
   drupal_set_message(t("Job '@title' was successfully deleted.", array('@title' => $title)));
   $form_state['redirect'] = url('admin/content/jobs');
 }
+
