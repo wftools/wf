@@ -5,6 +5,9 @@
  * Workflow job module installation functions.
  */
 
+/**
+ * Implements hook_schema().
+ */
 function wf_job_schema() {
   module_load_include('install', 'uuid', 'uuid');
 
@@ -263,25 +266,22 @@ function wf_job_install() {
 }
 
 /**
- * Create and populate the job status table.
+ * Implements hook_uninstall().
  */
-function wf_job_update_7001($sandbox) {
-  $name = 'wf_job_status';
-  $schema = wf_job_schema();
-  $table = $schema[$name];
-  db_create_table($name, $table);
+function wf_job_uninstall() {
+  $variables = array(
+    'wf_job_default_status',
+    'wf_job_ext_ref_plugin',
+    'wf_job_jsid_completed',
+    'wf_job_jsid_new',
+    'wf_job_slug_pattern',
+    'wf_job_visit_plugin',
+    'wf_job_login_plugin',
+  );
 
-  _wf_job_set_default_statuses($name);
-}
-
-/**
- * Add bundle table
- */
-function wf_job_update_7002($sandbox) {
-  $name = 'wf_job_bundle';
-  $schema = wf_job_schema();
-  $table = $schema[$name];
-  db_create_table($name, $table);
+  foreach ($variable as $variable) {
+    variable_del($variable);
+  }
 }
 
 /**
@@ -312,6 +312,28 @@ function _wf_job_set_default_statuses($table_name) {
   t('Approved');
   t('Completed');
   t('Needs Attention');
+}
+
+/**
+ * Create and populate the job status table.
+ */
+function wf_job_update_7001($sandbox) {
+  $name = 'wf_job_status';
+  $schema = wf_job_schema();
+  $table = $schema[$name];
+  db_create_table($name, $table);
+
+  _wf_job_set_default_statuses($name);
+}
+
+/**
+ * Add bundle table
+ */
+function wf_job_update_7002($sandbox) {
+  $name = 'wf_job_bundle';
+  $schema = wf_job_schema();
+  $table = $schema[$name];
+  db_create_table($name, $table);
 }
 
 /**

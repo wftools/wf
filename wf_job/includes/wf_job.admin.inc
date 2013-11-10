@@ -242,3 +242,75 @@ function wf_job_action_review_form_submit($form, &$form_state) {
 
   $form_state['redirect'] = $job->uri();
 }
+
+/**
+ * Admin settings form.
+ */
+function wf_job_admin_settings() {
+  $form = array();
+
+  $form['wf_job_jsid_new'] = array(
+    '#type' => 'select',
+    '#title' => t('Job Status New'),
+    '#description' => t('The new status of the job.'),
+    '#default_value' => variable_get('wf_job_jsid_new'),
+    '#options' => wf_job_status_list(),
+    '#required' => FALSE,
+  );
+
+  $form['wf_job_jsid_completed'] = array(
+    '#type' => 'select',
+    '#title' => t('Job Status Completed'),
+    '#description' => t('The completed status of the job.'),
+    '#default_value' => variable_get('wf_job_jsid_completed'),
+    '#options' => wf_job_status_list(),
+    '#required' => FALSE,
+  );
+
+  $form['wf_job_slug_pattern'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Slug Pattern'),
+    '#description' => t('The slug pattern of the job. Must contain @jid.'),
+    '#default_value' => variable_get('wf_job_slug_pattern'),
+    '#required' => FALSE,
+  );
+
+  $form['wf_job_visit_plugin'] = array(
+    '#type' => 'select',
+    '#title' => t('Job Visit Plugin'),
+    '#description' => t('The visit plugin of the job.'),
+    '#default_value' => variable_get('wf_job_visit_plugin'),
+    '#options' => wf_job_get_plugins_list('url_visit'),
+    '#required' => FALSE,
+  );
+
+  $form['wf_job_login_plugin'] = array(
+    '#type' => 'select',
+    '#title' => t('Job Login Plugin'),
+    '#description' => t('The login plugin of the job.'),
+    '#default_value' => variable_get('wf_job_login_plugin'),
+    '#options' => wf_job_get_plugins_list('url_login'),
+    '#required' => FALSE,
+  );
+
+  $form['#validate'][] = 'wf_job_admin_settings_validate';
+
+  return system_settings_form($form);
+}
+
+/**
+ * Handler the admin settings form validate.
+ */
+function wf_job_admin_settings_validate($form, &$form_state) {
+  $values = $form_state['values'];
+
+  if (isset($values['wf_job_jsid_new']) && isset($values['wf_job_jsid_completed'])) {
+    if ($values['wf_job_jsid_new'] === $values['wf_job_jsid_completed']) {
+      form_set_error('wf_job_jsid_completed', t('The status completed can\'t use the same value as new.'));
+    }
+  }
+
+  if (strpos($values['wf_job_slug_pattern'], '@jid') === FALSE) {
+    form_set_error('wf_job_slug_pattern', t('The Slug Pattern field must contain @jid pattern.'));
+  }
+}
