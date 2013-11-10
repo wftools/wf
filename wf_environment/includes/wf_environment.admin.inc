@@ -119,3 +119,34 @@ function wf_environment_admin_list() {
 
   return $output;
 }
+
+/**
+ * Admin settings form.
+ */
+function wf_environment_admin_settings() {
+  $form = array();
+
+  $environments = wf_environment_load_multiple(FALSE, array('active' => TRUE));
+  if (!count($environments)) {
+    $link = l(t('Please create at least one environment.'), 'environment/add');
+    return $form['no_environments'] = array(
+      '#markup' => t('No environments exist. !link', array('!link' => $link)),
+    );
+  }
+
+  $options = array();
+  foreach($environments as $environment) {
+    $options[$environment->id] = $environment->env;
+  }
+
+  $form['wf_environment_default'] = array(
+    '#type' => 'select',
+    '#title' => t('Default environment'),
+    '#default_value' => wf_environment_get_default(),
+    '#options' => $options,
+    '#description' => t('Select the default environment for new jobs.'),
+    '#required' => TRUE,
+  );
+
+  return system_settings_form($form);
+}

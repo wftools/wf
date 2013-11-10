@@ -123,6 +123,15 @@ function wf_environment_menu() {
       'access arguments' => array('manage environments'),
     );
   }
+  $items['admin/config/development/wf_environment'] = array(
+    'title' => 'WF Environments',
+    'description' => 'Configure environment settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_environment_admin_settings'),
+    'access arguments' => array('administer environments'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/wf_environment.admin.inc',
+  );
   $items['admin/content/environments'] = array(
     'title' => 'Environments',
     'description' => 'Manage environments.',
