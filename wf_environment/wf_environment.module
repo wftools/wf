@@ -188,7 +188,6 @@ function wf_environment_admin_paths() {
   return $paths;
 }
 
-
 /**
  * Implements hook_permission().
  */
@@ -490,6 +489,9 @@ function wf_environment_edit_form($form, $form_state, $env) {
   return $form;
 }
 
+/**
+ * Validates wf_environment edit form submissions.
+ */
 function wf_environment_edit_form_validate($form, &$form_state) {
   $env = (object) $form_state['values'];
   field_attach_form_validate('wf_environment', $env, $form, $form_state);

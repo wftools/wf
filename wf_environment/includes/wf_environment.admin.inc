@@ -135,7 +135,7 @@ function wf_environment_admin_settings() {
   }
 
   $options = array();
-  foreach($environments as $environment) {
+  foreach ($environments as $environment) {
     $options[$environment->id] = $environment->env;
   }
 
