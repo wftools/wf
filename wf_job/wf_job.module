@@ -919,45 +919,9 @@ function wf_job_action_title($job, $action) {
 }
 
 /**
- * Save a reply against a job.
- */
-function wf_job_reply_save($job, $title, $body, array $extra_values = array()) {
-  global $user;
-  $reply_fields = wf_job_reply_fields();
-  $entity_field_name = $reply_fields['entity'];
-  $field = reset(_field_invoke_get_instances('wf_job', 'job', array('deleted' => FALSE, 'field_name' => $entity_field_name)));
-  $field_info = field_info_field($entity_field_name);
-
-  $reply_values = array(
-    'id' => NULL,
-    'uid' => $user->uid,
-    'bundle' => $field_info['settings']['bundle'],
-    'position' => NULL,
-    'parent' => NULL,
-    'entity_type' => 'wf_job',
-    'entity_id' => $job->jid,
-    'instance_id' => $field['id'],
-    'created' => REQUEST_TIME,
-    'language' => isset($entity->language) ? $entity->language : LANGUAGE_NONE,
-    'depth' => 0,
-    'hostname' => ip_address(),
-    'redirect' => entity_uri('wf_job', $job),
-    'status' => 1,
-    'deleted' => 0,
-    $reply_fields['title'] => array(LANGUAGE_NONE => array(array('value' => $title))),
-    $reply_fields['body'] => array(LANGUAGE_NONE => array(array('value' => $body))),
-  ) + $extra_values;
-
-  $reply = entity_create('reply', $reply_values);
-  reply_save($reply);
-
-  return $reply;
-}
-
-/**
  * Trigger event notifications for job actions.
  */
-function wf_job_action_event_invoke($event, $job, $reply) {
+function wf_job_action_event_invoke($event, $job) {
   $owner = user_load($job->owner);
   $assigned = user_load($job->assigned);
   $env = wf_environment_load($job->eid);
@@ -972,7 +936,6 @@ function wf_job_action_event_invoke($event, $job, $reply) {
   }
 
   rules_invoke_event_by_args("wf_job_$event", array(
-    'reply' => $reply,
     'job' => $job,
     'environment' => $env,
     'next_environment' => $next_env,
@@ -1001,23 +964,19 @@ function wf_job_deployment($job, $succeeded, $message) {
     $job->eid = $env->next_env_id;
     if ($next_env->next_env_id) {
       $job->setStatusName('Started');
-      $log_summary = "Deployed to @env";
       $rules_event = 'deployed';
     }
     else {
       $job->setStatusName('Completed');
-      $log_summary = "Deployed to @env and completed";
       $rules_event = 'completed';
     }
   }
   else {
     $job->setStatusName('Needs Attention');
-    $log_summary = "Deployment to @env failed";
     $rules_event = 'deployment_failed';
   }
 
   $job->rules_event = $rules_event;
-  $job->log_summary = t($log_summary, array('@env' => $next_env->label()));
   $job->log = filter_xss_admin($message);
 
   wf_job_save($job);
@@ -1113,9 +1072,8 @@ function wf_job_entity_insert($entity, $entity_type) {
  */
 function wf_job_entity_update($entity, $entity_type) {
   if ('wf_job' == $entity_type) {
-    $reply = wf_job_reply_save($entity, $entity->log_summary, $entity->log);
     if (!empty($entity->rules_event)) {
-      wf_job_action_event_invoke($entity->rules_event, $entity, $reply);
+      wf_job_action_event_invoke($entity->rules_event, $entity);
     }
   }
 }
@@ -1148,45 +1106,151 @@ function wf_job_entity_metadata_get_properties($entity, array $options, $name, $
 }
 
 /**
- * Sets a warning if there are conflicts with the given job.
- *
- * @param WfJob $job
+ * Redirects the user to view the sandbox site.
  */
-function wf_job_report_conflicts($job) {
-  $env = wf_environment_load($job->eid);
-  $merge_env = wf_environment_merge();
-  if ($env == $merge_env) {
-    if (wf_job_get_deploy_conflicts($job) > 0) {
-      $plan_url = wf_environment_app_uri($env, $job, 'admin/content/deploy/plan/' . wf_job_slug($job->jid));
-      $plan_url['options'] = array_merge($plan_url['options'], array('attributes' => array('target' => '_blank')));
-      drupal_set_message(
-        t('<strong>Warning</strong>: Content changes in this job may conflict with changes in other jobs. !review', array(
-          '!review' => l('Review Conflicts', $plan_url['path'], $plan_url['options'])
-        )),
-        'warning',
-        FALSE
-      );
-    }
+function wf_job_visit(WfJob $job) {
+  ctools_include('plugins');
+
+  $plugin = variable_get('wf_job_visit_plugin');
+  if (!$plugin) {
+    drupal_set_message(t('View sandbox plugin undefined.'), 'error');
+    $uri = entity_uri('wf_job', $job);
+    return drupal_goto($uri['path'], $uri['options']);
+  }
+
+  $class_name = ctools_plugin_load_class('wf_job', 'url_visit', $plugin, 'handler');
+  $handler = new $class_name();
+
+  $url = $handler->generateVisitLink($job);
+  drupal_goto($url);
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function wf_job_ctools_plugin_api($module, $api) {
+  $apis = array(
+    'sandbox_domain',
+    'url_login',
+    'url_visit',
+    'url_ssh',
+    'external_reference',
+  );
+
+  if ('wf_job' == $module && in_array($api, $apis)) {
+    return array('version' => 1);
   }
 }
 
 /**
- * Returns the number of deploy conflicts this job has in it's current environment.
+ * Implements hook_ctools_plugin_type().
  */
-function wf_job_get_deploy_conflicts($job) {
-  $env = wf_environment_load($job->eid);
-  $alias = $env->drush_alias;
-  $plan_name = wf_job_slug($job->jid);
+function wf_job_ctools_plugin_type() {
+  $apis = array(
+    'sandbox_domain',
+    'url_login',
+    'url_visit',
+    'url_ssh',
+    'external_reference',
+  );
 
-  $shell = new Shell();
-  $result = $shell->run("drush @$alias deploy-conflict-count", array(), array($plan_name));
-  $data = drupal_json_decode($result);
-  if (FALSE === $result || FALSE === $data) {
-    drupal_set_message(t('Could not check for conflicts'), 'error');
-    watchdog('wf_job', t('Could not check for conflicts: @error', array('@error' => $shell->getError())), NULL, WATCHDOG_ERROR);
-    return 0;
+  $plugins = array();
+  foreach ($apis as $api) {
+    $plugins[$api] = array(
+      'classes' => array('handler'),
+    );
   }
-  else {
-    return $data['conflicts'];
+
+  return $plugins;
+}
+
+/**
+ * Default implementation for accessing a job sandbox.
+ *
+ * @param object $job
+ *   The object of the related Job entity.
+ */
+function wf_job_job_sandbox_login_page($job) {
+  // TODO implement redirect here using drupal_goto.
+  return t('You should be redirected to your job.');
+}
+
+/**
+ * Fetches a list of plugins.
+ *
+ * @param  string $type
+ *   The plugin type.
+ * @return array
+ *   An associative array of plugins keyed by name.
+ */
+function wf_job_get_plugins_list($type) {
+  $plugins = array();
+  foreach (ctools_get_plugins('wf_job', $type) as $name => $info) {
+    $plugins[$name] = $info['title'];
   }
+  return $plugins;
+}
+
+/**
+ * Implements hook_wf_log_info().
+ */
+function wf_job_wf_log_info() {
+  $logs = array();
+
+  $logs['wf_job_started'] = array(
+    'title' => t('Job started'),
+    'description' => t('A new Job was started.'),
+  );
+
+  $logs['wf_job_proposed'] = array(
+    'title' => t('Job proposed'),
+    'description' => t('Job was proposed for review.'),
+  );
+
+  $logs['wf_job_saved'] = array(
+    'title' => t('Job saved'),
+    'description' => t('Job was saved.'),
+  );
+
+  $logs['wf_job_approved'] = array(
+    'title' => t('Job approved'),
+    'description' => t('Job was approved.'),
+  );
+
+  $logs['wf_job_rejected'] = array(
+    'title' => t('Job rejected'),
+    'description' => t('Job was rejected.'),
+  );
+
+  $logs['wf_job_deployed'] = array(
+    'title' => t('Job deployed'),
+    'description' => t('Job was deployed to a new environment.'),
+  );
+
+  $logs['wf_job_deployment_failed'] = array(
+    'title' => t('Job deployment failed'),
+    'description' => t('Job\'s deployment to a new environment fails.'),
+  );
+
+  $logs['wf_job_completed'] = array(
+    'title' => t('Job completed'),
+    'description' => t('Job was deployed to the final environment.'),
+  );
+
+  $logs['wf_job_update_code_submit'] = array(
+    'title' => t('"Update code" button clicked'),
+    'description' => t('User clicked on the Update code button.'),
+  );
+
+  $logs['wf_job_start_update_code'] = array(
+    'title' => t('Code update started'),
+    'description' => t('Code update was started for a job.'),
+  );
+
+  $logs['wf_job_updated_code'] = array(
+    'title' => t('Job code updated'),
+    'description' => t('Job code has been updated.'),
+  );
+
+  return $logs;
 }

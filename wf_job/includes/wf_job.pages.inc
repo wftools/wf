@@ -57,14 +57,12 @@ function wf_job_edit_form($form, $form_state, $job) {
   $default_owner = $job->owner;
   $default_assigned = $job->assigned;
   $revision = TRUE;
-  $log_summary = t('Job updated');
   if (!empty($job->is_new)) {
     $is_new = TRUE;
     $status_type = 'value';
     $default_status = variable_get('wf_job_default_status', 1);
     $default_owner = $GLOBALS['user']->uid;
     $default_assigned = $GLOBALS['user']->uid;
-    $log_summary = t('Job created');
     $revision = FALSE;
   }
 

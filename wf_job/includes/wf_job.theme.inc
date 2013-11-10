@@ -46,30 +46,3 @@ function theme_wf_job_drush_aliases($variables) {
 
   return $php;
 }
-
-/**
- * Preprocess hook for reply theme hook.
- */
-function wf_job_preprocess_reply(&$variables) {
-  $reply_fields = wf_job_reply_fields();
-
-  $reply = $variables['elements']['reply'];
-  $variables['date'] = date('jS M Y', $reply->created);
-  $variables['time'] = date('g:ia', $reply->created);
-
-  foreach (array('title') as $field_type) {
-    $variables[$field_type] = t('Comment');
-    if (!empty($variables['content'][$reply_fields[$field_type]][0]['#markup'])) {
-      $variables[$field_type] = $variables['content'][$reply_fields[$field_type]][0]['#markup'];
-      unset($variables['content'][$reply_fields[$field_type]]);
-    }
-  }
-}
-
-/**
- * Preprocess hook for replies theme hook.
- */
-function wf_job_preprocess_replies(&$variables) {
-  $variables['header'] = t('Job History');
-}
-

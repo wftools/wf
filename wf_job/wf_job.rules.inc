@@ -18,7 +18,6 @@ function wf_job_rules_event_info() {
     'job' => array('type' => 'wf_job', 'label' => t('The job affected')),
     'environment' => array('type' => 'wf_environment', 'label' => t('The job\'s current environment')),
     'next_environment' => array('type' => 'wf_environment', 'label' => t('The job\'s next environment or NULL')),
-    'reply' => array('type' => 'reply', 'label' => t('A comment on change')),
     'owner' => array('type' => 'user', 'label' => t('The owner of the job')),
     'assigned' => array('type' => 'user', 'label' => t('The user assigned the job')),
   );

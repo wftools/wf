@@ -52,32 +52,23 @@ function wf_job_bundle_form_submit(&$form, &$form_state) {
 }
 
 /**
- * Attaches comment inputs to an action form.
+ * Start a job form.
  */
-function wf_job_action_attach_comment_inputs(&$form, &$form_state, $job) {
+function wf_job_action_start_form($form, &$form_state, $job) {
+  drupal_set_title(t('Start') . ': ' . entity_label('wf_job', $job));
+
   $form['log'] = array(
-    '#title' => t('Comment'),
-    '#type' => 'text_format',
-    '#required' => TRUE,
-    '#description' => t('Please make a comment.'),
+    '#type' => 'value',
+    '#value' => t('Job started by @user', array('@user' => $GLOBALS['user']->realname)),
   );
+
   $form['actions'] = array(
     '#weight' => 99,
   );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save'),
-    '#weight' => 5,
+    '#value' => t('Start job'),
   );
-}
-
-/**
- * Start a job form.
- */
-function wf_job_action_start_form($form, &$form_state, $job) {
-  drupal_set_title(t('Start') . ': ' . entity_label('wf_job', $job));
-  wf_job_action_attach_comment_inputs($form, $form_state, $job);
-  $form['actions']['submit']['#value'] = t('Start job');
 
   return $form;
 }
@@ -89,7 +80,6 @@ function wf_job_action_start_form_submit($form, &$form_state) {
   $job = reset($form_state['build_info']['args']);
 
   $job->revision = TRUE;
-  $job->log_summary = t('Job started');
   $job->log = filter_xss($form_state['values']['log']['value']);
   $job->rules_event = 'started';
   $job->setStatusName('Started');
@@ -135,8 +125,21 @@ function wf_job_action_propose_form($form, &$form_state, $job) {
     '#description' => t('Choose the person who will review this job.'),
   );
 
-  wf_job_action_attach_comment_inputs($form, $form_state, $job);
-  $form['actions']['submit']['#value'] = t('Propose for @env', array('@env' => $next_env->label()));
+  $form['log'] = array(
+    '#title' => t('Comment'),
+    '#type' => 'text_format',
+    '#required' => TRUE,
+    '#description' => t('Please make a comment.'),
+  );
+
+  $form['actions'] = array(
+    '#weight' => 99,
+  );
+
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Propose for @env', array('@env' => $next_env->label())),
+  );
 
   return $form;
 }
@@ -160,7 +163,6 @@ function wf_job_action_propose_form_submit($form, &$form_state) {
   $next_env = wf_environment_load($env->next_env_id);
 
   $job->revision = TRUE;
-  $job->log_summary = t('Job proposed for @env', array('@env' => $next_env->label()));
   $job->log = filter_xss($form_state['values']['log']['value']);
   $job->assigned = $form_state['values']['reviewer'];
   $job->rules_event = 'proposed';
@@ -192,20 +194,22 @@ function wf_job_action_review_form($form, &$form_state, $job) {
     '#markup' => l($next_env->label(), reset($next_env->uri())),
   );
 
-  $content_url = wf_job_content_changes_link($job);
-  $form['changes'] = array(
-    '#type' => 'item',
-    '#title' => t('Changes for review'),
-    'links' => array(
-      '#theme' => 'links',
-      '#links' => array(
-        array('title' => 'Review content changes', 'href' => $content_url['path'], 'options' => $content_url['options'], 'attributes' => array('target' => '_blank')),
-      ),
-    )
+  $form['log'] = array(
+    '#title' => t('Comment'),
+    '#type' => 'text_format',
+    '#required' => TRUE,
+    '#description' => t('Please make a comment.'),
   );
 
-  wf_job_action_attach_comment_inputs($form, $form_state, $job);
-  $form['actions']['submit']['#value'] = t('Approve for @env', array('@env' => $next_env->label()));
+  $form['actions'] = array(
+    '#weight' => 99,
+  );
+
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Approve for @env', array('@env' => $next_env->label())),
+  );
+
   $form['actions']['reject'] = array(
     '#type' => 'submit',
     '#value' => t('Reject Job'),
@@ -233,7 +237,6 @@ function wf_job_action_review_form_submit($form, &$form_state) {
   $next_env = wf_environment_load($env->next_env_id);
 
   $job->revision = TRUE;
-  $job->log_summary = t('@env deployment @event', array('@event' => $event, '@env' => $next_env->label()));
   $job->log = filter_xss($form_state['values']['log']['value']);
   $job->assigned = $job->owner;
   $job->rules_event = $event;
