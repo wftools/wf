@@ -40,9 +40,6 @@ function wf_job_add($bundle) {
  * Job edit menu callback.
  */
 function wf_job_edit($job = NULL) {
-  if (!is_null($job)) {
-    wf_job_report_conflicts($job);
-  }
   return drupal_get_form('wf_job_edit_form', $job);
 }
 

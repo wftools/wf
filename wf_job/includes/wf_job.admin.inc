@@ -92,7 +92,6 @@ function wf_job_action_start_form_submit($form, &$form_state) {
  * Propose a job form.
  */
 function wf_job_action_propose_form($form, &$form_state, $job) {
-  wf_job_report_conflicts($job);
   drupal_set_title(wf_job_action_title($job, 'propose'));
 
   $job_uri = $job->uri();
@@ -176,7 +175,6 @@ function wf_job_action_propose_form_submit($form, &$form_state) {
  * Review a job form.
  */
 function wf_job_action_review_form($form, &$form_state, $job) {
-  wf_job_report_conflicts($job);
   $env = wf_environment_load($job->eid);
   $next_env = wf_environment_load($env->next_env_id);
 
