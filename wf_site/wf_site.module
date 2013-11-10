@@ -1,0 +1,854 @@
+<?php
+
+/**
+ * @file
+ * Workflow Site Management functions.
+ */
+
+/**
+ * Implements hook_entity_info().
+ */
+function wf_site_entity_info() {
+  $info = array();
+
+  $info['wf_site'] = array(
+    'label' => t('Workflow Site'),
+    'entity class' => 'WfSite',
+    'controller class' => 'WfSiteController',
+    'base table' => 'wf_site',
+    'revision table' => 'wf_site_revision',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+      'bundle' => 'bundle',
+      'id' => 'sid',
+      'revision' => 'vid',
+      'label' => 'site_name',
+      'uuid' => 'uuid',
+      'revision uuid' => 'vuuid',
+    ),
+    'bundle keys' => array('bundle' => 'bundle'),
+    'bundles' => array(),
+    'load hook' => 'wf_site_load',
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Full Site'),
+        'custom settings' => FALSE,
+      ),
+    ),
+    'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
+    'module' => 'wf_site',
+    'uuid' => TRUE,
+    'access callback' => 'wf_site_access',
+    'default_revision' => TRUE,
+  );
+
+  $info['wf_site_bundle'] = array(
+    'label' => t('Site Type'),
+    'entity class' => 'Entity',
+    'controller class' => 'EntityAPIControllerExportable',
+    'base table' => 'wf_site_bundle',
+    'fieldable' => FALSE,
+    'bundle of' => 'wf_site',
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'bundle',
+      'name' => 'bundle',
+      'label' => 'label',
+      'status' => 'status',
+      'module' => 'module',
+    ),
+    'module' => 'wf_site',
+    'admin ui' => array(
+      'path' => 'admin/structure/site-types',
+      'file' => 'includes/wf_site.admin.inc',
+    ),
+    'access callback' => 'wf_site_type_access',
+  );
+
+  foreach (wf_site_load_bundles() as $name => $bundle) {
+    $info['wf_site']['bundles'][$name] = array(
+      'label' => $bundle->label,
+      'admin' => array(
+        'path' => 'admin/structure/site-types/manage/%',
+        'real path' => 'admin/structure/site-types/manage/' . $name,
+        'bundle argument' => 4,
+        'access arguments' => array('administer sites'),
+      ),
+    );
+  }
+
+  return $info;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function wf_site_menu() {
+  $items = array();
+
+  $items['site/%wf_site'] = array(
+    'title callback' => 'wf_site_page_title',
+    'title arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'wf_site', 1),
+    'page callback' => 'wf_site_view',
+    'page arguments' => array(1),
+  );
+
+  $items['site/%wf_site/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
+  $items['site/%wf_site/edit'] = array(
+    'title' => 'Edit',
+    'access callback' => 'entity_access',
+    'access arguments' => array('edit', 'wf_site', 1),
+    'page callback' => 'wf_site_edit',
+    'page arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['site/%wf_site/delete'] = array(
+    'title' => 'Delete',
+    'access callback' => 'entity_access',
+    'access arguments' => array('delete', 'wf_site', 1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_site_delete_form', 1),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['site/add'] = array(
+    'title' => 'Add new site',
+    'access callback' => 'entity_access',
+    'access arguments' => array('create', 'wf_site'),
+    'page callback' => 'wf_site_page_add',
+  );
+
+  foreach (wf_site_load_bundles() as $name => $bundle) {
+    $items['site/add/' . $name] = array(
+      'title' => 'Add new site',
+      'page callback' => 'wf_site_add',
+      'page arguments' => array(2),
+      'access callback' => 'entity_access',
+      'access arguments' => array('create', 'wf_site', $bundle),
+    );
+  }
+
+  $items['admin/content/sites'] = array(
+    'title' => 'Sites',
+    'description' => 'Manage sites.',
+    'page callback' => 'wf_site_admin_list',
+    'access arguments' => array('administer sites', 'view sites'),
+    'access callback' => '_wf_site_manage_sites_access',
+    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
+    'file' => 'includes/wf_site.admin.inc',
+  );
+
+  $items['admin/structure/site-types/manage/%wf_site_bundle'] = array(
+    'title' => 'Edit example type',
+    'access arguments' => array('administer sites'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bundle_key_form', 4),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/wf_site.admin.inc',
+  );
+
+  $items['admin/structure/site-types/manage/%wf_site_bundle/edit'] = array(
+    'title' => 'Edit',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_entity_property_info().
+ */
+function wf_site_entity_property_info() {
+  $info = array();
+  $properties = array();
+
+  $properties['sid'] = array(
+    'label' => t('Site ID'),
+    'description' => t('The unique site identifier.'),
+    'type' => 'integer',
+    'schema field' => 'sid',
+    'wf_extra_fields' => array('display'),
+  );
+
+  $properties['vid'] = array(
+    'label' => t('Revision ID'),
+    'description' => t('The unique site revision identifier.'),
+    'type' => 'integer',
+    'schema field' => 'vid',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $properties['uuid'] = array(
+    'label' => t('Site UUID'),
+    'type' => 'integer',
+    'description' => t('The universally unique site identifier.'),
+    'schema field' => 'uuid',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $properties['vuuid'] = array(
+    'label' => t('Site Revision UUID'),
+    'type' => 'integer',
+    'description' => t('The universally unique site revision identifier.'),
+    'schema field' => 'vuuid',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $properties['bundle'] = array(
+    'label' => t('Site Type'),
+    'type' => 'token',
+    'description' => t('The site type.'),
+    'schema field' => 'bundle',
+    'wf_extra_fields' => array('display'),
+  );
+
+  $properties['site_name'] = array(
+    'label' => t('Site Name'),
+    'type' => 'text',
+    'description' => t('The name of the site.'),
+    'schema field' => 'site_name',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $properties['active'] = array(
+    'label' => t('Site is Active'),
+    'type' => 'boolean',
+    'description' => t('Is the site active?'),
+    'schema field' => 'active',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $properties['blocked'] = array(
+    'label' => t('Site is Blocked'),
+    'type' => 'boolean',
+    'description' => t('Is the site blocked?'),
+    'schema field' => 'blocked',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $properties['created'] = array(
+    'label' => t('Date Created'),
+    'type' => 'date',
+    'description' => t('The date the site was created.'),
+    'schema field' => 'created',
+    'wf_extra_fields' => array('display'),
+  );
+
+  $properties['changed'] = array(
+    'label' => t('Date Changed'),
+    'type' => 'date',
+    'description' => t('The date the site was last modified.'),
+    'schema field' => 'changed',
+    'wf_extra_fields' => array('display'),
+  );
+
+  $properties['uid'] = array(
+    'label' => t('User ID'),
+    'type' => 'user',
+    'description' => t('The user who created the site.'),
+    'schema field' => 'uid',
+    'wf_extra_fields' => array('form', 'display'),
+  );
+
+  $info['wf_site'] = array('properties' => $properties);
+
+  return $info;
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function wf_site_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add action link to 'site/add' on 'admin/content/sites' page.
+  if ($root_path == 'admin/content/sites') {
+    $item = menu_get_item('site/add');
+    if ($item['access']) {
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function wf_site_admin_paths() {
+  $paths = array(
+    'site/*/edit' => TRUE,
+    'site/*/delete' => TRUE,
+    'site/*/revisions' => TRUE,
+    'site/*/revisions/*/revert' => TRUE,
+    'site/*/revisions/*/delete' => TRUE,
+    'site/add' => TRUE,
+  );
+  return $paths;
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+function wf_site_permission() {
+  $perms = array();
+
+  $perms['administer sites'] = array(
+    'title' => t('Administer sites'),
+  );
+
+  $perms['create sites'] = array(
+    'title' => t('Create sites'),
+  );
+
+  $perms['view sites'] = array(
+    'title' => t('View sites'),
+  );
+
+  $perms['edit sites'] = array(
+    'title' => t('Edit sites'),
+  );
+
+  $perms['delete sites'] = array(
+    'title' => t('Delete sites'),
+  );
+
+  foreach (array_keys(wf_site_load_bundles()) as $bundle) {
+    $perms += wf_site_list_permissions($bundle);
+  }
+
+  return $perms;
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ */
+function wf_site_field_extra_fields() {
+  return wf_generate_extra_fields('wf_site');
+}
+
+/**
+ * Display the edit form.
+ */
+function wf_site_edit($site) {
+  return drupal_get_form('wf_site_edit_form', $site);
+}
+
+/**
+ * Render the create site form.
+ */
+function wf_site_add($bundle) {
+  $args = array('bundle' => $bundle);
+
+  $site = entity_create('wf_site', $args);
+
+  return drupal_get_form('wf_site_edit_form', $site);
+}
+
+/**
+ * Generate the edit form.
+ */
+function wf_site_edit_form($form, $form_state, $site) {
+  $form['bundle'] = array(
+    '#type' => 'value',
+    '#value' => $site->bundle,
+  );
+
+  $form['default_revision'] = array(
+    '#type' => 'value',
+    '#value' => $site->default_revision,
+  );
+
+  if (!empty($site->sid)) {
+    $form['sid'] = array(
+      '#type' => 'value',
+      '#value' => $site->sid,
+    );
+    $form['vid'] = array(
+      '#type' => 'value',
+      '#value' => $site->vid,
+    );
+  }
+  else {
+    $sid = NULL;
+    $form['is_new'] = array(
+      '#type' => 'value',
+      '#value' => TRUE,
+    );
+  }
+
+  $form['site_name'] = array(
+    '#title' => t('Name'),
+    '#type' => 'textfield',
+    '#default_value' => $site->site_name,
+    '#required' => TRUE,
+    '#maxlength' => 100,
+  );
+
+  $form['active'] = array(
+    '#title' => t('Status'),
+    '#type' => 'select',
+    '#default_value' => $site->active,
+    '#options' => array(0 => t('Disabled'), 1 => t('Enabled')),
+    '#required' => TRUE,
+  );
+
+  $form['blocked'] = array(
+    '#title' => t('Blocked'),
+    '#description' => t('Want to mark this site as blocked?'),
+    '#type' => 'select',
+    '#default_value' => (int)$site->blocked,
+    '#options' => array(1 => t('Yes'), 0 => t('No')),
+  );
+
+  field_attach_form('wf_site', $site, $form, $form_state);
+
+  $form['actions'] = array(
+    '#weight' => 1000,
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+    ),
+  );
+
+  if (!empty($site->sid) && user_access('delete sites')) {
+    $site_uri = entity_uri('wf_site', $site);
+    $form['actions']['delete'] = array(
+      '#type' => 'link',
+      '#title' => t('Delete'),
+      '#href' => $site_uri['path'] . '/delete',
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * Attach the form validation on sites form.
+ */
+function wf_site_edit_form_validate($form, &$form_state) {
+  $site = (object) $form_state['values'];
+  field_attach_form_validate('wf_site', $site, $form, $form_state);
+}
+
+/**
+ * Handles submission of the site edit form.
+ */
+function wf_site_edit_form_submit($form, &$form_state) {
+  $site = (object) $form_state['values'];
+  field_attach_submit('wf_site', $site, $form, $form_state);
+  $saved_site = wf_site_save($site);
+  $form_state['redirect'] = "site/$saved_site->sid";
+}
+
+/**
+ * Saves an site.
+ */
+function wf_site_save($site) {
+  global $user;
+
+  $site->uid = $user->uid;
+  $site->changed = REQUEST_TIME;
+  if (!empty($site->is_new)) {
+    $site->created = REQUEST_TIME;
+  }
+  else {
+    $site->revision = TRUE;
+  }
+
+  entity_save('wf_site', $site);
+
+  return $site;
+}
+
+/**
+ * Form for deleting sites.
+ */
+function wf_site_delete_form($form, $form_state, $site) {
+  $site_uri = entity_uri('wf_site', $site);
+  $title = entity_label('wf_site', $site);
+  return confirm_form(
+    $form,
+    t("Are you sure you want to delete <strong>@title</strong>?", array('@title' => $title)),
+    $site_uri['path'] . '/view',
+    t("Deleting this site will trigger the deletion of all associated resources and cannot be undone."),
+    t("Delete")
+  );
+}
+
+/**
+ * Submit handler wf_site_delete_form.
+ */
+function wf_site_delete_form_submit($form, &$form_state) {
+  $site = reset($form_state['build_info']['args']);
+  $title = entity_label('wf_site', $site);
+  entity_delete('wf_site', $site->sid);
+  drupal_set_message(t("Site '@title' was successfully deleted.", array('@title' => $title)));
+  $form_state['redirect'] = url('admin/content/sites');
+}
+
+/**
+ * Load a site object.
+ */
+function wf_site_load($sid = NULL, $reset = FALSE) {
+  $sids = (isset ($sid) ? array($sid) : array());
+  $site = wf_site_load_multiple($sids, $reset);
+  return $site ? reset($site) : FALSE;
+}
+
+/**
+ * Loads one or more site objects.
+ */
+function wf_site_load_multiple($sids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('wf_site', $sids, $conditions, $reset);
+}
+
+/**
+ * Provides workflow site entity URI callback.
+ */
+function wf_site_uri(WfSite $site) {
+  return array(
+    'path' => 'site/' . $site->sid,
+  );
+}
+
+/**
+ * Page view callback.
+ */
+function wf_site_view(WfSite $site, $view_mode = 'full') {
+  drupal_set_title(wf_site_page_title($site));
+  return entity_view('wf_site', array(entity_id('wf_site', $site) => $site), $view_mode);
+}
+
+/**
+ * Generate the page title.
+ */
+function wf_site_page_title($site) {
+  return t('Site: @site', array('@site' => $site->site_name));
+}
+
+/**
+ * Fetches a list of workflow sites.
+ *
+ * @param bool $only_active
+ *   Should the list only include active sites?
+ * @param int $exclude_id
+ *   The excluded site id.
+ *
+ * @return array
+ *   The list of site wf_site entities.
+ */
+function wf_site_list($only_active = TRUE, $exclude_id = NULL) {
+  static $sites;
+
+  if (empty($sites)) {
+    $sites = entity_load('wf_site');
+
+    if (!is_null($exclude_id) && isset($sites[$exclude_id])) {
+      unset($sites[$exclude_id]);
+    }
+    if ($only_active) {
+      $sites = array_filter($sites, function($site) {
+        return (bool) $site->active;
+      });
+    }
+  }
+  return $sites;
+}
+
+/**
+ * Checks if a bundle exists.
+ *
+ * @param text $name
+ *   The bundle to look up.
+ *
+ * @return bool
+ *   Does the bundle exist?
+ */
+function wf_site_bundle_exists($name) {
+  $bundles = wf_site_load_bundles();
+  return isset($bundles[$name]);
+}
+
+/**
+ * Returns all defined sites bundles.
+ *
+ * @return array
+ *   All sites bundles.
+ */
+function wf_site_load_bundles() {
+  $cache = &drupal_static(__FUNCTION__);
+
+  if (!isset($cache)) {
+    $cache = db_select('wf_site_bundle', 'wsb')
+      ->fields('wsb')
+      ->orderBy('bundle')
+      ->execute()
+      ->fetchAllAssoc('bundle');
+  }
+
+  return $cache;
+}
+
+/**
+ * Access callback for the entity API.
+ *
+ * @param text $op
+ *   The operation being performed. One of 'view', 'update', 'create', 'delete'
+ *   or just 'edit' (being the same as 'create' or 'update').
+ * @param object $entity
+ *   (optional) A type to check access for. If nothing is given, access for
+ *   all profiles is determined.
+ * @param object $account
+ *   (optional) The user to check for.
+ *   Leave it to NULL to check for the global user.
+ * @param text $entity_type
+ *   (optional) Leave it to NULL to get the property from $entity.
+ *
+ * @return boolean
+ *   Whether access is allowed or not.
+ */
+function wf_site_access($op, $entity = NULL, $account = NULL, $entity_type = NULL) {
+  $access = FALSE;
+
+  $access = user_access('administer sites', $account);
+  if (FALSE === $access) {
+    $access = _wf_site_access_entity($op, $entity, $account);
+  }
+
+  return $access;
+}
+
+/**
+ * Access callback for main permissions on wf_site.
+ *
+ * @param text $op
+ *   The operation being performed. One of 'view', 'update', 'create', 'delete'
+ *   or just 'edit' (being the same as 'create' or 'update').
+ * @param object $entity
+ *   (optional) A type to check access for. If nothing is given, access for
+ *   all profiles is determined.
+ * @param object $account
+ *   (optional) The user to check for.
+ *   Leave it to NULL to check for the global user.
+ *
+ * @return boolean
+ *   Whether access is allowed or not.
+ */
+function _wf_site_access_entity($op, $entity = NULL, $account = NULL) {
+  $perm = $op . ' sites';
+
+  if (user_access($perm, $account)) {
+    return TRUE;
+  }
+  else {
+    return _wf_site_access_bundle($op, $entity, $account);
+  }
+}
+
+/**
+ * Grant access or not for specific bundles.
+ *
+ * @param text $op
+ *   The operation being performed. One of 'view', 'update', 'create', 'delete'
+ *   or just 'edit' (being the same as 'create' or 'update').
+ * @param object $entity
+ *   (optional) A type to check access for. If nothing is given, access for
+ *   all profiles is determined.
+ * @param object $account
+ *   (optional) The user to check for.
+ *   Leave it to NULL to check for the global user.
+ *
+ * @return boolean
+ *   Whether access is allowed or not.
+ */
+function _wf_site_access_bundle($op, $entity = NULL, $account = NULL) {
+  switch ($op) {
+    case 'create':
+      return _wf_site_access_create_bundles($entity, $account);
+
+    break;
+
+    default:
+      $perm = $op . ' any ' . $entity->bundle . ' site';
+      if (user_access($perm, $account)) {
+        return TRUE;
+      }
+      else {
+        $perm = $op . ' own ' . $entity->bundle . ' site';
+        return user_access($perm, $account);
+      }
+      break;
+  }
+}
+
+/**
+ * Try to check access per bundle if exists, otherwise check for any bundle.
+ *
+ * @param object $entity
+ *   (optional) A type to check access for. If nothing is given, access for
+ *   all profiles is determined.
+ * @param object $account
+ *   (optional) The user to check for.
+ *   Leave it to NULL to check for the global user.
+ *
+ * @return boolean
+ *   Whether access is allowed or not.
+ */
+function _wf_site_access_create_bundles($entity = NULL, $account = NULL) {
+  if (isset($entity)) {
+    $perm = "create $entity->bundle site";
+    if (user_access($perm, $account)) {
+      return TRUE;
+    }
+  }
+  else {
+    foreach (array_keys(wf_site_load_bundles()) as $bundle) {
+      $perm = "create $bundle site";
+      if (user_access($perm, $account)) {
+        return TRUE;
+      }
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Check if the user has all permissions.
+ *
+ * @return boolean
+ *   Whether access is allowed or not.
+ */
+function _wf_site_manage_sites_access() {
+  $args = func_get_args();
+
+  foreach ($args as $perm) {
+    if (!user_access($perm)) {
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
+/**
+ * Access callback for the entity API.
+ *
+ * @param text $op
+ *   The operation being performed. One of 'view', 'update', 'create', 'delete'
+ *   or just 'edit' (being the same as 'create' or 'update').
+ * @param text $type
+ *   (optional) A type to check access for. If nothing is given, access for
+ *   all profiles is determined.
+ * @param object $account
+ *   (optional) The user to check for.
+ *   Leave it to NULL to check for the global user.
+ *
+ * @return boolean
+ *   Whether access is allowed or not.
+ */
+function wf_site_type_access($op, $type = NULL, $account = NULL) {
+  return user_access('administer sites', $account);
+}
+
+/**
+ * List site types that can be created.
+ */
+function wf_site_page_add() {
+  $bundles = wf_site_load_bundles();
+
+  switch (count($bundles)) {
+    case 1:
+      $bundle = array_shift($bundles);
+      drupal_goto("site/add/{$bundle->bundle}");
+      break;
+
+    case 0:
+      return '<p>' . t('You have not created any site types yet.') . '</p>';
+
+    default:
+      return theme('wf_site_add_list', array('content' => $bundles));
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function wf_site_theme() {
+  $themes = array();
+
+  $themes['wf_site_add_list'] = array(
+    'file' => 'includes/wf_site.theme.inc',
+    'variables' => array('content' => NULL),
+  );
+
+  return $themes;
+}
+
+/**
+ * Helper function to create wf_site permission list for a given wf_site type.
+ *
+ * @param string $type
+ *   The machine-readable name of the wf_site type.
+ *
+ * @return array
+ *   An array of permission names and descriptions.
+ */
+function wf_site_list_permissions($type) {
+  // Build standard list of wf_site permissions for this wf_site type.
+  $actions = array('view', 'edit', 'review', 'delete');
+
+  $perms = array();
+  $perms["create $type site"] = array(
+    'title' => t(
+      '%type_name: Create new site',
+      array('%type_name' => $type)
+    ),
+  );
+
+  foreach ($actions as $action) {
+    $perms["$action own $type site"] = array(
+      'title' => t(
+        '%type_name: %action own site', array(
+          '%action' => ucfirst($action),
+          '%type_name' => $type,
+        )
+      ),
+    );
+    $perms["$action any $type site"] = array(
+      'title' => t(
+        '%type_name: %action any site', array(
+          '%action' => ucfirst($action),
+          '%type_name' => $type,
+        )
+      ),
+    );
+  }
+
+  return $perms;
+}
+
+/**
+ * Implements hook_wf_log_info().
+ */
+function wf_site_wf_log_info() {
+  $logs = array();
+
+  $logs['wf_site_updated'] = array(
+    'title' => t('Site updated'),
+    'description' => t('The site was updated.'),
+  );
+
+  return $logs;
+}

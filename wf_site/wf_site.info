@@ -1,0 +1,12 @@
+name = WF Site
+description = WF Site Management
+core = 7.x
+package = WF
+project = wf
+dependencies[] = wf
+dependencies[] = entity
+dependencies[] = uuid
+dependencies[] = wf_job
+
+files[] = includes/wf_site.class.inc
+files[] = includes/wf_site.controller.inc

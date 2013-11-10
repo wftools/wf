@@ -1,0 +1,194 @@
+<?php
+
+/**
+ * @file
+ * WF install schema.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function wf_site_schema() {
+  module_load_include('install', 'uuid', 'uuid');
+
+  $uuid_field = uuid_schema_field_definition();
+
+  $schema = array();
+
+  $schema['wf_site'] = array(
+    'description' => 'Sites managed by workflow system.',
+    'fields' => array(
+      'sid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Unique id.',
+      ),
+      'vid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The current version identifier.',
+      ),
+      'uuid' => $uuid_field,
+      'bundle' => array(
+        'description' => 'The bundle type for the site.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'site_name' => array(
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'description' => 'The name of the site.',
+      ),
+      'active' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'default' => 1,
+        'description' => 'Is the record active?',
+      ),
+      'blocked' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'default' => 0,
+        'description' => 'Is the record blocked?',
+      ),
+      'created' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The Unix timestamp when the example was created.',
+      ),
+      'changed' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The Unix timestamp when the example was most recently saved.',
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The user who made the latest change',
+      ),
+    ),
+    'primary key' => array('sid'),
+    'unique keys' => array(
+      'uuid' => array('uuid'),
+      'vid' => array('vid'),
+    ),
+    'foreign keys' => array(
+      'wf_site_revision' => array(
+        'table' => 'wf_site_revision',
+        'columns' => array('vid' => 'vid'),
+      ),
+    ),
+    'indexes' => array(
+      'site_name' => array('site_name'),
+      'bundle' => array('bundle'),
+      'active' => array('active'),
+    ),
+  );
+
+  $schema['wf_site_revision'] = array(
+    'description' => 'Revision history for sites managed by workflow system.',
+    'fields' => array(
+      'sid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unique id.',
+      ),
+      'vid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The version identifier.',
+      ),
+      'vuuid' => $uuid_field,
+      'bundle' => array(
+        'description' => 'The bundle type for the site.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'site_name' => array(
+        'type' => 'varchar',
+        'length' => 200,
+        'not null' => TRUE,
+        'description' => 'The name of the site.',
+      ),
+      'active' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'size' => 'tiny',
+        'default' => 1,
+        'description' => 'Is the record active?',
+      ),
+      'changed' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The Unix timestamp when the example was most recently saved.',
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The user who made this change',
+      ),
+    ),
+    'primary key' => array('vid'),
+    'unique keys' => array('vuuid' => array('vuuid')),
+    'indexes' => array(
+      'sid' => array('sid'),
+    ),
+  );
+
+  $schema['wf_site_bundle'] = array(
+    'description' => 'Stores information about all defined wf_site bundles.',
+    'fields' => array(
+      'bundle' => array(
+        'description' => 'The machine-readable name of this wf_site type.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'The human-readable name of this wf_site type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0x01,
+        'size' => 'tiny',
+        'description' => 'The exportable status of the entity.',
+      ),
+      'module' => array(
+        'description' => 'The name of the providing module if the entity has been defined in code.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('bundle'),
+    'unique keys' => array(),
+  );
+
+  return $schema;
+}
