@@ -288,7 +288,7 @@ function wf_job_services_delete($jid) {
  *   Integer number of items to be returned.
  * @return
  *   An array of job objects.
- **/
+ */
 function wf_job_services_index($page, $fields, $parameters, $page_size) {
   $job_select = db_select('wf_job', 't')
     ->orderBy('jid', 'DESC');
