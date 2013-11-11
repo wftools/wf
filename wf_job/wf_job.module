@@ -1171,24 +1171,6 @@ function wf_job_env_status_block() {
 }
 
 /**
- * Provides a structured link array for use with the url() function
- */
-function wf_job_content_changes_link($job) {
-  $dev_env = wf_environment_dev();
-  $merge_env = wf_environment_merge();
-
-  $current_env = wf_environment_load($job->eid);
-  if ($current_env == $dev_env) {
-    $content_url = wf_environment_app_uri($dev_env, $job, 'admin/content/deploy/plan/' . wf_job_slug($job->jid));
-  }
-  else {
-    $content_url = wf_environment_app_uri($merge_env, $job, 'admin/content/deploy/plan/' . wf_job_slug($job->jid));
-  }
-
-  return $content_url;
-}
-
-/**
  * Implements hook_entity_insert().
  */
 function wf_job_entity_insert($entity, $entity_type) {
