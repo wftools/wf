@@ -782,7 +782,7 @@ function wf_job_load_bundles() {
 /**
  * Creates a new job object.
  */
-function entityform_create($values = array()) {
+function wf_job_create($values = array()) {
   return entity_create('wf_job', $values);
 }
 
@@ -799,7 +799,7 @@ function wf_job_delete(WfJob $job) {
  * @param $ids array
  *   A list of job ids to delete.
  */
-function entityform_delete_multiple(array $ids) {
+function wf_job_delete_multiple(array $ids) {
   entity_delete('wf_job', $ids);
 }
 
