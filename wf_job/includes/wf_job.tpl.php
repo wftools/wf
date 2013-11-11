@@ -1,29 +1,32 @@
 <?php
-// TODO Insert docs here.
+/**
+ * @file
+ * WF Job view template file.
+ */
 ?>
 
 <h2><?php print $elements['#job']->title; ?></h2>
 <dl>
-  <dt>ID</dt>
+  <dt>ID: </dt>
   <dd><?php print $elements['#job']->jid; ?></dd>
 
-  <dt>Reference</dt>
+  <dt>Reference: </dt>
   <dd><?php print $elements['#job']->reference; ?></dd>
 
-  <dt>Details</dt>
+  <dt>Details: </dt>
   <dd>
     <div>
     <?php print $elements['#job']->details; ?>
     </div>
   </dd>
 
-  <dt>Owner</dt>
+  <dt>Owner: </dt>
   <dd><?php print $elements['owner_name']; ?></dd>
 
-  <dt>Assigned</dt>
+  <dt>Assigned: </dt>
   <dd><?php print $elements['assigned_name']; ?></dd>
 
-  <dt>Created</dt>
+  <dt>Created: </dt>
   <dd><?php print $elements['created_date']; ?></dd>
 
 </dl>
