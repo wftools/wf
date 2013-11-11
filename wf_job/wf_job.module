@@ -933,8 +933,13 @@ function wf_job_sandbox_uri($job, $path = '') {
  * An array of aliases
  */
 function wf_job_drush_aliases() {
+  $new_id = variable_get('wf_job_jsid_new');
+  $completed_id = variable_get('wf_job_jsid_completed');
+
   $query = new EntityFieldQuery();
+  // Implement hook_entity_query_alter() if you need to change this.
   $jids = $query->entityCondition('entity_type', 'wf_job')
+        ->propertyCondition('jsid', array($new_id, $completed_id), 'NOT IN')
         ->propertyOrderBy('jid')
         ->execute();
 
