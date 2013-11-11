@@ -371,8 +371,6 @@ function wf_job_services_deployment($jid, $data) {
  *  Whether access is given or not.
  */
 function wf_job_services_access($op, $args) {
-  return TRUE;
   $job = empty($args[0]) ? NULL : $args[0];
-
   return wf_job_access($op, $job);
 }
