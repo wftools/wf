@@ -888,21 +888,21 @@ function wf_job_preprocess_wf_job(&$variables) {
   );
 
   $external_reference = $variables['elements']['#job']->reference;
-  $job = $variables['elements']['#job'];
-  drupal_alter('wf_job_external_ref', $external_reference, $job);
-
-  if (!is_array($external_reference)) {
-    $external_reference = array(
-      'reference' => $external_reference,
-      'escaped' => FALSE,
-    );
-  }
-
-  if (FALSE === $external_reference['escaped']) {
+  $reference = '';
+  $plugin = variable_get('wf_job_ext_ref_plugin');
+  if (!$plugin && $external_reference) {
     $sanitize[] = 'reference';
+    $reference = $external_reference;
   }
-
-  $variables['elements']['#job']->reference = $external_reference['reference'];
+  elseif ($plugin && $external_reference) {
+    $class = ctools_plugin_load_class('wf_job', 'external_reference', $plugin, 'handler');
+    $hander = new $class();
+    $render = $hander->generateExternalRef($variables['elements']['#job']);
+    if (!empty($render)) {
+      $reference = drupal_render($render);
+    }
+  }
+  $variables['elements']['#job']->reference = $reference;
 
   foreach ($sanitize as $var) {
     $variables['elements']['#job']->{$var} = check_plain($variables['elements']['#job']->{$var});
@@ -920,6 +920,7 @@ function wf_job_preprocess_wf_job(&$variables) {
  * The job for which a sandbox URI is sought
  */
 function wf_job_sandbox_uri($job, $path = '') {
+  // TODO make this pluggable.
   $slug = wf_job_slug($job->jid);
   $dev_env = wf_environment_dev();
   return wf_environment_app_uri($dev_env, $job);
