@@ -4,8 +4,6 @@
  *   Workflow module
  */
 
-require_once 'wf.features.inc';
-
 define('WF_CODE_INDENT_SPACES', 2);
 
 /**
