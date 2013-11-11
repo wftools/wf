@@ -550,8 +550,15 @@ function wf_job_update_job_code_form($form, $form_state, $job) {
  */
 function wf_job_update_job_code_form_submit($form, &$form_state) {
   // Gets the current job and fires wf_job_update_code_submit rules event.
+  // Then redirects to the view of the job.
   $job = reset($form_state['build_info']['args']);
+
   rules_invoke_event('wf_job_update_code_submit', $job);
+
+  $uri = entity_uri('wf_job', $job);
+  $form_state['redirect'] = url($uri['path'], $uri['options']);
+
+  drupal_set_message(t('A code update for this job will commence shortly.'));
 }
 
 /**
