@@ -5,8 +5,6 @@
  * Workflow job module functions.
  */
 
-include_once 'wf_job.features.inc';
-
 /**
  * Implements hook_entity_info().
  */
