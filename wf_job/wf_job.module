@@ -1194,9 +1194,7 @@ function wf_job_entity_update($entity, $entity_type) {
  * @param int $job_id
  */
 function wf_job_slug($jid) {
-  // wf_job_slug_pattern must contain a @jid placeholder for the jid.
-  $slug_pattern = variable_get('wf_job_slug_pattern', t('job@jid', array('@jid' => $jid)));
-  return sprintf($slug_pattern, $jid);
+  return format_string(variable_get('wf_job_slug_pattern', 'job@jid'), array('@jid' => $jid));
 }
 
 /**
