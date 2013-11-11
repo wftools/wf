@@ -10,7 +10,7 @@
 function wf_job_views_default_views() {
   $export = array();
 
-  $view = new view();
+  $view = new view;
   $view->name = 'job_list';
   $view->description = 'Lists all jobs.';
   $view->tag = 'default';
@@ -23,7 +23,6 @@ function wf_job_views_default_views() {
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Job list';
-  $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['access']['perm'] = 'manage jobs';
   $handler->display->display_options['cache']['type'] = 'none';
@@ -190,7 +189,7 @@ function wf_job_views_default_views() {
   $handler->display->display_options['tab_options']['weight'] = '0';
   $export['job_list'] = $view;
 
-  $view = new view();
+  $view = new view;
   $view->name = 'job_users';
   $view->description = 'List users which can be assigned to jobs.';
   $view->tag = 'default';
@@ -203,13 +202,13 @@ function wf_job_views_default_views() {
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Job users';
-  $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'role';
   $handler->display->display_options['access']['role'] = array(
     2 => '2',
   );
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['query']['options']['query_comment'] = FALSE;
   $handler->display->display_options['exposed_form']['type'] = 'basic';
   $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
@@ -254,20 +253,10 @@ function wf_job_views_default_views() {
   $handler->display->display_options['filters']['permission']['expose']['label'] = 'Permission';
   $handler->display->display_options['filters']['permission']['expose']['operator'] = 'permission_op';
   $handler->display->display_options['filters']['permission']['expose']['identifier'] = 'permission';
-  $handler->display->display_options['filters']['permission']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    3 => 0,
-    6 => 0,
-    7 => 0,
-    5 => 0,
-    4 => 0,
-  );
   $handler->display->display_options['filters']['permission']['reduce_duplicates'] = TRUE;
 
   /* Display: Block */
   $handler = $view->new_display('block', 'Block', 'block');
-  $handler->display->display_options['defaults']['hide_admin_links'] = FALSE;
   $export['job_users'] = $view;
 
   return $export;
