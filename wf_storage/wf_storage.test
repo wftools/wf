@@ -5,7 +5,14 @@
  * WF Storage module tests.
  */
 
+/**
+ * WF Storage unit test class.
+ */
 class WfStorageUnitTest extends DrupalUnitTestCase {
+
+  /**
+   * {@inheritdoc}
+   */
   public static function getInfo() {
     return array(
       'name' => 'WF Storage unit tests',
@@ -31,7 +38,14 @@ class WfStorageUnitTest extends DrupalUnitTestCase {
   }
 }
 
+/**
+ * WF Storage integration test class.
+ */
 class WfStorageTest extends DrupalWebTestCase {
+
+  /**
+   * {@inheritdoc}
+   */
   public static function getInfo() {
     return array(
       'name' => 'WF Storage tests',

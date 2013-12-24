@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @file
  * WF Storage module functions.
  */
 
