@@ -1,9 +1,7 @@
 # WF Tools
 
-WF Tools is a collection of Drupal modules for building a WF management node.
-The management node is standalone Drupal site that is responsible for 
-coordinating deployments of code, content and config in a coordinated way 
-between multiple environments.
+WF Tools is a collection of Drupal modules for building a WF management node.  The management node is standalone Drupal site that is responsible for 
+coordinating deployments of code, content and config in a coordinated way between multiple environments.
 
 ## Modules
 WF Tools consists of the following modules:
