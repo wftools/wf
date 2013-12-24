@@ -89,15 +89,15 @@ function wf_shell_client_command_alter(&$variables) {
 }
 
 /**
-* Retrive the structure for hook_field_extra_fields().
-*/
+ * Retrive the structure for hook_field_extra_fields().
+ */
 function wf_generate_extra_fields($entity_type) {
   $entity = entity_get_property_info($entity_type);
 
   $extra_fields = array();
   $weight = -50;
 
-  foreach($entity['properties'] as $field_name => $field_properties) {
+  foreach ($entity['properties'] as $field_name => $field_properties) {
     foreach ($field_properties['wf_extra_fields'] as $value) {
       if (!isset($extra_fields[$value])) {
         $extra_fields[$value] = array();
