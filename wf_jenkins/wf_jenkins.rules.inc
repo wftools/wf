@@ -5,7 +5,7 @@
  */
 
 /**
- * Implementation of hook_rules_action_info().
+ * Implements hook_rules_action_info().
  */
 function wf_jenkins_rules_action_info() {
   return array(
