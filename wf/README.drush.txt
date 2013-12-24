@@ -13,10 +13,8 @@ Alternatively you can store the root user's credentials in
 example code snippet to achieve this:
 
 <?php
-
 $options['db-root-user'] = 'root';
 $options['db-root-pass'] = 'changeme';
-
 ?>
 
 It is not advisable to put this information in the server's global 
