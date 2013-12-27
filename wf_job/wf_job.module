@@ -1158,11 +1158,13 @@ function wf_job_env_status_block() {
   foreach(wf_environment_list() as $id => $env) {
     if ($job->eid == $id) {
       $class = array('current', preg_replace('/[^a-z0-1]+/', '-', strtolower($status)));
+      $class[] = $env->env;
       $items[] = array('data' => t('@env: @status', array('@env' => $env->env, '@status' => $status)), 'class' => $class);
-      $class = array('future');
       continue;
     }
-    $items[] = array('data' => $env->env, 'class' => $class);
+    $default_class = array($env->env);
+    array_merge($default_class, $class);
+    $items[] = array('data' => $env->env, 'class' => $default_class);
   }
 
   return array(
