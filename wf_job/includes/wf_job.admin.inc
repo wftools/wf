@@ -57,9 +57,11 @@ function wf_job_bundle_form_submit(&$form, &$form_state) {
 function wf_job_action_start_form($form, &$form_state, $job) {
   drupal_set_title(t('Start') . ': ' . entity_label('wf_job', $job));
 
+  $user_entity = entity_load_single('user', $GLOBALS['user']->uid);
+
   $form['log'] = array(
     '#type' => 'value',
-    '#value' => t('Job started by @user', array('@user' => $GLOBALS['user']->realname)),
+    '#value' => t('Job started by @user', array('@user' => $user_entity->realname)),
   );
 
   $form['actions'] = array(
