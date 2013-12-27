@@ -248,6 +248,7 @@ function wf_job_edit_form_submit($form, &$form_state) {
  * Displays a job.
  */
 function wf_job_view($job) {
+  drupal_set_title($job->title);
   $out = entity_view('wf_job', array($job));
   if (!is_array($out)) {
     return t('Unable to render job.');
