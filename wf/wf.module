@@ -97,16 +97,18 @@ function wf_generate_extra_fields($entity_type) {
   $extra_fields = array();
   $weight = -50;
 
-  foreach ($entity['properties'] as $field_name => $field_properties) {
-    foreach ($field_properties['wf_extra_fields'] as $value) {
-      if (!isset($extra_fields[$value])) {
-        $extra_fields[$value] = array();
+  foreach($entity['properties'] as $field_name => $field_properties) {
+    if (isset($field_properties['wf_extra_fields']) && is_array($field_properties['wf_extra_fields'])) {
+      foreach ($field_properties['wf_extra_fields'] as $value) {
+        if (!isset($extra_fields[$value])) {
+          $extra_fields[$value] = array();
+        }
+        $extra_fields[$value][$field_name] = array(
+          'label' => $field_properties['label'],
+          'description' => $field_properties['description'],
+          'weight' => $weight,
+        );
       }
-      $extra_fields[$value][$field_name] = array(
-        'label' => $field_properties['label'],
-        'description' => $field_properties['description'],
-        'weight' => $weight,
-      );
     }
     ++$weight;
   }
