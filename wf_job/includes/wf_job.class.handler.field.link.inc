@@ -57,18 +57,37 @@ class WfJobHandlerFieldLink extends views_handler_field {
    * {@inheritdoc}
    */
   public function render($values) {
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('view');
-    $wf_job_id = $values->{$this->aliases['jid']};
-    return l($text, 'job/' . $wf_job_id);
+    $job_id = $values->{$this->aliases['jid']};
+    return $this->wf_job_render_link($job_id, t('View'));
   }
 
   /**
-   * {@inheritdoc}
+   * Generate the base job view URI.
+   *
+   * @param int $job_id
+   *  The job id to generate the URI for.
+   *
+   * @return string
+   *  The generated URI.
    */
-  public function access() {
-    $jid = $values->{$this->aliases['jid']};
-    $result = entity_load('wf_job', array($jid));
-    $job = reset($result);
-    return wf_job_access($job, $this->handler_action_type);
+  protected function wf_job_render_link($job_id, $default_text, $action = '') {
+    $job = entity_load_single('wf_job', $job_id);
+    if (!$job) {
+      return '';
+    }
+
+    if (!wf_job_access($action, $job)) {
+      return '';
+    }
+
+    $text = !empty($this->options['text']) ? $this->options['text'] : $default_text;
+    $job_id = (int) $job_id;
+
+    $path = "job/{$job_id}";
+    if ($action) {
+      $path .= "/{$action}";
+    }
+
+    return l($text, $path);
   }
 }

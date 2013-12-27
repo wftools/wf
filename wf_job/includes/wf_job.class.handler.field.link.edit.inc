@@ -13,14 +13,8 @@ class WfJobHandlerFieldLinkEdit extends WfJobHandlerFieldLink {
   /**
    * {@inheritdoc}
    */
-  protected $handler_action_type = 'edit';
-
-  /**
-   * {@inheritdoc}
-   */
   function render($values) {
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
-    $wf_job_id = $values->{$this->aliases['jid']};
-    return l($text, 'job/' . $wf_job_id . '/edit');
+    $job_id = $values->{$this->aliases['jid']};
+    return $this->wf_job_render_link($job_id, t('Edit'), 'edit');
   }
 }

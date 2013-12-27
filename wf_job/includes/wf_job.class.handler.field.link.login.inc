@@ -13,14 +13,8 @@ class WfJobHandlerFieldLinkLogin extends WfJobHandlerFieldLink {
   /**
    * {@inheritdoc}
    */
-  protected $handler_action_type = 'login';
-
-  /**
-   * {@inheritdoc}
-   */
-  public function render($values) {
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('login');
-    $wf_job_id = $values->{$this->aliases['jid']};
-    return l($text, 'job/' . $wf_job_id . '/login');
+  function render($values) {
+    $job_id = $values->{$this->aliases['jid']};
+    return $this->wf_job_render_link($job_id, t('Login'), 'login');
   }
 }

@@ -13,14 +13,8 @@ class WfJobHandlerFieldLinkDelete extends WfJobHandlerFieldLink {
   /**
    * {@inheritdoc}
    */
-  protected $handler_action_type = 'delete';
-
-  /**
-   * {@inheritdoc}
-   */
   public function render($values) {
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('delete');
-    $wf_job_id = $values->{$this->aliases['jid']};
-    return l($text, 'job/' . $wf_job_id . '/delete');
+    $job_id = $values->{$this->aliases['jid']};
+    return $this->wf_job_render_link($job_id, t('Delete'), 'delete');
   }
 }
