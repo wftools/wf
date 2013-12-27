@@ -185,7 +185,7 @@ function wf_job_menu() {
     'title' => 'Login to dev sandbox',
     'access callback' => 'wf_job_action_allowed',
     'access arguments' => array(1, 'login'),
-    'page callback' => 'wf_job_job_sandbox_login_page',
+    'page callback' => 'wf_job_login_page',
     'page arguments' => array(1),
     'type' => MENU_LOCAL_ACTION,
     'weight' => 20,
@@ -454,7 +454,7 @@ function wf_job_access($op, $entity, $account = NULL, $entity_type = NULL) {
   }
 
   if (!isset($entity_type)) {
-    $entity_type = $entity->type;
+    $entity_type = $entity->bundle;
   }
 
   if (user_access('manage jobs', $account)) {
@@ -1221,22 +1221,44 @@ function wf_job_entity_metadata_get_properties($entity, array $options, $name, $
 }
 
 /**
- * Redirects the user to view the sandbox site.
+ * Generates the sandbox URL.
+ *
+ * @param WfJob $job
+ *  The job to generate the URL for.
+ *
+ * @return string
+ *  The sandbox URL.
+ *
+ * @throw WfJobUrlException
+ *   When the plugin is undefined or problems lower in the stack.
  */
-function wf_job_visit(WfJob $job) {
+function wf_job_sandbox_url(WfJob $job) {
   ctools_include('plugins');
 
   $plugin = variable_get('wf_job_visit_plugin');
   if (!$plugin) {
-    drupal_set_message(t('View sandbox plugin undefined.'), 'error');
-    $uri = entity_uri('wf_job', $job);
-    return drupal_goto($uri['path'], $uri['options']);
+    throw new WfJobUrlException(t('Undefined visit URL plugin'));
   }
 
   $class_name = ctools_plugin_load_class('wf_job', 'url_visit', $plugin, 'handler');
   $handler = new $class_name();
 
   $url = $handler->generateVisitLink($job);
+  return $url;
+}
+
+/**
+ * Redirects the user to view the sandbox site.
+ */
+function wf_job_visit(WfJob $job) {
+  try {
+    $url = wf_job_sandbox_url($job);
+  }
+  catch (Exception $e) {
+    drupal_set_message(t('Unable to generate visit URL.'), 'error');
+    $uri = entity_uri('wf_job', $job);
+    return drupal_goto($uri['path'], $uri['options']);
+  }
   drupal_goto($url);
 }
 
@@ -1285,9 +1307,28 @@ function wf_job_ctools_plugin_type() {
  * @param object $job
  *   The object of the related Job entity.
  */
-function wf_job_job_sandbox_login_page($job) {
-  // TODO implement redirect here using drupal_goto.
-  return t('You should be redirected to your job.');
+function wf_job_login_page($job) {
+  ctools_include('plugins');
+
+  try {
+    $plugin = variable_get('wf_job_login_plugin');
+    if (!$plugin) {
+      throw new WfJobUrlException(t('Undefined login URL plugin'));
+    }
+
+    $class_name = ctools_plugin_load_class('wf_job', 'url_login', $plugin, 'handler');
+    $handler = new $class_name();
+
+    $url = $handler->generateLoginLink($job);
+    drupal_goto($url);
+  }
+  catch (Exception $e) {
+    watchdog('wf_job_login_plugin', $e->getMessage());
+    drupal_set_message(t('Unable to generate login URL.'), 'error');
+  }
+
+  $uri = entity_uri('wf_job', $job);
+  return drupal_goto($uri['path'], $uri['options']);
 }
 
 /**
