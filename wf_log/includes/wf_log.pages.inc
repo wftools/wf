@@ -290,7 +290,7 @@ function wf_log_bundle_form_submit(&$form, &$form_state) {
  * List Log types that can be created.
  */
 function wf_log_page_add() {
-  $bundles = wf_log_bundles();
+  $bundles = wf_log_load_bundles();
 
   switch (count($bundles)) {
     case 0:

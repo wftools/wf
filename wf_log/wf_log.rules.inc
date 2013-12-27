@@ -80,7 +80,7 @@ function wf_log_create_log_message(EntityDrupalWrapper $entity, $log_bundle, $me
  *   Array containing bundle machine name as key and value.
  */
 function wf_log_rules_parameter_bundle_list() {
-  $log_bundles = array_keys(wf_log_bundles());
+  $log_bundles = array_keys(wf_log_load_bundles());
 
   $bundle_list = array();
   foreach ($log_bundles as $bundle) {

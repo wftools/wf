@@ -74,7 +74,7 @@ function wf_log_entity_info() {
  * Implements hook_entity_info_alter().
  */
 function wf_log_entity_info_alter(&$entity_info) {
-  foreach (wf_log_bundles() as $type => $info) {
+  foreach (wf_log_load_bundles() as $type => $info) {
     $entity_info['wf_log']['bundles'][$type] = array(
       'label' => $info->label,
       'admin' => array(
@@ -266,7 +266,7 @@ function wf_log_menu() {
     'weight' => 3,
   );
 
-  foreach (wf_log_bundles() as $log => $info) {
+  foreach (wf_log_load_bundles() as $log => $info) {
     $items['wf-log/add/' . $log] = array(
       'title' => 'Add new entry Log',
       'page callback' => 'wf_log_add',
@@ -458,7 +458,7 @@ function wf_log_permission() {
     ),
   );
 
-  foreach (array_keys(wf_log_bundles()) as $bundle) {
+  foreach (array_keys(wf_log_load_bundles()) as $bundle) {
     $permissions = array_merge($permissions, wf_log_list_permissions($bundle));
   }
 
@@ -506,13 +506,13 @@ function wf_log_bundle_access($op, $type = NULL, $account = NULL) {
  * Load Log Bundle.
  */
 function wf_log_bundle_load($log_bundle) {
-  return wf_log_bundles($log_bundle);
+  return wf_log_load_bundles($log_bundle);
 }
 
 /**
  * List of Log Bundles.
  */
-function wf_log_bundles($log_name = NULL) {
+function wf_log_load_bundles($log_name = NULL) {
   $logs = entity_load_multiple_by_name('wf_log_bundle', isset($log_name) ? array($log_name) : FALSE);
   return isset($log_name) ? reset($logs) : $logs;
 }
@@ -548,7 +548,7 @@ function wf_log_bundle_delete_multiple($log_bundle_ids) {
  *   Does the bundle exist?
  */
 function wf_log_bundle_exists($name) {
-  $bundles = wf_log_bundles();
+  $bundles = wf_log_load_bundles();
   return isset($bundles[$name]);
 }
 
