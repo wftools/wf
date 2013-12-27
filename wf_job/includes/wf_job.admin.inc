@@ -182,16 +182,19 @@ function wf_job_action_review_form($form, &$form_state, $job) {
 
   drupal_set_title(t('Review job proposed for @env', array('@env' => $next_env->label())));
 
+  $job_uri = $job->uri();
+  $next_env_uri = $next_env->uri();
+
   $form['job'] = array(
     '#type' => 'item',
     '#title' => t('Job being proposed'),
-    '#markup' => l($job->label(), reset($job->uri())),
+    '#markup' => l($job->label(), reset($job_uri)),
   );
 
   $form['env'] = array(
     '#type' => 'item',
     '#title' => t('Target environment'),
-    '#markup' => l($next_env->label(), reset($next_env->uri())),
+    '#markup' => l($next_env->label(), reset($next_env_uri)),
   );
 
   $form['log'] = array(
