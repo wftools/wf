@@ -82,7 +82,7 @@ function wf_job_action_start_form_submit($form, &$form_state) {
   $job = reset($form_state['build_info']['args']);
 
   $job->revision = TRUE;
-  $job->log = filter_xss($form_state['values']['log']['value']);
+  $job->log = $form_state['values']['log']['value'];
   $job->rules_event = 'started';
   $job->setStatusName('Started');
   wf_job_save($job);
@@ -164,7 +164,7 @@ function wf_job_action_propose_form_submit($form, &$form_state) {
   $next_env = wf_environment_load($env->next_env_id);
 
   $job->revision = TRUE;
-  $job->log = filter_xss($form_state['values']['log']['value']);
+  $job->log = $form_state['values']['log']['value'];
   $job->assigned = $form_state['values']['reviewer'];
   $job->rules_event = 'proposed';
   $job->setStatusName('In Review');
@@ -237,7 +237,7 @@ function wf_job_action_review_form_submit($form, &$form_state) {
   $next_env = wf_environment_load($env->next_env_id);
 
   $job->revision = TRUE;
-  $job->log = filter_xss($form_state['values']['log']['value']);
+  $job->log = $form_state['values']['log']['value'];
   $job->assigned = $job->owner;
   $job->rules_event = $event;
   $job->setStatusName($new_status);
