@@ -109,6 +109,7 @@ function wf_site_menu() {
     'page callback' => 'wf_site_edit',
     'page arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
+    'weight' => 0,
   );
 
   $items['site/%wf_site/delete'] = array(
@@ -118,6 +119,7 @@ function wf_site_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('wf_site_delete_form', 1),
     'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
   );
 
   $items['site/add'] = array(
