@@ -365,7 +365,23 @@ function wf_log_view(WfLog $log, $view_mode = 'full') {
     return t('Unable to render log.');
   }
 
-  return reset($out['wf_log']);
+  $output = reset($out['wf_log']);
+
+  if (module_exists('colorbox')) {
+    if (!isset($_GET['iframe'])) {
+      $querystring = array(
+        'width' => '400',
+        'height' => '500',
+        'iframe' => 'true',
+      );
+      drupal_goto('wf-log/' . $log->lid, array('query' => $querystring));
+    }
+
+    print(render($output));
+    drupal_exit();
+  }
+
+  return $output;
 }
 
 /**
