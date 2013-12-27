@@ -118,10 +118,10 @@ function wf_log_entity_property_info() {
 
   $properties['uuid'] = array(
     'label' => t('UUID'),
-    'type' => 'integer',
+    'type' => 'text',
     'description' => t('The universally unique log identifier.'),
     'schema field' => 'uuid',
-    'wf_extra_fields' => array('form', 'display'),
+    'wf_extra_fields' => array('display'),
   );
 
   $properties['message_summary'] = array(
