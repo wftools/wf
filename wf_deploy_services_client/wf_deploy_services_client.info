@@ -1,0 +1,7 @@
+name = WF client for deploy services
+description = Provides information about entity changes in a job.
+package = WF
+core = 7.x
+
+dependencies[] = diff
+dependencies[] = wf_job

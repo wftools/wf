@@ -1,0 +1,107 @@
+<?php
+/**
+ * @file
+ * WF Deploy Services Client module functions.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function wf_deploy_services_client_menu() {
+  $items = array();
+
+  $items['job/%wf_job/diff/entities'] = array(
+    'title' => 'View content diff',
+    'description' => 'Provide content of the job',
+    'file' => 'wf_deploy_services_client.pages.inc',
+    'page callback' => 'wf_deploy_services_client_render_entity_diff',
+    'page arguments' => array(1),
+    'access arguments' => array('view job entity diff'),
+    'type' => MENU_LOCAL_ACTION,
+    'weight' => 90,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function wf_deploy_services_client_permission() {
+  $perms = array();
+
+  $perms['view job entity diff'] = array(
+    'title' => t('View job entity diff')
+  );
+
+  return $perms;
+}
+
+/**
+ * Fetches information required to make the request.
+ */
+function wf_deploy_services_client_remote_config(WfJob $job) {
+  $base_url = wf_job_sandbox_url($job);
+  $endpoint = variable_get('wf_deploy_services_client_endpoint_name', 'wf-diff');
+
+  $config = array(
+    'url' => "{$base_url}{$endpoint}/deploy/job{$job->jid}/diff.json",
+    'headers' => array(
+      'Accept' => 'application/json',
+      'Content-Type' => 'application/json',
+    ),
+  );
+
+  // Handle CSRF token.
+  $token_url = "{$base_url}services/session/token";
+  $token_response = drupal_http_request($token_url);
+  if (!isset($token_response->error)) {
+    $config['headers']['X-CSRF-Token'] = trim($token_response->data);
+  }
+
+  return $config;
+}
+
+/**
+ * Access the service on a given url.
+ *
+ * @param array $config
+ *   Request configuration.
+ *
+ * @return array
+ */
+function wf_deploy_services_client_get_diff(array $config) {
+  $url = $config['url'];
+  unset($config['url']);
+
+  $options = $config + array(
+    'method' => 'POST',
+    'timeout' => 120, // 2 minutes
+    'headers' => array(
+      'Accept' => 'application/json',
+      'Content-Type' => 'application/json',
+    ),
+  );
+
+  $response = drupal_http_request($url, $options);
+  if (200 != $response->code) {
+    // handle this in a try catch in calling method
+    throw new Exception("Unable to load diff", $response->code);
+  }
+
+  $data = json_decode($response->data, TRUE);
+
+  return $data;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function wf_deploy_services_client_theme($existing, $type, $theme, $path) {
+  return array(
+    'wf_deploy_services_client_plan_diff' => array(
+      'file' => 'wf_deploy_services_client.pages.inc',
+      'variables' => array('diffs' => NULL, 'remote_url' => NULL),
+    ),
+  );
+}
