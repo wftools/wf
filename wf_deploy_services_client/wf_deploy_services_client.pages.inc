@@ -9,6 +9,10 @@
  * Page callback to render diffs.
  */
 function wf_deploy_services_client_render_entity_diff(WfJob $job) {
+  if ('diff' == arg(2) && 'entities' == arg(3)) {
+    drupal_set_title(t('View content diff'));
+  }
+
   try {
     $remote_config = wf_deploy_services_client_remote_config($job);
     $diffs = wf_deploy_services_client_get_diff($remote_config);
