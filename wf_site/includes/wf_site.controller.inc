@@ -12,11 +12,10 @@ class WfSiteController extends EntityAPIController {
    */
   public function create(array $values = array()) {
     $values += array(
-	    'active' => TRUE,
-	    'blocked' => FALSE,
-	    'is_new' => TRUE,
-	    'default_revision' => TRUE,
-	  );
+      'active' => TRUE,
+      'is_new' => TRUE,
+      'default_revision' => TRUE,
+    );
 
     return parent::create($values);
   }

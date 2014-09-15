@@ -53,14 +53,6 @@ function wf_site_schema() {
         'default' => 1,
         'description' => 'Is the record active?',
       ),
-      'blocked' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'size' => 'tiny',
-        'default' => 0,
-        'description' => 'Is the record blocked?',
-      ),
       'created' => array(
         'type' => 'int',
         'not null' => TRUE,

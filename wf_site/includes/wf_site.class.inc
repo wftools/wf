@@ -158,23 +158,6 @@ class WfSite extends Entity {
       0 => array('#markup' => $active_str),
     );
 
-    $blocked_str = $this->blocked ? t('Yes') : t('No');
-    $content['blocked'] = array(
-      '#theme' => 'field',
-      '#title' => t('Blocked'),
-      '#access' => TRUE,
-      '#view_mode' => $view_mode,
-      '#language' => LANGUAGE_NONE,
-      '#field_name' => 'field_fake_description',
-      '#field_type' => 'text',
-      '#label_display' => 'none',
-      '#entity_type' => 'wf_site',
-      '#bundle' => $this->bundle,
-      '#items' => array(array('value' => $blocked_str)),
-      '#formatter' => 'text_default',
-      0 => array('#markup' => $blocked_str),
-    );
-
     $user_name = entity_label('user', user_load($this->uid));
     $content['uid'] = array(
       '#theme' => 'field',

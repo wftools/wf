@@ -391,14 +391,6 @@ function wf_site_edit_form($form, $form_state, $site) {
     '#required' => TRUE,
   );
 
-  $form['blocked'] = array(
-    '#title' => t('Blocked'),
-    '#description' => t('Want to mark this site as blocked?'),
-    '#type' => 'select',
-    '#default_value' => (int)$site->blocked,
-    '#options' => array(1 => t('Yes'), 0 => t('No')),
-  );
-
   field_attach_form('wf_site', $site, $form, $form_state);
 
   $form['actions'] = array(
