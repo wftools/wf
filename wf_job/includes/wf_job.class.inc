@@ -30,8 +30,6 @@ class WfJob extends Entity {
 
   public $modified;
 
-  public $log;
-
   public $uid;
 
   public $default_revision = TRUE;
@@ -91,9 +89,9 @@ class WfJob extends Entity {
    *  Returns TRUE if the status name is valid, otherwise FALSE.
    */
   public function setStatusName($status_name) {
-    $statuses = array_flip(wf_job_status_list());
-    if (isset($statuses[$status_name])) {
-      $this->jsid = $statuses[$status_name];
+    $status = wf_job_load_status_by_name($status_name);
+    if (!empty($status)) {
+      $this->jsid = $status->jsid;
       return TRUE;
     }
     return FALSE;

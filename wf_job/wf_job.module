@@ -973,20 +973,23 @@ function wf_job_deployment($job, $succeeded, $message) {
     if ($next_env->next_env_id) {
       $job->setStatusName('Started');
       $rules_event = 'deployed';
+      $log_type = 'wf_job_deployed';
     }
     else {
       $job->setStatusName('Completed');
       $rules_event = 'completed';
+      $log_type = 'wf_job_completed';
     }
   }
   else {
     $job->setStatusName('Needs Attention');
     $rules_event = 'deployment_failed';
+    $log_type = 'wf_job_deployment_failed';
   }
 
   $job->rules_event = $rules_event;
-  $job->log = filter_xss_admin($message);
 
+  wf_job_attach_log_to_entity($job, $message, $log_type);
   wf_job_save($job);
 
   return TRUE;
@@ -1026,15 +1029,14 @@ function wf_job_env_status_block() {
     return array();
   }
 
-  $statuses = wf_job_status_list();
-  $status = $statuses[$job->jsid];
+  $status = wf_job_load_status($job->jsid);
   $class = array('passed');
 
-  foreach(wf_environment_list() as $id => $env) {
+  foreach (wf_environment_list() as $id => $env) {
     if ($job->eid == $id) {
-      $class = array('current', preg_replace('/[^a-z0-1]+/', '-', strtolower($status)));
+      $class = array('current', $status->machine_name);
       $class[] = $env->env;
-      $items[] = array('data' => t('@env: @status', array('@env' => $env->env, '@status' => $status)), 'class' => $class);
+      $items[] = array('data' => t('@env: @status', array('@env' => $env->env, '@status' => $status->status)), 'class' => $class);
       continue;
     }
     $default_class = array($env->env);
@@ -1328,5 +1330,75 @@ function wf_job_update_status(WfJob $job, $status_id) {
  */
 function wf_job_update_environment(WfJob $job, $env_id) {
   $job->eid = $env_id;
+
+  // Avoiding recursion.
+  unset($job->rules_event);
+
   wf_job_save($job);
+}
+
+/**
+ * Extracts the system_status from the current status on a job.
+ *
+ * @param  EntityDrupalWrapper $job
+ *   The structure of job.
+ * @return string
+ *   The current system_status on a job.
+ */
+function wf_job_get_system_status(EntityDrupalWrapper $job) {
+  $status = $job->jsid->system_status->value();
+  return $status;
+}
+
+/**
+ * Add form log field to a form structure.
+ *
+ * @param array $form
+ *   Form API structured array.
+ */
+function wf_job_attach_log_field_form(&$form) {
+  if (module_exists('wf_log')) {
+    $form['log'] = array(
+      '#title' => t('Comment'),
+      '#type' => 'textarea',
+      '#required' => TRUE,
+      '#description' => t('Please make a comment.'),
+    );
+  }
+}
+
+/**
+ * Attach the log value and type to an entity to be saved.
+ *
+ * @param object $entity
+ *   Entity object.
+ *
+ * @param string $log_value
+ *   The log message.
+ *
+ * @param string $log_type
+ *   The log_type.
+ */
+function wf_job_attach_log_to_entity(&$entity, $log_value, $log_type) {
+  if (module_exists('wf_log')) {
+    wf_log_attach_log_to_entity($entity, $log_value, $log_type);
+  }
+}
+
+/**
+ * Attach the form log field value and type to an entity to be saved.
+ *
+ * @param object $entity
+ *   Entity object.
+ *
+ * @param array $form_state
+ *   Form API form state structure.
+ *
+ * @param string $log_type
+ *   The log type.
+ */
+function wf_job_attach_form_log_value_to_entity(&$entity, $form_state, $log_type) {
+  if (isset($form_state['values']['log'])) {
+    wf_job_attach_log_to_entity($entity, $form_state['values']['log'], $log_type);
+  }
 }

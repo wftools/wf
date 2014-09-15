@@ -23,6 +23,13 @@ function wf_job_rules_event_info() {
   );
 
   return array(
+    'wf_job_started_failed' => $defaults + array(
+      'label' => t('When a job started failed'),
+      'variables' => array(
+        'job' => array('type' => 'wf_job', 'label' => t('The job affected')),
+        'sites' => array('type' => 'wf_site', 'label' => t('The site affected')),
+      ),
+    ),
     'wf_job_started' => $defaults + array(
       'label' => t('After a job is started'),
       'variables' => $default_variables,
@@ -45,7 +52,7 @@ function wf_job_rules_event_info() {
     ),
     'wf_job_deployment_failed' => $defaults + array(
       'label' => t('After a job\'s deployment to a new environment fails'),
-      'variables' => $default_variables,
+      'variables' => $default_variables + array('sites' => array('type' => 'wf_site', 'label' => t('The site affected'))),
     ),
     'wf_job_completed' => $defaults + array(
       'label' => t('After a job is deployed to the final environment'),

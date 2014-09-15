@@ -56,15 +56,14 @@ function wf_job_bundle_form_submit(&$form, &$form_state) {
  * Start a job form.
  */
 function wf_job_action_start_form($form, &$form_state, $job) {
-  drupal_set_title(t('Start') . ': ' . entity_label('wf_job', $job));
+  drupal_set_title(t('Start'));
 
-  $user_entity = entity_load_single('user', $GLOBALS['user']->uid);
+  $uid = $GLOBALS['user']->uid;
+  $user_entity = entity_load_single('user', $uid);
 
-  $form['log'] = array(
-    '#type' => 'value',
-    '#value' => t('Job started by @user', array('@user' => $user_entity->realname)),
+  $form['message'] = array(
+    '#markup' => '<p>To begin work on this job please click "Start job".</p><p>This will prepare the sandbox server. You will be emailed when it is ready for use.</p>',
   );
-
   $form['actions'] = array(
     '#weight' => 99,
   );
@@ -135,12 +134,7 @@ function wf_job_action_propose_form($form, &$form_state, $job) {
     '#description' => t('Choose the person who will review this job.'),
   );
 
-  $form['log'] = array(
-    '#title' => t('Comment'),
-    '#type' => 'text_format',
-    '#required' => TRUE,
-    '#description' => t('Please make a comment.'),
-  );
+  wf_job_attach_log_field_form($form, 'wf_job_proposed');
 
   $form['actions'] = array(
     '#weight' => 99,
@@ -173,10 +167,9 @@ function wf_job_action_propose_form_submit($form, &$form_state) {
   $next_env = wf_environment_load($env->next_env_id);
 
   $job->revision = TRUE;
-  $job->log = $form_state['values']['log']['value'];
   $job->assigned = $form_state['values']['reviewer'];
   $job->rules_event = 'proposed';
-  $job->setStatusName('In Review');
+  wf_job_attach_form_log_value_to_entity($job, $form_state, 'wf_job_proposed');
   wf_job_save($job);
 
   $form_state['redirect'] = $job->uri();
@@ -206,12 +199,7 @@ function wf_job_action_review_form($form, &$form_state, $job) {
     '#markup' => l($next_env->label(), reset($next_env_uri)),
   );
 
-  $form['log'] = array(
-    '#title' => t('Comment'),
-    '#type' => 'text_format',
-    '#required' => TRUE,
-    '#description' => t('Please make a comment.'),
-  );
+  wf_job_attach_log_field_form($form);
 
   $form['actions'] = array(
     '#weight' => 99,
@@ -237,22 +225,21 @@ function wf_job_action_review_form($form, &$form_state, $job) {
 function wf_job_action_review_form_submit($form, &$form_state) {
   $job = reset($form_state['build_info']['args']);
   if (strpos($form_state['values']['op'], t('Approve for')) === 0) {
-    $new_status = 'Approved';
     $event = 'approved';
+    $log_type = 'wf_job_approved';
   }
   else {
-    $new_status = 'Started';
     $event = 'rejected';
+    $log_type = 'wf_job_rejected';
   }
 
   $env = wf_environment_load($job->eid);
   $next_env = wf_environment_load($env->next_env_id);
 
   $job->revision = TRUE;
-  $job->log = $form_state['values']['log']['value'];
   $job->assigned = $job->owner;
   $job->rules_event = $event;
-  $job->setStatusName($new_status);
+  wf_job_attach_form_log_value_to_entity($job, $form_state, $log_type);
   wf_job_save($job);
 
   $form_state['redirect'] = $job->uri();

@@ -162,12 +162,7 @@ function wf_job_edit_form($form, $form_state, $job) {
 
   field_attach_form('wf_job', $job, $form, $form_state);
 
-  $form['log'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Log Message'),
-    '#default_value' => '',
-    '#required' => TRUE,
-  );
+  wf_job_attach_log_field_form($form);
 
   // Fix a few things if this is a new job.
   if (!empty($job->is_new)) {
@@ -175,8 +170,6 @@ function wf_job_edit_form($form, $form_state, $job) {
       $form[$field]['#type'] = 'value';
       $form[$field]['#value'] = $form[$field]['#default_value'];
     }
-    $form['log']['#type'] = 'value';
-    $form['log']['#value'] =  t('Job created by @user.', array('@user' => $GLOBALS['user']->name));
   }
 
   $form['actions'] = array('#weight' => 99);
@@ -240,16 +233,15 @@ function wf_job_edit_form_validate($form, &$form_state) {
  */
 function wf_job_edit_form_submit($form, &$form_state) {
   $job = new WfJob($form_state['values']);
+  wf_job_attach_form_log_value_to_entity($job, $form_state, 'wf_job_saved');
   wf_job_save($job);
   $form_state['redirect'] = $job->uri();
 
   if ($form_state['values']['op'] == t('Create and Start')) {
     $job->revision = TRUE;
-    $job->log = t('Job started by @user', array('@user' => $GLOBALS['user']->realname));
-    $job->rules_event = 'wf_job_started';
-    $job->setStatusName('Started');
+    $job->rules_event = 'started';
+    wf_job_attach_form_log_value_to_entity($job, $form_state, 'wf_job_started');
     wf_job_save($job);
-    rules_invoke_event('wf_job_started', $job, $job->eid, $job->eid, $job->owner, $job->assigned);
   }
 }
 

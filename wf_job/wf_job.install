@@ -170,10 +170,6 @@ function wf_job_schema() {
         'type' => 'int',
         'not null' => TRUE,
       ),
-      'log' => array(
-        'description' => 'Log message for this revision.',
-        'type' => 'text',
-      ),
       'uid' => array(
         'description' => 'The user who made the change.',
         'type' => 'int',
@@ -363,4 +359,16 @@ function wf_job_update_7004($sandbox) {
  */
 function wf_job_update_7005(&$sandbox) {
   db_drop_unique_key('wf_job', 'reference');
+}
+
+/**
+ * Removes log field from schema.
+ */
+function wf_job_update_7008($sandbox) {
+  $table = 'wf_job_revision';
+  $field = 'log';
+
+  if (db_field_exists($table, $field)) {
+    db_drop_field($table, $field);
+  }
 }
