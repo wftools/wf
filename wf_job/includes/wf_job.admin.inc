@@ -85,6 +85,73 @@ function wf_job_action_start_form_submit($form, &$form_state) {
   $job->log = $form_state['values']['log']['value'];
   $job->rules_event = 'started';
   $job->setStatusName('Started');
+}
+
+/**
+ * Return the job to dev environment form.
+ */
+function wf_job_action_to_dev_form($form, &$form_state, $job) {
+  $job_uri = entity_uri('wf_job', $job);
+  $title = entity_label('wf_job', $job);
+  return confirm_form(
+    $form,
+    t("Do you want to return <strong>@title</strong> to <strong>dev</strong> environment?", array('@title' => $title)),
+    $job_uri['path'],
+    t("Returning this job will trigger the update environment action to dev."),
+    t("Return to dev")
+  );
+}
+
+/**
+ * Form submit handler for wf_job_action_to_dev_form.
+ */
+function wf_job_action_to_dev_form_submit($form, &$form_state) {
+  $job = reset($form_state['build_info']['args']);
+  $title = entity_label('wf_job', $job);
+  $job_uri = entity_uri('wf_job', $job);
+
+  wf_job_attach_log_to_entity($job, t('Returned job to dev environment.'), 'wf_job_to_dev');
+  $job->rules_event = 'returned_to_dev';
+  $job->save();
+
+  drupal_set_message(t("Job '@title' was successfully returned to dev environment.", array('@title' => $title)));
+  $form_state['redirect'] = $job_uri['path'];
+}
+
+/**
+ * Reallocate the job assigned and owner users.
+ */
+function wf_job_action_reallocate_form($form, &$form_state, $job) {
+  module_load_include('inc', 'wf_job', 'includes/wf_job.pages');
+
+  $edit = wf_job_edit_form($form, $form_state, $job);
+
+  $form = array();
+
+  $form['owner'] = $edit['owner'];
+  $form['assigned'] = $edit['assigned'];
+
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+/**
+ * Form submit handler for wf_job_action_reallocate_form.
+ */
+function wf_job_action_reallocate_form_submit($form, &$form_state) {
+  $job = reset($form_state['build_info']['args']);
+
+  $job->revision = TRUE;
+  $job->owner = $form_state['values']['owner'];
+  $job->assigned = $form_state['values']['assigned'];
+
+  wf_job_attach_log_to_entity($job, t('Job assigned and owner has been updated.'), 'wf_job_reallocate');
+
+  $job->rules_event = 'reassigned';
   wf_job_save($job);
 
   $form_state['redirect'] = $job->uri();

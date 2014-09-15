@@ -34,6 +34,14 @@ function wf_job_rules_event_info() {
       'label' => t('After a job is started'),
       'variables' => $default_variables,
     ),
+    'wf_job_returned_to_dev' => $defaults + array(
+      'label' => t('After a job is returned to dev'),
+      'variables' => $default_variables,
+    ),
+    'wf_job_reassigned' => $defaults + array(
+      'label' => t('After a job is reassigned'),
+      'variables' => $default_variables,
+    ),
     'wf_job_proposed' => $defaults + array(
       'label' => t('After a job is proposed for review'),
       'variables' => $default_variables,

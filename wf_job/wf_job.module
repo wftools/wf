@@ -171,6 +171,28 @@ function wf_job_menu() {
     'file' => 'includes/wf_job.admin.inc',
     'weight' => -10,
   );
+  $items['job/%wf_job/to-dev'] = array(
+    'title callback' => 'wf_job_action_title',
+    'title arguments' => array(1, 'return to dev'),
+    'access callback' => 'wf_job_access',
+    'access arguments' => array('to-dev', 1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_job_action_to_dev_form', 1),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'includes/wf_job.admin.inc',
+    'weight' => -10,
+  );
+  $items['job/%wf_job/reallocate'] = array(
+    'title callback' => 'wf_job_action_title',
+    'title arguments' => array(1, 'reallocate'),
+    'access callback' => 'wf_job_access',
+    'access arguments' => array('reallocate', 1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_job_action_reallocate_form', 1),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'includes/wf_job.admin.inc',
+    'weight' => 9999,
+  );
   $items['job/%wf_job/propose'] = array(
     'title callback' => 'wf_job_action_title',
     'title arguments' => array(1, 'propose'),
@@ -290,6 +312,13 @@ function wf_job_permission() {
     'title' => t('Review own jobs'),
   );
 
+  $perms['return job to dev'] = array(
+    'title' => t('Return job to dev'),
+  );
+
+  $perms['reallocate job'] = array(
+    'title' => t('Reallocate job'),
+  );
 
   return $perms;
 }
@@ -1523,6 +1552,16 @@ function wf_job_wf_log_info() {
   $logs['wf_job_updated_code'] = array(
     'title' => t('Job code updated'),
     'description' => t('Job code has been updated.'),
+  );
+
+  $logs['wf_job_to_dev'] = array(
+    'title' => t('Returned to dev'),
+    'description' => t('Returned job to dev environment.'),
+  );
+
+  $logs['wf_job_reallocate'] = array(
+    'title' => t('Reallocate job'),
+    'description' => t('Job assigned and owner has been updated.'),
   );
 
   return $logs;
