@@ -471,10 +471,25 @@ function wf_site_save($site) {
  */
 function wf_site_delete_form($form, $form_state, $site) {
   $site_uri = entity_uri('wf_site', $site);
-  $title = entity_label('wf_site', $site);
+  $site_title = check_plain(entity_label('wf_site', $site));
+  $job_count = wf_site_get_job_count($site->sid);
+
+  if ($job_count > 0) {
+    drupal_set_title(t("Delete <strong>@title</strong>", array('@title' => $site_title)), PASS_THROUGH);
+    drupal_set_message(t('Unable to delete site'), 'error');
+    $jobs_link = l(t('Update jobs'), "site/{$site->sid}/jobs");
+    return array(
+      'disclaimer' => array(
+        '#markup' => t('Unable to delete site because jobs are associated with it.
+                        Please !update_jobs and try again.',
+                      array('!update_jobs' => $jobs_link)),
+      ),
+    );
+  }
+
   return confirm_form(
     $form,
-    t("Are you sure you want to delete <strong>@title</strong>?", array('@title' => $title)),
+    t("Are you sure you want to delete <strong>@title</strong>?", array('@title' => $site_title)),
     $site_uri['path'] . '/view',
     t("Deleting this site will trigger the deletion of all associated resources and cannot be undone."),
     t("Delete")
@@ -489,7 +504,7 @@ function wf_site_delete_form_submit($form, &$form_state) {
   $title = entity_label('wf_site', $site);
   entity_delete('wf_site', $site->sid);
   drupal_set_message(t("Site '@title' was successfully deleted.", array('@title' => $title)));
-  $form_state['redirect'] = url('admin/content/sites');
+  $form_state['redirect'] = array('site');
 }
 
 /**
@@ -785,4 +800,36 @@ function wf_site_wf_log_info() {
   );
 
   return $logs;
+}
+
+/**
+ * Gets related job count from a site.
+ */
+function wf_site_get_job_count($site_id) {
+  $job_count = 0;
+
+  // Ensure all job bundles are searched for a wf_site entity reference field.
+  $fields = array();
+  $field_info = field_info_instances('wf_job');
+
+  foreach ($field_info as $bundle => $info) {
+    foreach ($info as $field => $data) {
+      if (!empty($data['widget']['module']) && 'entityreference' == $data['widget']['module']) {
+        $field_info = field_info_field($data['field_name']);
+        if ('wf_site' == $field_info['settings']['target_type']) {
+          $fields[] = $data['field_name'];
+        }
+      }
+    }
+  }
+
+  foreach ($fields as $field_name) {
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'wf_job')
+          ->fieldCondition($field_name, 'target_id', $site_id);
+
+    $job_count += $query->count()->execute();
+  }
+
+  return $job_count;
 }
