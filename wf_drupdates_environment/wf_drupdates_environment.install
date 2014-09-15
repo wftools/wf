@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for wf_drupdates_environment module.
+ */
+
+/**
+ * Implements hook_field_schema().
+ */
+function wf_drupdates_environment_field_schema($field) {
+  if ('wf_drupdates_environment_field_default' == $field['type']) {
+    $db_columns = array(
+      'env_id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+      'drupdates_release_id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+    );
+
+    return array('columns' => $db_columns);
+  }
+}

@@ -1,0 +1,7 @@
+name = WF Drupdates Environment
+description = Defines an 'wf_drupdates_environment' field type.
+package = WF
+core = 7.x
+
+dependencies[] = wf_environment
+dependencies[] = drupdates

@@ -1,0 +1,301 @@
+<?php
+
+/**
+ * @file
+ * wf_drupdates_environment module hooks.
+ */
+
+/**
+ * Implements hook_field_info().
+ */
+function wf_drupdates_environment_field_info() {
+  return array(
+    'wf_drupdates_environment_field_default' => array(
+      'label' => t('WF releases by environment'),
+      'description' => t('This field stores WF environment and releases information in the database.'),
+      'default_widget' => 'wf_drupdates_environment_widget',
+      'default_formatter' => 'wf_drupdates_environment_default',
+      'property_type' => 'wf_drupdates_environment',
+      'property_callbacks' => array('wf_drupdates_environment_property_callback'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function wf_drupdates_environment_field_widget_info() {
+  $widgets['wf_drupdates_environment_widget'] = array(
+    'label' => t('Default'),
+    'description' => t('A field to track Drupdates releases with WF environments.'),
+    'field types' => array('wf_drupdates_environment_field_default'),
+    'behaviors' => array(
+      'multiple values' => FIELD_BEHAVIOR_CUSTOM,
+      'default value' => FIELD_BEHAVIOR_DEFAULT,
+    ),
+  );
+
+  return $widgets;
+}
+
+/**
+ * Property callback to 'wf_drupdates_environment_field_default' field.
+ */
+function wf_drupdates_environment_property_callback(&$info, $entity_type, $field, $instance, $field_type) {
+  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
+  $property['getter callback'] = 'entity_metadata_field_verbatim_get';
+  $property['setter callback'] = 'entity_metadata_field_verbatim_set';
+  unset($property['query callback']);
+
+  $property['property info']['env_id'] = array(
+    'type' => 'wf_environment',
+    'label' => t('Environment'),
+    'description' => t('Stores the related WF environment ID.'),
+    'setter callback' => 'entity_property_verbatim_set',
+    'default' => 0,
+  );
+
+  $property['property info']['drupdates_release_id'] = array(
+    'type' => 'drupdates_release',
+    'label' => t('Release'),
+    'description' => t('Stores the Drupdates release id'),
+    'setter callback' => 'entity_property_verbatim_set',
+    'default' => 0,
+  );
+}
+
+/**
+ * Fetches a list of workflow environments.
+ */
+function wf_drupdates_environment_list_environments() {
+  $list_environments = array();
+
+  $environments = entity_load('wf_environment');
+  foreach ($environments as $env_id => $environment) {
+    $list_environments[$env_id] = $environment->env;
+  }
+
+  return $list_environments;
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function wf_drupdates_environment_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $elements = array();
+  $environments = wf_drupdates_environment_list_environments();
+
+  $default_values = array();
+  foreach ($items as $item) {
+    $default_values[$item['env_id']] = $item['drupdates_release_id'];
+  }
+
+  foreach ($environments as $env_id => $env_name) {
+    $elements[$env_id] = array(
+      '#type' => 'wf_drupdates_environment_element',
+      '#default_value' => isset($default_values[$env_id]) ? $default_values[$env_id] : NULL,
+      '#environment' => array('name' => $env_name, 'id' => $env_id),
+      '#release' => wf_drupdates_environment_get_project_releases_list(TRUE),
+    );
+  }
+
+  // Build elements widget.
+  $field_elements = array(
+    '#theme' => 'wf_drupdates_environment',
+    '#field_name' => $field['field_name'],
+  ) + $elements;
+
+  return $field_elements;
+}
+
+/**
+ * Process an individual element.
+ */
+function wf_drupdates_environment_element_process($element, &$form_state, &$form) {
+  $element['env_id'] = array(
+    '#type' => 'value',
+    '#value' => $element['#environment']['id'],
+    '#label' => $element['#environment']['name'],
+  );
+
+  $element['drupdates_release_id'] = array(
+    '#type' => 'select',
+    '#options' => $element['#release'],
+    '#empty_option' => t('- Select -'),
+    '#empty_value' => 0,
+    '#default_value' => $element['#default_value'],
+  );
+
+  return $element;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function wf_drupdates_environment_form_field_ui_field_edit_form_alter(&$form, &$form_state, $form_id) {
+  if ($form['#field']['type'] == 'wf_drupdates_environment_field_default') {
+    $description = t("This is unlimited by this field's nature based on the number of environments.");
+    $form['field']['cardinality'] = array(
+      '#type' => 'select',
+      '#title' => t('Number of values'),
+      '#options' => array(FIELD_CARDINALITY_UNLIMITED => t('Unlimited')),
+      '#default_value' => FIELD_CARDINALITY_UNLIMITED,
+      '#description' => $description,
+    );
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function wf_drupdates_environment_theme($existing, $type, $theme, $path) {
+  $base = array(
+    'file' => 'wf_drupdates_environment.theme.inc',
+    'path' => $path,
+  );
+
+  $themes = array(
+    // Formatter theming functions.
+    'wf_drupdates_environment_field_formatter_default' => $base + array('render element' => 'element'),
+    // Widget theming functions.
+    'wf_drupdates_environment' => $base + array('render element' => 'element'),
+    'wf_drupdates_environment_element' => $base + array('render element' => 'element'),
+  );
+
+  return $themes;
+}
+
+/**
+ * Implements FAPI wf_drupdates_environment_field().
+ */
+function wf_drupdates_environment_element_info() {
+  return array(
+    'wf_drupdates_environment_element' => array(
+      '#input' => TRUE,
+      '#process' => array('wf_drupdates_environment_element_process'),
+      '#tree' => TRUE,
+      '#theme' => 'wf_drupdates_environment_element',
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function wf_drupdates_environment_field_is_empty($item, $field) {
+  return empty($item);
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function wf_drupdates_environment_field_formatter_info() {
+  return array(
+    'wf_drupdates_environment_default' => array(
+      'label' => t('Default'),
+      'field types' => array('wf_drupdates_environment_field_default'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function wf_drupdates_environment_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+
+  if ('wf_drupdates_environment_default' == $display['type']) {
+    // Theme the result.
+    $theme_output = theme('wf_drupdates_environment_field_formatter_default', array('element' => $items));
+    $element[] = array('#markup' => $theme_output);
+  }
+
+  return $element;
+}
+
+/**
+ * Returns a list containing the release id as key and project info as value.
+ *
+ * @param bool $only_active
+ *   Set TRUE to return only the activated projects releases, FALSE otherwise.
+ *
+ * @return array
+ *   An array containing the project releases information.
+ */
+function wf_drupdates_environment_get_project_releases_list($only_active = FALSE) {
+  // Gets activated Projects.
+  $projects = array_keys(drupdates_project_list($only_active));
+
+  $releases_list = array();
+  foreach ($projects as $project_id) {
+    // Gets the project releases.
+    $project_releases = wf_drupdates_environment_get_releases_by_project($project_id, $only_active);
+    foreach ($project_releases as $release_id) {
+      $releases_list[$release_id] = wf_drupdates_environment_get_descriptive_project_release_name($release_id);
+    }
+  }
+
+  return $releases_list;
+}
+
+/**
+ * Returns a string containing an descriptive name of project and release.
+ *
+ * @param object $release_id
+ *   The given drupdates release id.
+ *
+ * @return string
+ *   Descriptive name of project and release.
+ */
+function wf_drupdates_environment_get_descriptive_project_release_name($release_id) {
+  $descriptive_project_release_name = '';
+
+  $entity_release = drupdates_release_load($release_id);
+  if ($entity_release) {
+    $release_wrapper = entity_metadata_wrapper('drupdates_release', $entity_release);
+    $project_wrapper = entity_metadata_wrapper('drupdates_project', $release_wrapper->dpid->value());
+
+    $variables = array(
+      '@project_name' => $project_wrapper->project->value(),
+      '@release_core' => $release_wrapper->core->value(),
+      '@release_version' => $release_wrapper->version->value(),
+      '@release_patch' => $release_wrapper->patch->value(),
+    );
+
+    $descriptive_project_release_name = check_plain(t('@project_name (@release_core.x-@release_version.@release_patch)', $variables));
+  }
+
+  return $descriptive_project_release_name;
+}
+
+/**
+ * Retrieves the active releases by a given project.
+ *
+ * @param int $project_id
+ *   The related project id to get the releases.
+ *
+ * @return array
+ *   An array containing the releases.
+ */
+function wf_drupdates_environment_get_releases_by_project($project_id, $only_active = FALSE) {
+  $releases = array();
+
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'drupdates_release')
+  ->propertyCondition('dpid', $project_id);
+
+  if ($only_active) {
+    $query->propertyCondition('active', TRUE);
+  }
+
+  $query->propertyOrderBy('core', 'DESC')
+  ->propertyOrderBy('version', 'DESC')
+  ->propertyOrderBy('patch', 'DESC');
+  $result = $query->execute();
+
+  if (isset($result['drupdates_release'])) {
+    $releases = array_keys($result['drupdates_release']);
+  }
+
+  return $releases;
+}
