@@ -124,8 +124,7 @@ function wf_site_menu() {
 
   $items['site/add'] = array(
     'title' => 'Add new site',
-    'access callback' => 'entity_access',
-    'access arguments' => array('create', 'wf_site'),
+    'access callback' => 'wf_site_create_access',
     'page callback' => 'wf_site_page_add',
   );
 
@@ -143,8 +142,7 @@ function wf_site_menu() {
     'title' => 'Sites',
     'description' => 'Manage sites.',
     'page callback' => 'wf_site_admin_list',
-    'access arguments' => array('administer sites', 'view sites'),
-    'access callback' => '_wf_site_manage_sites_access',
+    'access arguments' => array('administer sites'),
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
     'file' => 'includes/wf_site.admin.inc',
   );
@@ -602,133 +600,67 @@ function wf_site_load_bundles() {
  * @param object $account
  *   (optional) The user to check for.
  *   Leave it to NULL to check for the global user.
- * @param text $entity_type
+ * @param string $entity_type
  *   (optional) Leave it to NULL to get the property from $entity.
  *
  * @return boolean
  *   Whether access is allowed or not.
  */
 function wf_site_access($op, $entity = NULL, $account = NULL, $entity_type = NULL) {
-  $access = FALSE;
 
-  $access = user_access('administer sites', $account);
-  if (FALSE === $access) {
-    $access = _wf_site_access_entity($op, $entity, $account);
-  }
+  global $user;
 
-  return $access;
-}
-
-/**
- * Access callback for main permissions on wf_site.
- *
- * @param text $op
- *   The operation being performed. One of 'view', 'update', 'create', 'delete'
- *   or just 'edit' (being the same as 'create' or 'update').
- * @param object $entity
- *   (optional) A type to check access for. If nothing is given, access for
- *   all profiles is determined.
- * @param object $account
- *   (optional) The user to check for.
- *   Leave it to NULL to check for the global user.
- *
- * @return boolean
- *   Whether access is allowed or not.
- */
-function _wf_site_access_entity($op, $entity = NULL, $account = NULL) {
-  $perm = $op . ' sites';
-
-  if (user_access($perm, $account)) {
+  if (user_access('administer sites', $account)) {
     return TRUE;
   }
-  else {
-    return _wf_site_access_bundle($op, $entity, $account);
+
+  $bundle = '';
+  if (!empty($entity->bundle)) {
+    $bundle = $entity->bundle;
   }
-}
 
-/**
- * Grant access or not for specific bundles.
- *
- * @param text $op
- *   The operation being performed. One of 'view', 'update', 'create', 'delete'
- *   or just 'edit' (being the same as 'create' or 'update').
- * @param object $entity
- *   (optional) A type to check access for. If nothing is given, access for
- *   all profiles is determined.
- * @param object $account
- *   (optional) The user to check for.
- *   Leave it to NULL to check for the global user.
- *
- * @return boolean
- *   Whether access is allowed or not.
- */
-function _wf_site_access_bundle($op, $entity = NULL, $account = NULL) {
-  switch ($op) {
-    case 'create':
-      return _wf_site_access_create_bundles($entity, $account);
-
-    break;
-
-    default:
-      $perm = $op . ' any ' . $entity->bundle . ' site';
-      if (user_access($perm, $account)) {
-        return TRUE;
-      }
-      else {
-        $perm = $op . ' own ' . $entity->bundle . ' site';
-        return user_access($perm, $account);
-      }
-      break;
+  if ('create' == $op) {
+    return user_permission("create {$bundle} site", $account);
   }
-}
 
-/**
- * Try to check access per bundle if exists, otherwise check for any bundle.
- *
- * @param object $entity
- *   (optional) A type to check access for. If nothing is given, access for
- *   all profiles is determined.
- * @param object $account
- *   (optional) The user to check for.
- *   Leave it to NULL to check for the global user.
- *
- * @return boolean
- *   Whether access is allowed or not.
- */
-function _wf_site_access_create_bundles($entity = NULL, $account = NULL) {
-  if (isset($entity)) {
-    $perm = "create $entity->bundle site";
-    if (user_access($perm, $account)) {
+  $permissions = array(
+    "{$op} sites",
+    "{$op} any {$bundle} site",
+  );
+
+  foreach ($permissions as $permission) {
+    if (user_access($permission, $account)) {
       return TRUE;
     }
   }
-  else {
-    foreach (array_keys(wf_site_load_bundles()) as $bundle) {
-      $perm = "create $bundle site";
-      if (user_access($perm, $account)) {
-        return TRUE;
-      }
-    }
-  }
+
   return FALSE;
 }
 
 /**
- * Check if the user has all permissions.
+ * Access callback for creating a new site entity.
  *
- * @return boolean
- *   Whether access is allowed or not.
+ * @return bool
+ *   TRUE is user is allowed to create any site type.
  */
-function _wf_site_manage_sites_access() {
-  $args = func_get_args();
+function wf_site_create_access() {
 
-  foreach ($args as $perm) {
-    if (!user_access($perm)) {
-      return FALSE;
+  if (user_access('administer sites')) {
+    return TRUE;
+  }
+
+  if (user_access('create sites')) {
+    return TRUE;
+  }
+
+  foreach (array_keys(wf_site_load_bundles()) as $bundle) {
+    $perm = "create $bundle site";
+    if (user_access($perm)) {
+      return TRUE;
     }
   }
 
-  return TRUE;
+  return FALSE;
 }
 
 /**
@@ -807,14 +739,6 @@ function wf_site_list_permissions($type) {
   );
 
   foreach ($actions as $action) {
-    $perms["$action own $type site"] = array(
-      'title' => t(
-        '%type_name: %action own site', array(
-          '%action' => ucfirst($action),
-          '%type_name' => $type,
-        )
-      ),
-    );
     $perms["$action any $type site"] = array(
       'title' => t(
         '%type_name: %action any site', array(
