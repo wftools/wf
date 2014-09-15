@@ -82,9 +82,11 @@ function wf_job_action_start_form_submit($form, &$form_state) {
   $job = reset($form_state['build_info']['args']);
 
   $job->revision = TRUE;
-  $job->log = $form_state['values']['log']['value'];
   $job->rules_event = 'started';
-  $job->setStatusName('Started');
+  wf_job_attach_log_to_entity($job, t('Job Started.'), 'wf_job_started');
+  wf_job_save($job);
+
+  $form_state['redirect'] = $job->uri();
 }
 
 /**
