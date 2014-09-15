@@ -40,6 +40,9 @@ function wf_job_add($bundle) {
  * Job edit menu callback.
  */
 function wf_job_edit($job = NULL) {
+  $title = t('Edit job #@jid', array('@jid' => $job->jid));
+  drupal_alter('wf_job_edit_title', $title, $job);
+  drupal_set_title($title);
   return drupal_get_form('wf_job_edit_form', $job);
 }
 

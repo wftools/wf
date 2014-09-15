@@ -111,7 +111,7 @@ function wf_job_entity_info() {
 function wf_job_menu() {
   $items = array();
   $items['job/add'] = array(
-    'title' => 'New job',
+    'title' => 'Create new job',
     // Grant the user access to this page regardless of other permissions.
     'access callback' => TRUE,
     'page callback' => 'wf_job_page_add',
