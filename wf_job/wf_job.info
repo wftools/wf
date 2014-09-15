@@ -24,3 +24,5 @@ files[] = includes/wf_job.url_login_plugin.interface.inc
 files[] = includes/wf_job.url_visit_plugin.interface.inc
 files[] = includes/wf_job.domain.exception.inc
 files[] = includes/wf_job.url.exception.inc
+files[] = includes/wf_job.acl.interface.inc
+files[] = plugins/acl/wf_job.WfJobAclStandard.class.php

@@ -97,6 +97,14 @@ function wf_job_action_start_form_submit($form, &$form_state) {
 function wf_job_action_propose_form($form, &$form_state, $job) {
   drupal_set_title(wf_job_action_title($job, 'propose'));
 
+  $job_wrapper = entity_metadata_wrapper('wf_job', $job);
+
+  ctools_include('plugins');
+  $plugin = variable_get('wf_job_acl_plugin', 'standard');
+  $class_name = ctools_plugin_load_class('wf_job', 'acl', $plugin, 'handler');
+  $handler = new $class_name();
+  $reviewers = $handler->getAssignees($job, TRUE);
+
   $job_uri = $job->uri();
   $form['job'] = array(
     '#type' => 'item',
@@ -272,6 +280,15 @@ function wf_job_admin_settings() {
     '#default_value' => variable_get('wf_job_jsid_completed'),
     '#options' => wf_job_status_list(),
     '#required' => FALSE,
+  );
+
+  $form['wf_job_acl_plugin'] = array(
+    '#type' => 'select',
+    '#title' => t('ACL Plugin'),
+    '#description' => t('The plugin used to control permissions.'),
+    '#default_value' => variable_get('wf_job_acl_plugin', 'standard'),
+    '#options' => wf_job_get_plugins_list('acl'),
+    '#required' => TRUE,
   );
 
   $form['wf_job_slug_pattern'] = array(

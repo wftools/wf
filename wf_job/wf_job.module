@@ -97,20 +97,18 @@ function wf_job_menu() {
 
   foreach (array_keys(wf_job_load_bundles()) as $bundle) {
     $items['job/add/' . $bundle] = array(
-      'title' => 'New job',
+      'title' => 'Create new job',
       'page callback' => 'wf_job_add',
       'page arguments' => array(2),
-      'access callback' => 'entity_access',
-      'access arguments' => array('create', 'wf_job', $bundle),
+      'access callback' => 'wf_job_access',
+      'access arguments' => array('create', NULL, NULL, $bundle),
       'file' => 'includes/wf_job.pages.inc',
     );
   }
 
   $items['job/%wf_job'] = array(
-    'title callback' => 'wf_job_page_title',
-    'title arguments' => array(1),
-    'access callback' => 'entity_access',
-    'access arguments' => array('view', 'wf_job', 1),
+    'access callback' => 'wf_job_access',
+    'access arguments' => array('view', 1),
     'page callback' => 'wf_job_view',
     'page arguments' => array(1),
     'file' => 'includes/wf_job.pages.inc',
@@ -122,8 +120,8 @@ function wf_job_menu() {
   );
   $items['job/%wf_job/edit'] = array(
     'title' => 'Edit',
-    'access callback' => 'entity_access',
-    'access arguments' => array('edit', 'wf_job', 1),
+    'access callback' => 'wf_job_access',
+    'access arguments' => array('edit', 1),
     'page callback' => 'wf_job_edit',
     'page arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
@@ -131,8 +129,8 @@ function wf_job_menu() {
   );
   $items['job/%wf_job/delete'] = array(
     'title' => 'Delete',
-    'access callback' => 'entity_access',
-    'access arguments' => array('delete', 'wf_job', 1),
+    'access callback' => 'wf_job_access',
+    'access arguments' => array('delete', 1),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('wf_job_delete_form', 1),
     'type' => MENU_LOCAL_TASK,
@@ -142,8 +140,8 @@ function wf_job_menu() {
   $items['job/%wf_job/start'] = array(
     'title callback' => 'wf_job_action_title',
     'title arguments' => array(1, 'start'),
-    'access callback' => 'wf_job_action_allowed',
-    'access arguments' => array(1, 'start'),
+    'access callback' => 'wf_job_access',
+    'access arguments' => array('start', 1),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('wf_job_action_start_form', 1),
     'type' => MENU_LOCAL_ACTION,
@@ -153,8 +151,8 @@ function wf_job_menu() {
   $items['job/%wf_job/propose'] = array(
     'title callback' => 'wf_job_action_title',
     'title arguments' => array(1, 'propose'),
-    'access callback' => 'wf_job_action_allowed',
-    'access arguments' => array(1, 'propose'),
+    'access callback' => 'wf_job_access',
+    'access arguments' => array('propose', 1),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('wf_job_action_propose_form', 1),
     'type' => MENU_LOCAL_ACTION,
@@ -164,18 +162,18 @@ function wf_job_menu() {
   $items['job/%wf_job/review'] = array(
     'title callback' => 'wf_job_action_title',
     'title arguments' => array(1, 'review'),
-    'access callback' => 'wf_job_action_allowed',
-    'access arguments' => array(1, 'review'),
+    'access callback' => 'wf_job_access',
+    'access arguments' => array('review', 1),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('wf_job_action_review_form', 1),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'includes/wf_job.admin.inc',
     'weight' => -10,
   );
- $items['job/%wf_job/visit'] = array(
+  $items['job/%wf_job/visit'] = array(
     'title' => 'Visit Sandbox',
-    'access callback' => 'wf_job_action_allowed',
-    'access arguments' => array(1, 'visit'),
+    'access callback' => 'wf_job_access',
+    'access arguments' => array('visit', 1),
     'page callback' => 'wf_job_visit',
     'page arguments' => array(1),
     'type' => MENU_LOCAL_ACTION,
@@ -183,8 +181,8 @@ function wf_job_menu() {
   );
   $items['job/%wf_job/login'] = array(
     'title' => 'Login to dev sandbox',
-    'access callback' => 'wf_job_action_allowed',
-    'access arguments' => array(1, 'login'),
+    'access callback' => 'wf_job_access',
+    'access arguments' => array('login', 1),
     'page callback' => 'wf_job_login_page',
     'page arguments' => array(1),
     'type' => MENU_LOCAL_ACTION,
@@ -192,14 +190,14 @@ function wf_job_menu() {
   );
   $items['job/%wf_job/update-code'] = array(
     'title' => 'Update code',
-    'access callback' => 'wf_job_action_allowed',
-    'access arguments' => array(1, 'update_code'),
+    'access callback' => 'wf_job_access',
+    'access arguments' => array('update_code', 1),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('wf_job_update_job_code_form', 1),
     'type' => MENU_LOCAL_ACTION,
     'weight' => 50,
   );
-   $items['admin/content/jobs/drush-aliases'] = array(
+  $items['admin/content/jobs/drush-aliases'] = array(
     'title' => 'Download drush aliases',
     'description' => 'Admin page for exporting drush wf.aliases.drushrc.php file',
     'page callback' => 'drupal_get_form',
@@ -315,115 +313,6 @@ function wf_job_list_permissions($type) {
 }
 
 /**
- * Returns whether the current user is allowed to perform the $action on the given $job at this time.
- *
- * @param WfJob $job
- * @param string $action
- *
- * @return bool
- */
-function wf_job_action_allowed($job, $action) {
-  return wf_job_action_allowed_by_user($job, $action) && wf_job_action_allowed_in_current_state($job, $action);
-}
-
-/**
- * Returns whether the current user is allowed to perform the $action on the given $job.
- *
- * @param WfJob $job
- * @param string $action
- *
- * @return bool
- */
-function wf_job_action_allowed_by_user($job, $action) {
-  global $user;
-
-  $is_admin = user_access('administer jobs');
-  if ($is_admin) {
-    return TRUE;
-  }
-
-  $type = $job->bundle;
-
-  switch ($action) {
-    /*
-    case 'change_environment':
-    case 'change_status':
-      return $is_admin;
-    */
-
-    case 'change_owner':
-    case 'assign':
-      return TRUE;
-
-    case 'start':
-    case 'propose':
-    case 'edit':
-      return wf_job_access('edit', $job, $user, $type);
-
-    case 'update_code':
-      return user_access("update code job any {$type}") || (user_access("update code job own {$type}") && $job->owner == $user->uid);
-
-    // FIXME: Implement proper permission checks for propose/review
-    case 'propose':
-    case 'review':
-    case 'approve':
-    case 'reject':
-      return wf_job_access('review', $job, $user, $type) && $job->assigned == $user->uid;
-
-    case 'login':
-    case 'visit':
-      return wf_job_access($action, $job, $user, $type);
-  }
-
-  return FALSE;
-}
-
-/**
- * Returns whether the $action is allowed for the $job in its current state.
- *
- * @param WfJob $job
- * @param string $action
- *
- * @return boolean
- */
-function wf_job_action_allowed_in_current_state($job, $action) {
-  $statuses = wf_job_status_list();
-  $jsid = empty($job->jsid) ? 1 : $job->jsid;
-  $status = $statuses[$jsid];
-  $env = wf_environment_load($job->eid);
-  $has_next_env = !empty($env->next_env_id);
-  $is_default_env = ($job->eid == wf_environment_get_default());
-
-  switch ($action) {
-    case 'change_environment':
-    case 'change_status':
-    case 'change_owner':
-    case 'assign':
-      return TRUE;
-
-    case 'start':
-      return $is_default_env && $status == 'New';
-
-    case 'login':
-    case 'update_code':
-      return $is_default_env && $status == 'Started';
-
-    case 'propose':
-      return $has_next_env && $status == 'Started';
-
-    case 'review':
-    case 'approve':
-    case 'reject':
-      return $has_next_env && $status == 'In Review';
-
-    case 'visit':
-       return !in_array($status, array('New', 'Completed')) && $has_next_env;
-  }
-  return FALSE;
-}
-
-
-/**
  * Access callback for the entity API.
  *
  * @param $op
@@ -441,38 +330,24 @@ function wf_job_action_allowed_in_current_state($job, $action) {
  *   Whether access is allowed or not.
  */
 function wf_job_access($op, $entity, $account = NULL, $entity_type = NULL) {
-  $has_access = FALSE;
+  ctools_include('plugins');
+  $handler = &drupal_static(__FUNCTION__);
+  if (!$handler) {
+    $plugin = variable_get('wf_job_acl_plugin', 'standard');
+    $class_name = ctools_plugin_load_class('wf_job', 'acl', $plugin, 'handler');
+    $handler = new $class_name();
+  }
 
   if (!isset($account)) {
     global $user;
     $account = $user;
   }
 
-  // Access for admin user.
-  if (1 === $account->uid) {
-    return TRUE;
-  }
-
   if (!isset($entity_type)) {
     $entity_type = $entity->bundle;
   }
 
-  if (user_access('manage jobs', $account)) {
-    return TRUE;
-  }
-
-  switch ($op) {
-    case 'create':
-      $perm = 'create ' . $entity_type . ' job';
-      return  user_access($perm, $account);
-
-    case 'view':
-    case 'edit':
-    case 'delete':
-      return wf_job_granular_access($op, $entity_type, $entity, $account);
-  }
-
-  return FALSE;
+  return $handler->hasAccess($op, $entity, $account, $entity_type);
 }
 
 /**
@@ -1208,7 +1083,7 @@ function wf_job_slug($jid) {
  * Callback for getting properties of an entity.
  */
 function wf_job_entity_metadata_get_properties($entity, array $options, $name, $entity_type) {
-  switch ($name){
+  switch ($name) {
     case 'url':
       $return = entity_uri($entity_type, $entity);
       return url($return['path'], $return['options'] + $options);
@@ -1267,6 +1142,7 @@ function wf_job_visit(WfJob $job) {
  */
 function wf_job_ctools_plugin_api($module, $api) {
   $apis = array(
+    'acl',
     'sandbox_domain',
     'url_login',
     'url_visit',
@@ -1284,6 +1160,7 @@ function wf_job_ctools_plugin_api($module, $api) {
  */
 function wf_job_ctools_plugin_type() {
   $apis = array(
+    'acl',
     'sandbox_domain',
     'url_login',
     'url_visit',
@@ -1294,7 +1171,9 @@ function wf_job_ctools_plugin_type() {
   $plugins = array();
   foreach ($apis as $api) {
     $plugins[$api] = array(
+      'cache' => TRUE,
       'classes' => array('handler'),
+      'use hooks' => TRUE,
     );
   }
 
@@ -1409,6 +1288,31 @@ function wf_job_wf_log_info() {
   );
 
   return $logs;
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function wf_job_ctools_plugin_directory($owner, $plugin_type) {
+  if ('wf_job' == $owner) {
+    return "plugins/{$plugin_type}";
+  }
+}
+
+/**
+ * Implements hook_wf_job_acl().
+ */
+function wf_job_wf_job_acl() {
+  $plugins = array();
+
+  $plugins['standard'] = array(
+    'title' => t('Standard ACLs'),
+    'description' => t('Standard permissions based access control system for WF Jobs.'),
+    'handler' => 'WfJobAclStandard',
+    'file' => 'plugins/acl/wf_job.WfJobAclStandard.class.php',
+  );
+
+  return $plugins;
 }
 
 /**

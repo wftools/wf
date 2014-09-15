@@ -47,6 +47,16 @@ function wf_job_edit($job = NULL) {
  * Job edit form.
  */
 function wf_job_edit_form($form, $form_state, $job) {
+  global $user;
+
+  ctools_include('plugins');
+  $handler = &drupal_static(__FUNCTION__);
+  if (!$handler) {
+    $plugin = variable_get('wf_job_acl_plugin', 'standard');
+    $class_name = ctools_plugin_load_class('wf_job', 'acl', $plugin, 'handler');
+    $handler = new $class_name();
+  }
+
   // Set some sane default values.
   $is_new = FALSE;
   $status_type = 'select';
@@ -119,26 +129,25 @@ function wf_job_edit_form($form, $form_state, $job) {
     '#options' => wf_job_status_list(),
     '#default_value' => $default_status,
     '#required' => TRUE,
-    '#disabled' => !wf_job_action_allowed($job, 'change_status'),
+    '#disabled' => !wf_job_access('change_status', $job, $user),
   );
 
-  $users = wf_job_users();
   $form['owner'] = array(
     '#type' => 'select',
     '#title' => t('Owner'),
-    '#options' => $users,
+    '#options' => $handler->getOwners($job),
     '#default_value' => $default_owner,
     '#required' => TRUE,
-    '#disabled' => !wf_job_action_allowed($job, 'change_owner'),
+    '#disabled' => !wf_job_access('change_owner', $job, $user),
   );
 
   $form['assigned'] = array(
     '#type' => 'select',
     '#title' => t('Assigned to'),
-    '#options' => $users,
+    '#options' => $handler->getAssignees($job),
     '#default_value' => $default_assigned,
     '#required' => TRUE,
-    '#disabled' => !wf_job_action_allowed($job, 'assign'),
+    '#disabled' => !wf_job_access('assign', $job, $user),
   );
 
   $envs = wf_environment_list_names();
@@ -148,7 +157,7 @@ function wf_job_edit_form($form, $form_state, $job) {
     '#options' => $envs,
     '#default_value' => $job->eid,
     '#required' => TRUE,
-    '#disabled' => !wf_job_action_allowed($job, 'change_environment'),
+    '#disabled' => !wf_job_access('change_environment', $job, $user),
   );
 
   field_attach_form('wf_job', $job, $form, $form_state);

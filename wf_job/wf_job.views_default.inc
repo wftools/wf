@@ -247,6 +247,14 @@ function wf_job_views_default_views() {
   $handler->display->display_options['filters']['permission']['field'] = 'permission';
   $handler->display->display_options['filters']['permission']['value'] = array(
     'manage jobs' => 'manage jobs',
+    'view own job job' => 'view own job job',
+    'view any job job' => 'view any job job',
+    'rewiew job before integratio' => 'rewiew job before integration',
+    'rewiew job before prod' => 'rewiew job before prod',
+    'rewiew job before stage' => 'rewiew job before stage',
+    'propose job for integration' => 'propose job for integration',
+    'propose job for prod' => 'propose job for prod',
+    'propose job for stage' => 'propose job for stage',
   );
   $handler->display->display_options['filters']['permission']['exposed'] = TRUE;
   $handler->display->display_options['filters']['permission']['expose']['operator_id'] = 'permission_op';
