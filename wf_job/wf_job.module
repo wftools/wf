@@ -604,7 +604,7 @@ function wf_job_entity_property_info() {
     'type' => 'integer',
     'description' => t('The unique job identifier.'),
     'schema field' => 'jid',
-    'wf_extra_fields' => array('display'),
+    'extra_fields' => array('display'),
   );
 
   $properties['vid'] = array(
@@ -612,7 +612,7 @@ function wf_job_entity_property_info() {
     'type' => 'integer',
     'description' => t('The unique job revision identifier.'),
     'schema field' => 'vid',
-    'wf_extra_fields' => array('form'),
+    'extra_fields' => array('form'),
   );
 
   $properties['uuid'] = array(
@@ -620,7 +620,7 @@ function wf_job_entity_property_info() {
     'type' => 'integer',
     'description' => t('The universally unique job identifier.'),
     'schema field' => 'uuid',
-    'wf_extra_fields' => array('form'),
+    'extra_fields' => array('form'),
   );
 
   $properties['vuuid'] = array(
@@ -628,7 +628,7 @@ function wf_job_entity_property_info() {
     'type' => 'integer',
     'description' => t('The universally unique job revision identifier.'),
     'schema field' => 'vuuid',
-    'wf_extra_fields' => array(),
+    'extra_fields' => array(),
   );
 
   $properties['bundle'] = array(
@@ -636,7 +636,7 @@ function wf_job_entity_property_info() {
     'type' => 'text',
     'description' => t('The job bundle.  This value is always job.'),
     'schema field' => 'bundle',
-    'wf_extra_fields' => array('display'),
+    'extra_fields' => array('display'),
   );
 
   $properties['title'] = array(
@@ -644,7 +644,7 @@ function wf_job_entity_property_info() {
     'type' => 'text',
     'description' => t('The name of the job.'),
     'schema field' => 'title',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['reference'] = array(
@@ -652,7 +652,7 @@ function wf_job_entity_property_info() {
     'type' => 'text',
     'description' => t('A reference identifier for the job in another system.'),
     'schema field' => 'reference',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['details'] = array(
@@ -660,7 +660,7 @@ function wf_job_entity_property_info() {
     'type' => 'text',
     'description' => t('Detailed notes about the job.'),
     'schema field' => 'reference',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['jsid'] = array(
@@ -669,7 +669,7 @@ function wf_job_entity_property_info() {
     'description' => t('The current status of the job.'),
     'options list' => 'wf_job_status_list',
     'schema field' => 'jsid',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['owner'] = array(
@@ -677,7 +677,7 @@ function wf_job_entity_property_info() {
     'type' => 'user',
     'description' => t('The user who owns the job.'),
     'schema field' => 'owner',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['assigned'] = array(
@@ -685,7 +685,7 @@ function wf_job_entity_property_info() {
     'type' => 'user',
     'description' => t('The user who the job is currently assigned to.'),
     'schema field' => 'assigned',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['eid'] = array(
@@ -693,7 +693,7 @@ function wf_job_entity_property_info() {
     'type' => 'wf_environment',
     'description' => t('The current environment for the job.'),
     'schema field' => 'eid',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['created'] = array(
@@ -701,7 +701,7 @@ function wf_job_entity_property_info() {
     'type' => 'date',
     'description' => 'Date when the job was created',
     'schema field' => 'created',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['modified'] = array(
@@ -709,7 +709,7 @@ function wf_job_entity_property_info() {
     'type' => 'date',
     'description' => 'Date when the job was last modified',
     'schema field' => 'created',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['url'] = array(
@@ -718,7 +718,7 @@ function wf_job_entity_property_info() {
     'getter callback' => 'wf_job_entity_metadata_get_properties',
     'type' => 'uri',
     'computed' => TRUE,
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['edit_url'] = array(

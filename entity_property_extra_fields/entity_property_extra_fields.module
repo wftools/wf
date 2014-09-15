@@ -1,0 +1,79 @@
+<?php
+
+/**
+ * @file
+ * entity_property_extra_fields module hooks implementation.
+ */
+
+define('ENTITY_PROPERTY_EXTRA_FIELDS_KEY', 'extra_fields');
+
+/**
+ * Implements hook_field_extra_fields().
+ */
+function entity_property_extra_fields_field_extra_fields() {
+  return entity_property_extra_fields_get_extra_fields_structure();
+}
+
+/**
+ * Returns the structured array for hook_field_extra_fields().
+ *
+ * @return array
+ *   The hook_field_extra_fields() structured array.
+ */
+function entity_property_extra_fields_get_extra_fields_structure() {
+  $cache = cache_get('entity_property_extra_fields');
+  if ($cache) {
+    // Gets value from cache.
+    return $cache->data;
+  }
+
+  $extra = entity_property_extra_fields_generate_extra_fields_structure();
+
+  // Sets new cache value.
+  cache_set('entity_property_extra_fields', $extra);
+
+  return $extra;
+}
+
+/**
+ * Generates a structured array for hook_field_extra_fields().
+ *
+ * @return array
+ *   A hook_field_extra_fields() structured array.
+ */
+function entity_property_extra_fields_generate_extra_fields_structure() {
+  $entities = entity_get_info();
+
+  $extra_fields = array();
+
+  foreach ($entities as $entity_type => $entity_info) {
+    $weight = -50;
+
+    // Gets all properties by entity.
+    $entity_properties = entity_get_all_property_info($entity_type);
+    foreach ($entity_properties as $field_name => $field_properties) {
+
+      // Checks if extra fields key exist in entity properties.
+      $extra_fields_key_exist = !empty($field_properties[ENTITY_PROPERTY_EXTRA_FIELDS_KEY]) && is_array($field_properties[ENTITY_PROPERTY_EXTRA_FIELDS_KEY]);
+      if ($extra_fields_key_exist) {
+
+        // Separates by context ('display', 'form').
+        foreach ($field_properties[ENTITY_PROPERTY_EXTRA_FIELDS_KEY] as $context) {
+
+          // Creates the structure to each bundle.
+          foreach (array_keys($entity_info['bundles']) as $bundle) {
+            $extra_fields[$entity_type][$bundle][$context][$field_name] = array(
+              'label' => $field_properties['label'],
+              'description' => isset($field_properties['description']) ? $field_properties['description'] : '',
+              'weight' => $weight,
+            );
+          }
+        }
+      }
+
+      ++$weight;
+    }
+  }
+
+  return $extra_fields;
+}

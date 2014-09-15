@@ -97,7 +97,7 @@ function wf_log_entity_property_info() {
     'type' => 'integer',
     'description' => t('The unique log identifier.'),
     'schema field' => 'lid',
-    'wf_extra_fields' => array('display'),
+    'extra_fields' => array('display'),
   );
 
   $properties['entity_type'] = array(
@@ -105,7 +105,7 @@ function wf_log_entity_property_info() {
     'type' => 'text',
     'description' => t('The entity type of the log entry.'),
     'schema field' => 'entity_type',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['entity'] = array(
@@ -113,15 +113,15 @@ function wf_log_entity_property_info() {
     'type' => 'integer',
     'description' => t('The entity of the log entry.'),
     'schema field' => 'entity',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['uuid'] = array(
     'label' => t('UUID'),
-    'type' => 'text',
+    'type' => 'integer',
     'description' => t('The universally unique log identifier.'),
     'schema field' => 'uuid',
-    'wf_extra_fields' => array('display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['message_summary'] = array(
@@ -129,7 +129,7 @@ function wf_log_entity_property_info() {
     'type' => 'text',
     'description' => t('The message summary of the related Log.'),
     'schema field' => 'message_summary',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['message_body'] = array(
@@ -137,7 +137,7 @@ function wf_log_entity_property_info() {
     'type' => 'text',
     'description' => t('The message details of the related Log.'),
     'schema field' => 'message_body',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['message_type'] = array(
@@ -145,7 +145,7 @@ function wf_log_entity_property_info() {
     'type' => 'text',
     'description' => t('The message type of the related Log.'),
     'schema field' => 'message_type',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['uid'] = array(
@@ -153,7 +153,7 @@ function wf_log_entity_property_info() {
     'type' => 'user',
     'description' => t('The user owner.'),
     'schema field' => 'uid',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['created'] = array(
@@ -161,7 +161,7 @@ function wf_log_entity_property_info() {
     'type' => 'date',
     'description' => t('The Unix timestamp when the Log was created.'),
     'schema field' => 'created',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $info = array();
@@ -169,13 +169,6 @@ function wf_log_entity_property_info() {
   $info['wf_log_bundle'] = array('properties' => array());
 
   return $info;
-}
-
-/**
- * Implements hook_field_extra_fields().
- */
-function wf_log_field_extra_fields() {
-  return wf_generate_extra_fields('wf_log');
 }
 
 /**

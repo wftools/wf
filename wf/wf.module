@@ -87,37 +87,3 @@ function wf_shell_client_command_alter(&$variables) {
     $variables['options']['-o'] = 'User=deployer';
   }
 }
-
-/**
- * Retrive the structure for hook_field_extra_fields().
- */
-function wf_generate_extra_fields($entity_type) {
-  $entity = entity_get_property_info($entity_type);
-
-  $extra_fields = array();
-  $weight = -50;
-
-  foreach($entity['properties'] as $field_name => $field_properties) {
-    if (isset($field_properties['wf_extra_fields']) && is_array($field_properties['wf_extra_fields'])) {
-      foreach ($field_properties['wf_extra_fields'] as $value) {
-        if (!isset($extra_fields[$value])) {
-          $extra_fields[$value] = array();
-        }
-        $extra_fields[$value][$field_name] = array(
-          'label' => $field_properties['label'],
-          'description' => $field_properties['description'],
-          'weight' => $weight,
-        );
-      }
-    }
-    ++$weight;
-  }
-
-  $entities = array();
-  $entity_info = entity_get_info($entity_type);
-  foreach (array_keys($entity_info['bundles']) as $bundle) {
-    $entities[$bundle] = $extra_fields;
-  }
-
-  return array($entity_type => $entities);
-}

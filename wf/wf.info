@@ -3,3 +3,4 @@ description = WF base configuration settings.
 core = 7.x
 package = WF
 project = wf
+dependencies[] = entity_property_extra_fields

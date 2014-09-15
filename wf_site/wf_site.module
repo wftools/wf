@@ -179,7 +179,7 @@ function wf_site_entity_property_info() {
     'description' => t('The unique site identifier.'),
     'type' => 'integer',
     'schema field' => 'sid',
-    'wf_extra_fields' => array('display'),
+    'extra_fields' => array('display'),
   );
 
   $properties['vid'] = array(
@@ -187,7 +187,7 @@ function wf_site_entity_property_info() {
     'description' => t('The unique site revision identifier.'),
     'type' => 'integer',
     'schema field' => 'vid',
-    'wf_extra_fields' => array('display'),
+    'extra_fields' => array('display'),
   );
 
   $properties['uuid'] = array(
@@ -195,7 +195,7 @@ function wf_site_entity_property_info() {
     'type' => 'text',
     'description' => t('The universally unique site identifier.'),
     'schema field' => 'uuid',
-    'wf_extra_fields' => array('display'),
+    'extra_fields' => array('display'),
   );
 
   $properties['vuuid'] = array(
@@ -203,7 +203,7 @@ function wf_site_entity_property_info() {
     'type' => 'text',
     'description' => t('The universally unique site revision identifier.'),
     'schema field' => 'vuuid',
-    'wf_extra_fields' => array('display'),
+    'extra_fields' => array('display'),
   );
 
   $properties['bundle'] = array(
@@ -211,15 +211,16 @@ function wf_site_entity_property_info() {
     'type' => 'token',
     'description' => t('The site type.'),
     'schema field' => 'bundle',
-    'wf_extra_fields' => array('display'),
+    'extra_fields' => array('display'),
   );
 
   $properties['site_name'] = array(
     'label' => t('Site Name'),
     'type' => 'text',
     'description' => t('The name of the site.'),
+    'setter callback' => 'entity_property_verbatim_set',
     'schema field' => 'site_name',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['active'] = array(
@@ -227,15 +228,7 @@ function wf_site_entity_property_info() {
     'type' => 'boolean',
     'description' => t('Is the site active?'),
     'schema field' => 'active',
-    'wf_extra_fields' => array('form', 'display'),
-  );
-
-  $properties['blocked'] = array(
-    'label' => t('Site is Blocked'),
-    'type' => 'boolean',
-    'description' => t('Is the site blocked?'),
-    'schema field' => 'blocked',
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $properties['created'] = array(
@@ -243,7 +236,7 @@ function wf_site_entity_property_info() {
     'type' => 'date',
     'description' => t('The date the site was created.'),
     'schema field' => 'created',
-    'wf_extra_fields' => array('display'),
+    'extra_fields' => array('display'),
   );
 
   $properties['changed'] = array(
@@ -251,7 +244,7 @@ function wf_site_entity_property_info() {
     'type' => 'date',
     'description' => t('The date the site was last modified.'),
     'schema field' => 'changed',
-    'wf_extra_fields' => array('display'),
+    'extra_fields' => array('display'),
   );
 
   $properties['uid'] = array(
@@ -259,7 +252,7 @@ function wf_site_entity_property_info() {
     'type' => 'user',
     'description' => t('The user who created the site.'),
     'schema field' => 'uid',
-    'wf_extra_fields' => array('display'),
+    'extra_fields' => array('display'),
   );
 
   $info['wf_site'] = array('properties' => $properties);
@@ -330,13 +323,6 @@ function wf_site_permission() {
   }
 
   return $perms;
-}
-
-/**
- * Implements hook_field_extra_fields().
- */
-function wf_site_field_extra_fields() {
-  return wf_generate_extra_fields('wf_site');
 }
 
 /**
