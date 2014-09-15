@@ -88,8 +88,6 @@ function wf_site_menu() {
   $items = array();
 
   $items['site/%wf_site'] = array(
-    'title callback' => 'wf_site_page_title',
-    'title arguments' => array(1),
     'access callback' => 'entity_access',
     'access arguments' => array('view', 'wf_site', 1),
     'page callback' => 'wf_site_view',
@@ -425,9 +423,27 @@ function wf_site_edit_form_validate($form, &$form_state) {
  */
 function wf_site_edit_form_submit($form, &$form_state) {
   $site = (object) $form_state['values'];
+  wf_site_edit_form_create_log($site, $form_state);
   field_attach_submit('wf_site', $site, $form, $form_state);
   $saved_site = wf_site_save($site);
   $form_state['redirect'] = "site/$saved_site->sid";
+}
+
+/**
+ * Create logs to site form edit.
+ */
+function wf_site_edit_form_create_log(&$entity, $form_state) {
+  if (module_exists('wf_log')) {
+    $log_type = 'wf_site_updated';
+
+    $is_new = isset($form_state['values']['is_new']);
+    if ($is_new) {
+      $log_type = 'wf_site_created';
+    }
+
+    $log_message = wf_log_get_log_info_title($log_type);
+    wf_log_attach_log_to_entity($entity, $log_message, $log_type);
+  }
 }
 
 /**
@@ -513,7 +529,7 @@ function wf_site_view(WfSite $site, $view_mode = 'full') {
  * Generate the page title.
  */
 function wf_site_page_title($site) {
-  return t('Site: @site', array('@site' => $site->site_name));
+  return t('@site', array('@site' => $site->site_name));
 }
 
 /**
@@ -757,6 +773,11 @@ function wf_site_list_permissions($type) {
  */
 function wf_site_wf_log_info() {
   $logs = array();
+
+  $logs['wf_site_created'] = array(
+    'title' => t('Site Created'),
+    'description' => t('The site was created.'),
+  );
 
   $logs['wf_site_updated'] = array(
     'title' => t('Site updated'),
