@@ -333,11 +333,11 @@ function wf_log_get_view_page_title($log) {
 }
 
 /**
- * Load a Log.
+ * Load a Log entry.
  */
-function wf_log_load($log_id = NULL, $reset = FALSE) {
+function wf_log_load($log_id = NULL, $conditions = array(), $reset = FALSE) {
   $ids = (isset($log_id) ? array($log_id) : array());
-  $log = wf_log_load_multiple($ids, $reset);
+  $log = wf_log_load_multiple($ids, $conditions, $reset);
 
   return $log ? reset($log) : FALSE;
 }
@@ -353,23 +353,14 @@ function wf_log_load_multiple($log_ids = array(), $conditions = array(), $reset 
  * Page view callback.
  */
 function wf_log_view(WfLog $log, $view_mode = 'full') {
-  $out = entity_view('wf_log', array($log));
+  $out = entity_view('wf_log', array($log), $view_mode);
   if (!is_array($out)) {
-    return t('Unable to render log.');
+    return t('Unable to render log entry.');
   }
 
   $output = reset($out['wf_log']);
 
-  if (module_exists('colorbox')) {
-    if (!isset($_GET['iframe'])) {
-      $querystring = array(
-        'width' => '400',
-        'height' => '500',
-        'iframe' => 'true',
-      );
-      drupal_goto('wf-log/' . $log->lid, array('query' => $querystring));
-    }
-
+  if (module_exists('colorbox') && isset($_GET['iframe'])) {
     print(render($output));
     drupal_exit();
   }
@@ -440,27 +431,22 @@ function wf_log_permission() {
     'create workflow log entities' => array(
       'title' => t('Create Workflow Logs'),
       'description' => t('Allows users to create Workflow Logs.'),
-      'restrict access' => TRUE,
     ),
     'view workflow log entities' => array(
       'title' => t('View Workflow Logs'),
       'description' => t('Allows users to view Workflow Logs.'),
-      'restrict access' => TRUE,
     ),
     'edit any workflow log entities' => array(
       'title' => t('Edit any Workflow Logs'),
       'description' => t('Allows users to edit Workflow Logs.'),
-      'restrict access' => TRUE,
     ),
     'edit own workflow log entities' => array(
       'title' => t('Edit own Workflow Logs'),
       'description' => t('Allows users to edit own Logs.'),
-      'restrict access' => TRUE,
     ),
     'delete workflow log entities' => array(
       'title' => t('Delete Workflow Logs'),
       'description' => t('Allows users to delete the Logs.'),
-      'restrict access' => TRUE,
     ),
     'manage workflow logs' => array(
       'title' => t('Manage log creation, updating and deleting'),
@@ -639,6 +625,164 @@ function wf_log_menu_local_tasks_alter(&$data, $router_item, $root_path) {
         '#theme' => 'menu_local_action',
         '#link' => $item,
       );
+    }
+  }
+}
+
+/**
+ * Implments hook_block_view_MODULE_DELTA_alter().
+ */
+function wf_log_block_view_views_log_list_job_change_log_block_alter(&$data, $block) {
+
+  // We only care if the colorbox module is enabled.
+  if (!module_exists('colorbox')) {
+    return;
+  }
+
+  if (!isset($data['content']['#attached'])) {
+    $data['content']['#attached'] = array();
+  }
+
+  if (!isset($data['content']['#attached']['js'])) {
+    $data['content']['#attached']['js'] = array();
+  }
+
+  $js = drupal_get_path('module', 'wf_log') . '/js/wf_log.js';
+
+  $data['content']['#attached']['js'][$js] = array(
+    'type' => 'file',
+   'scope' => 'header',
+  );
+}
+
+/**
+ * Create new Log message entry.
+ *
+ * @param EntityDrupalWrapper $entity
+ *   The entity object received by action parameter.
+ *
+ * @param string $log_bundle
+ *   The bundle log value received by action parameter.
+ *
+ * @param string $message_type
+ *   The message type value received by action parameter.
+ *
+ * @param string $message_body
+ *   The message body value received by action parameter.
+ */
+function wf_log_create_log_message(EntityDrupalWrapper $entity, $log_bundle, $message_type, $message_body) {
+  $values = array(
+    'entity_type' => $entity->type(),
+    'entity' => $entity->getIdentifier(),
+    'bundle' => $log_bundle,
+    'message_type' => $message_type,
+    'message_summary' => wf_log_get_log_info_title($message_type),
+    'message_body' => $message_body,
+    'uid' => $GLOBALS['user']->uid,
+    'created' => time(),
+  );
+
+  wf_log_add_log_entry($values);
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function wf_log_entity_insert($entity, $entity_type) {
+  wf_log_save_wf_entity_log($entity, $entity_type);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function wf_log_entity_update($entity, $entity_type) {
+  wf_log_save_wf_entity_log($entity, $entity_type);
+}
+
+/**
+ * Saves a new wf_log entry of a given entity.
+ */
+function wf_log_save_wf_entity_log($entity, $entity_type) {
+  if ('wf_log' != $entity_type && (0 === strpos($entity_type, 'wf_')) && isset($entity->log)) {
+    $log_type = !empty($entity->log_type) ? $entity->log_type : 'wf_log_message';
+
+    $wrapper = entity_metadata_wrapper($entity_type, $entity);
+    wf_log_create_log_message($wrapper, 'log', $log_type, $entity->log);
+
+    // Avoid duplicated log generated by consequent rules actions.
+    unset($entity->log);
+  }
+}
+
+/**
+ * Implements hook_wf_log_info().
+ */
+function wf_log_wf_log_info() {
+  $logs = array();
+
+  $logs['wf_log_message'] = array(
+    'title' => t('Log message'),
+    'description' => t('New log message.'),
+  );
+
+  return $logs;
+}
+
+/**
+ * Attach the log value and type to an entity to be saved.
+ *
+ * @param object $entity
+ *   Entity object.
+ *
+ * @param string $log_value
+ *   The log message.
+ *
+ * @param string $log_type
+ *   The log_type.
+ */
+function wf_log_attach_log_to_entity(&$entity, $log_value, $log_type) {
+  $entity->log = $log_value;
+  $entity->log_type = $log_type;
+}
+
+/**
+ * Returns an array containing the log IDs of a given entity_id.
+ *
+ * @param number $entity_id
+ *   The given entity_id.
+ *
+ * @param string $entity_type
+ *   The given entity type.
+ *
+ * @return array
+ *   An array containing the Log IDs.
+ */
+function wf_log_get_logs_by_entity_id($entity_type, $entity_id) {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'wf_log', '=')
+  ->propertyCondition('entity', $entity_id, '=')
+  ->propertyCondition('entity_type', $entity_type, '=');
+  $log_entries = $query->execute();
+
+  $log_ids = array();
+  if (isset($log_entries['wf_log'])) {
+    $log_ids = array_keys($log_entries['wf_log']);
+  }
+
+  return $log_ids;
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function wf_log_entity_delete($entity, $type) {
+  // Deletes log entries related of a deleted wf_[x] entity.
+  if ('wf_log' != $type && (0 === strpos($type, 'wf_'))) {
+    $deleted_entity_id = entity_id($type, $entity);
+
+    $log_ids = wf_log_get_logs_by_entity_id($type, $deleted_entity_id);
+    if ($log_ids) {
+      wf_log_delete_multiple($log_ids);
     }
   }
 }

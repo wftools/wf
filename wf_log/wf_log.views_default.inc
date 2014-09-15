@@ -11,7 +11,7 @@ function wf_log_views_default_views() {
   $views = array();
 
   $view = new view();
-  $view->name = WF_LOG_DEFAULT_VIEWS_LIST_LOGS;
+  $view->name = 'log_list';
   $view->description = 'Lists all WF Logs.';
   $view->tag = 'default';
   $view->base_table = 'wf_log';
@@ -23,6 +23,7 @@ function wf_log_views_default_views() {
   /* Display: Master */
   $handler = $view->new_display('default', 'Master', 'default');
   $handler->display->display_options['title'] = 'Logs';
+  $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'perm';
   $handler->display->display_options['access']['perm'] = 'manage workflow logs';
   $handler->display->display_options['cache']['type'] = 'none';
@@ -101,23 +102,17 @@ function wf_log_views_default_views() {
       'empty_column' => 0,
     ),
   );
-  $handler->display->display_options['style_options']['override'] = 1;
-  $handler->display->display_options['style_options']['sticky'] = 0;
-  $handler->display->display_options['style_options']['empty_table'] = 0;
   /* No results behavior: Global: Text area */
   $handler->display->display_options['empty']['area']['id'] = 'area';
   $handler->display->display_options['empty']['area']['table'] = 'views';
   $handler->display->display_options['empty']['area']['field'] = 'area';
   $handler->display->display_options['empty']['area']['label'] = 'No results';
-  $handler->display->display_options['empty']['area']['empty'] = FALSE;
   $handler->display->display_options['empty']['area']['content'] = 'No log was created yet';
   $handler->display->display_options['empty']['area']['format'] = 'full_html';
-  $handler->display->display_options['empty']['area']['tokenize'] = 0;
   /* Relationship: Workflow Log: Owner */
   $handler->display->display_options['relationships']['uid']['id'] = 'uid';
   $handler->display->display_options['relationships']['uid']['table'] = 'wf_log';
   $handler->display->display_options['relationships']['uid']['field'] = 'uid';
-  $handler->display->display_options['relationships']['uid']['required'] = 0;
   /* Field: Workflow Log: Log ID */
   $handler->display->display_options['fields']['lid']['id'] = 'lid';
   $handler->display->display_options['fields']['lid']['table'] = 'wf_log';
@@ -127,184 +122,39 @@ function wf_log_views_default_views() {
   $handler->display->display_options['fields']['entity_type']['table'] = 'wf_log';
   $handler->display->display_options['fields']['entity_type']['field'] = 'entity_type';
   $handler->display->display_options['fields']['entity_type']['label'] = 'Entity';
-  $handler->display->display_options['fields']['entity_type']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['entity_type']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['entity_type']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['entity_type']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['entity_type']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['entity_type']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['entity_type']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['entity_type']['hide_alter_empty'] = 1;
   /* Field: Workflow Log: Entity ID */
   $handler->display->display_options['fields']['entity_id']['id'] = 'entity_id';
   $handler->display->display_options['fields']['entity_id']['table'] = 'wf_log';
   $handler->display->display_options['fields']['entity_id']['field'] = 'entity_id';
-  $handler->display->display_options['fields']['entity_id']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['entity_id']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['entity_id']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['entity_id']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['entity_id']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['entity_id']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['entity_id']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['entity_id']['hide_alter_empty'] = 1;
   /* Field: Workflow Log: Message summary */
   $handler->display->display_options['fields']['message_summary']['id'] = 'message_summary';
   $handler->display->display_options['fields']['message_summary']['table'] = 'wf_log';
   $handler->display->display_options['fields']['message_summary']['field'] = 'message_summary';
-  $handler->display->display_options['fields']['message_summary']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['message_summary']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['message_summary']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['message_summary']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['message_summary']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['message_summary']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['message_summary']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['message_summary']['hide_alter_empty'] = 1;
   /* Field: Realname: Real name */
   $handler->display->display_options['fields']['realname']['id'] = 'realname';
   $handler->display->display_options['fields']['realname']['table'] = 'realname';
   $handler->display->display_options['fields']['realname']['field'] = 'realname';
   $handler->display->display_options['fields']['realname']['relationship'] = 'uid';
   $handler->display->display_options['fields']['realname']['label'] = 'Owner';
-  $handler->display->display_options['fields']['realname']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['realname']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['realname']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['realname']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['realname']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['realname']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['realname']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['realname']['hide_alter_empty'] = 1;
-  $handler->display->display_options['fields']['realname']['link_to_user'] = 1;
   /* Field: Workflow Log: Timestamp */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'wf_log';
   $handler->display->display_options['fields']['created']['field'] = 'created';
   $handler->display->display_options['fields']['created']['label'] = 'Created';
-  $handler->display->display_options['fields']['created']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['created']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['created']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['created']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['created']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['created']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['created']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['created']['hide_alter_empty'] = 1;
   $handler->display->display_options['fields']['created']['date_format'] = 'short';
   /* Field: Workflow Log: Link */
   $handler->display->display_options['fields']['link_wf_log']['id'] = 'link_wf_log';
   $handler->display->display_options['fields']['link_wf_log']['table'] = 'wf_log';
   $handler->display->display_options['fields']['link_wf_log']['field'] = 'link_wf_log';
-  $handler->display->display_options['fields']['link_wf_log']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['hide_alter_empty'] = 1;
   /* Field: Workflow Log: Edit Link */
   $handler->display->display_options['fields']['edit_wf_log']['id'] = 'edit_wf_log';
   $handler->display->display_options['fields']['edit_wf_log']['table'] = 'wf_log';
   $handler->display->display_options['fields']['edit_wf_log']['field'] = 'edit_wf_log';
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['edit_wf_log']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['edit_wf_log']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['hide_alter_empty'] = 1;
   /* Field: Workflow Log: Delete Link */
   $handler->display->display_options['fields']['delete_wf_log']['id'] = 'delete_wf_log';
   $handler->display->display_options['fields']['delete_wf_log']['table'] = 'wf_log';
   $handler->display->display_options['fields']['delete_wf_log']['field'] = 'delete_wf_log';
   $handler->display->display_options['fields']['delete_wf_log']['label'] = 'Operations';
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['delete_wf_log']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['delete_wf_log']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['hide_alter_empty'] = 1;
   /* Sort criterion: Workflow Log: Log ID */
   $handler->display->display_options['sorts']['lid']['id'] = 'lid';
   $handler->display->display_options['sorts']['lid']['table'] = 'wf_log';
@@ -319,8 +169,6 @@ function wf_log_views_default_views() {
   $handler->display->display_options['filters']['entity_type']['expose']['label'] = 'Entity type';
   $handler->display->display_options['filters']['entity_type']['expose']['operator'] = 'entity_type_op';
   $handler->display->display_options['filters']['entity_type']['expose']['identifier'] = 'entity_type';
-  $handler->display->display_options['filters']['entity_type']['expose']['required'] = 0;
-  $handler->display->display_options['filters']['entity_type']['expose']['multiple'] = FALSE;
   /* Filter criterion: Workflow Log: Message summary */
   $handler->display->display_options['filters']['message_summary']['id'] = 'message_summary';
   $handler->display->display_options['filters']['message_summary']['table'] = 'wf_log';
@@ -331,8 +179,6 @@ function wf_log_views_default_views() {
   $handler->display->display_options['filters']['message_summary']['expose']['label'] = 'Message summary';
   $handler->display->display_options['filters']['message_summary']['expose']['operator'] = 'message_summary_op';
   $handler->display->display_options['filters']['message_summary']['expose']['identifier'] = 'message_summary';
-  $handler->display->display_options['filters']['message_summary']['expose']['required'] = 0;
-  $handler->display->display_options['filters']['message_summary']['expose']['multiple'] = FALSE;
   /* Filter criterion: Workflow Log: Owner */
   $handler->display->display_options['filters']['uid']['id'] = 'uid';
   $handler->display->display_options['filters']['uid']['table'] = 'wf_log';
@@ -342,7 +188,6 @@ function wf_log_views_default_views() {
   $handler->display->display_options['filters']['uid']['expose']['label'] = 'Owner';
   $handler->display->display_options['filters']['uid']['expose']['operator'] = 'uid_op';
   $handler->display->display_options['filters']['uid']['expose']['identifier'] = 'uid';
-  $handler->display->display_options['filters']['uid']['expose']['multiple'] = FALSE;
 
   /* Display: Log admin List */
   $handler = $view->new_display('page', 'Log admin List', 'page');
@@ -417,9 +262,6 @@ function wf_log_views_default_views() {
       'empty_column' => 0,
     ),
   );
-  $handler->display->display_options['style_options']['override'] = 1;
-  $handler->display->display_options['style_options']['sticky'] = 0;
-  $handler->display->display_options['style_options']['empty_table'] = 0;
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['defaults']['row_options'] = FALSE;
@@ -433,184 +275,106 @@ function wf_log_views_default_views() {
   $handler->display->display_options['fields']['entity_type']['table'] = 'wf_log';
   $handler->display->display_options['fields']['entity_type']['field'] = 'entity_type';
   $handler->display->display_options['fields']['entity_type']['label'] = 'Entity Type';
-  $handler->display->display_options['fields']['entity_type']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['entity_type']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['entity_type']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['entity_type']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['entity_type']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['entity_type']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['entity_type']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['entity_type']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['entity_type']['hide_alter_empty'] = 1;
   /* Field: Workflow Log: Entity ID */
   $handler->display->display_options['fields']['entity_id']['id'] = 'entity_id';
   $handler->display->display_options['fields']['entity_id']['table'] = 'wf_log';
   $handler->display->display_options['fields']['entity_id']['field'] = 'entity_id';
-  $handler->display->display_options['fields']['entity_id']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['entity_id']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['entity_id']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['entity_id']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['entity_id']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['entity_id']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['entity_id']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['entity_id']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['entity_id']['hide_alter_empty'] = 1;
   /* Field: Workflow Log: Message summary */
   $handler->display->display_options['fields']['message_summary']['id'] = 'message_summary';
   $handler->display->display_options['fields']['message_summary']['table'] = 'wf_log';
   $handler->display->display_options['fields']['message_summary']['field'] = 'message_summary';
-  $handler->display->display_options['fields']['message_summary']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['message_summary']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['message_summary']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['message_summary']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['message_summary']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['message_summary']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['message_summary']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['message_summary']['hide_alter_empty'] = 1;
   /* Field: Realname: Real name */
   $handler->display->display_options['fields']['realname']['id'] = 'realname';
   $handler->display->display_options['fields']['realname']['table'] = 'realname';
   $handler->display->display_options['fields']['realname']['field'] = 'realname';
   $handler->display->display_options['fields']['realname']['relationship'] = 'uid';
   $handler->display->display_options['fields']['realname']['label'] = 'Owner';
-  $handler->display->display_options['fields']['realname']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['realname']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['realname']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['realname']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['realname']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['realname']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['realname']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['realname']['hide_alter_empty'] = 1;
-  $handler->display->display_options['fields']['realname']['link_to_user'] = 1;
+  $handler->display->display_options['fields']['realname']['empty'] = 'Anonymous';
   /* Field: Workflow Log: Timestamp */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'wf_log';
   $handler->display->display_options['fields']['created']['field'] = 'created';
   $handler->display->display_options['fields']['created']['label'] = 'Created';
-  $handler->display->display_options['fields']['created']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['created']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['created']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['created']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['created']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['created']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['created']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['created']['hide_alter_empty'] = 1;
   $handler->display->display_options['fields']['created']['date_format'] = 'short';
   /* Field: Workflow Log: Link */
   $handler->display->display_options['fields']['link_wf_log']['id'] = 'link_wf_log';
   $handler->display->display_options['fields']['link_wf_log']['table'] = 'wf_log';
   $handler->display->display_options['fields']['link_wf_log']['field'] = 'link_wf_log';
-  $handler->display->display_options['fields']['link_wf_log']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['hide_alter_empty'] = 1;
   /* Field: Workflow Log: Edit Link */
   $handler->display->display_options['fields']['edit_wf_log']['id'] = 'edit_wf_log';
   $handler->display->display_options['fields']['edit_wf_log']['table'] = 'wf_log';
   $handler->display->display_options['fields']['edit_wf_log']['field'] = 'edit_wf_log';
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['edit_wf_log']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['edit_wf_log']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['edit_wf_log']['hide_alter_empty'] = 1;
   /* Field: Workflow Log: Delete Link */
   $handler->display->display_options['fields']['delete_wf_log']['id'] = 'delete_wf_log';
   $handler->display->display_options['fields']['delete_wf_log']['table'] = 'wf_log';
   $handler->display->display_options['fields']['delete_wf_log']['field'] = 'delete_wf_log';
   $handler->display->display_options['fields']['delete_wf_log']['label'] = 'Operations';
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['delete_wf_log']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['delete_wf_log']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['delete_wf_log']['hide_alter_empty'] = 1;
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Workflow Log: Log ID */
+  $handler->display->display_options['sorts']['lid']['id'] = 'lid';
+  $handler->display->display_options['sorts']['lid']['table'] = 'wf_log';
+  $handler->display->display_options['sorts']['lid']['field'] = 'lid';
+  $handler->display->display_options['sorts']['lid']['order'] = 'DESC';
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Workflow Log: Entity type */
+  $handler->display->display_options['filters']['entity_type']['id'] = 'entity_type';
+  $handler->display->display_options['filters']['entity_type']['table'] = 'wf_log';
+  $handler->display->display_options['filters']['entity_type']['field'] = 'entity_type';
+  $handler->display->display_options['filters']['entity_type']['operator'] = 'contains';
+  $handler->display->display_options['filters']['entity_type']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['entity_type']['expose']['operator_id'] = 'entity_type_op';
+  $handler->display->display_options['filters']['entity_type']['expose']['label'] = 'Entity type';
+  $handler->display->display_options['filters']['entity_type']['expose']['operator'] = 'entity_type_op';
+  $handler->display->display_options['filters']['entity_type']['expose']['identifier'] = 'entity_type';
+  /* Filter criterion: Workflow Log: Message summary */
+  $handler->display->display_options['filters']['message_summary']['id'] = 'message_summary';
+  $handler->display->display_options['filters']['message_summary']['table'] = 'wf_log';
+  $handler->display->display_options['filters']['message_summary']['field'] = 'message_summary';
+  $handler->display->display_options['filters']['message_summary']['operator'] = 'contains';
+  $handler->display->display_options['filters']['message_summary']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['message_summary']['expose']['operator_id'] = 'message_summary_op';
+  $handler->display->display_options['filters']['message_summary']['expose']['label'] = 'Message summary';
+  $handler->display->display_options['filters']['message_summary']['expose']['operator'] = 'message_summary_op';
+  $handler->display->display_options['filters']['message_summary']['expose']['identifier'] = 'message_summary';
+  /* Filter criterion: Workflow Log: Owner */
+  $handler->display->display_options['filters']['uid']['id'] = 'uid';
+  $handler->display->display_options['filters']['uid']['table'] = 'wf_log';
+  $handler->display->display_options['filters']['uid']['field'] = 'uid';
+  $handler->display->display_options['filters']['uid']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['uid']['expose']['operator_id'] = 'uid_op';
+  $handler->display->display_options['filters']['uid']['expose']['label'] = 'Owner';
+  $handler->display->display_options['filters']['uid']['expose']['operator'] = 'uid_op';
+  $handler->display->display_options['filters']['uid']['expose']['identifier'] = 'uid';
+  /* Filter criterion: Workflow Log: Entity */
+  $handler->display->display_options['filters']['entity']['id'] = 'entity';
+  $handler->display->display_options['filters']['entity']['table'] = 'wf_log';
+  $handler->display->display_options['filters']['entity']['field'] = 'entity';
+  $handler->display->display_options['filters']['entity']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['entity']['expose']['operator_id'] = 'entity_op';
+  $handler->display->display_options['filters']['entity']['expose']['label'] = 'Entity ID';
+  $handler->display->display_options['filters']['entity']['expose']['operator'] = 'entity_op';
+  $handler->display->display_options['filters']['entity']['expose']['identifier'] = 'entity';
+  $handler->display->display_options['filters']['entity']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    3 => 0,
+    7 => 0,
+    9 => 0,
+    11 => 0,
+    12 => 0,
+    14 => 0,
+    15 => 0,
+    18 => 0,
+    17 => 0,
+    21 => 0,
+    26 => 0,
+    31 => 0,
+    36 => 0,
+    41 => 0,
+    61 => 0,
+    66 => 0,
+  );
   $handler->display->display_options['path'] = 'admin/content/wf-logs';
   $handler->display->display_options['menu']['type'] = 'tab';
   $handler->display->display_options['menu']['title'] = 'Logs';
@@ -677,9 +441,6 @@ function wf_log_views_default_views() {
       'empty_column' => 0,
     ),
   );
-  $handler->display->display_options['style_options']['override'] = 1;
-  $handler->display->display_options['style_options']['sticky'] = 0;
-  $handler->display->display_options['style_options']['empty_table'] = 0;
   $handler->display->display_options['defaults']['style_options'] = FALSE;
   $handler->display->display_options['defaults']['row_plugin'] = FALSE;
   $handler->display->display_options['defaults']['row_options'] = FALSE;
@@ -689,129 +450,43 @@ function wf_log_views_default_views() {
   $handler->display->display_options['empty']['area']['table'] = 'views';
   $handler->display->display_options['empty']['area']['field'] = 'area';
   $handler->display->display_options['empty']['area']['label'] = 'No results';
-  $handler->display->display_options['empty']['area']['empty'] = FALSE;
   $handler->display->display_options['empty']['area']['content'] = 'No results found';
   $handler->display->display_options['empty']['area']['format'] = 'full_html';
-  $handler->display->display_options['empty']['area']['tokenize'] = 0;
   $handler->display->display_options['defaults']['fields'] = FALSE;
   /* Field: Workflow Log: Message summary */
   $handler->display->display_options['fields']['message_summary']['id'] = 'message_summary';
   $handler->display->display_options['fields']['message_summary']['table'] = 'wf_log';
   $handler->display->display_options['fields']['message_summary']['field'] = 'message_summary';
   $handler->display->display_options['fields']['message_summary']['label'] = 'Activity';
-  $handler->display->display_options['fields']['message_summary']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['message_summary']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['message_summary']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['message_summary']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['message_summary']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['message_summary']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['message_summary']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['message_summary']['hide_alter_empty'] = 1;
   /* Field: Workflow Log: Message body */
   $handler->display->display_options['fields']['message_body']['id'] = 'message_body';
   $handler->display->display_options['fields']['message_body']['table'] = 'wf_log';
   $handler->display->display_options['fields']['message_body']['field'] = 'message_body';
   $handler->display->display_options['fields']['message_body']['label'] = 'Details';
-  $handler->display->display_options['fields']['message_body']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['message_body']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['message_body']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['message_body']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['message_body']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['message_body']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['message_body']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['message_body']['hide_alter_empty'] = 1;
   /* Field: Realname: Real name */
   $handler->display->display_options['fields']['realname']['id'] = 'realname';
   $handler->display->display_options['fields']['realname']['table'] = 'realname';
   $handler->display->display_options['fields']['realname']['field'] = 'realname';
   $handler->display->display_options['fields']['realname']['relationship'] = 'uid';
   $handler->display->display_options['fields']['realname']['label'] = 'Owner';
-  $handler->display->display_options['fields']['realname']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['realname']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['realname']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['realname']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['realname']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['realname']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['realname']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['realname']['hide_alter_empty'] = 1;
-  $handler->display->display_options['fields']['realname']['link_to_user'] = 1;
+  $handler->display->display_options['fields']['realname']['empty'] = 'Anonymous';
   /* Field: Workflow Log: Timestamp */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'wf_log';
   $handler->display->display_options['fields']['created']['field'] = 'created';
   $handler->display->display_options['fields']['created']['label'] = 'Created';
-  $handler->display->display_options['fields']['created']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['created']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['created']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['created']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['created']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['created']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['created']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['created']['hide_alter_empty'] = 1;
   $handler->display->display_options['fields']['created']['date_format'] = 'short';
   /* Field: Workflow Log: Link */
   $handler->display->display_options['fields']['link_wf_log']['id'] = 'link_wf_log';
   $handler->display->display_options['fields']['link_wf_log']['table'] = 'wf_log';
   $handler->display->display_options['fields']['link_wf_log']['field'] = 'link_wf_log';
   $handler->display->display_options['fields']['link_wf_log']['label'] = 'View';
-  $handler->display->display_options['fields']['link_wf_log']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['hide_alter_empty'] = 1;
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Workflow Log: Log ID */
+  $handler->display->display_options['sorts']['lid']['id'] = 'lid';
+  $handler->display->display_options['sorts']['lid']['table'] = 'wf_log';
+  $handler->display->display_options['sorts']['lid']['field'] = 'lid';
+  $handler->display->display_options['sorts']['lid']['order'] = 'DESC';
   $handler->display->display_options['defaults']['arguments'] = FALSE;
   /* Contextual filter: Workflow Log: Entity */
   $handler->display->display_options['arguments']['entity']['id'] = 'entity';
@@ -819,12 +494,10 @@ function wf_log_views_default_views() {
   $handler->display->display_options['arguments']['entity']['field'] = 'entity';
   $handler->display->display_options['arguments']['entity']['default_action'] = 'empty';
   $handler->display->display_options['arguments']['entity']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['entity']['default_argument_skip_url'] = 0;
   $handler->display->display_options['arguments']['entity']['summary']['number_of_records'] = '0';
   $handler->display->display_options['arguments']['entity']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['entity']['summary_options']['items_per_page'] = '25';
-  $handler->display->display_options['arguments']['entity']['break_phrase'] = 0;
-  $handler->display->display_options['arguments']['entity']['not'] = 0;
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Workflow Log: Entity type */
   $handler->display->display_options['filters']['entity_type']['id'] = 'entity_type';
@@ -845,129 +518,43 @@ function wf_log_views_default_views() {
   $handler->display->display_options['empty']['area']['table'] = 'views';
   $handler->display->display_options['empty']['area']['field'] = 'area';
   $handler->display->display_options['empty']['area']['label'] = 'No results';
-  $handler->display->display_options['empty']['area']['empty'] = FALSE;
   $handler->display->display_options['empty']['area']['content'] = 'No results found';
   $handler->display->display_options['empty']['area']['format'] = 'full_html';
-  $handler->display->display_options['empty']['area']['tokenize'] = 0;
   $handler->display->display_options['defaults']['fields'] = FALSE;
   /* Field: Workflow Log: Message summary */
   $handler->display->display_options['fields']['message_summary']['id'] = 'message_summary';
   $handler->display->display_options['fields']['message_summary']['table'] = 'wf_log';
   $handler->display->display_options['fields']['message_summary']['field'] = 'message_summary';
   $handler->display->display_options['fields']['message_summary']['label'] = 'Activity';
-  $handler->display->display_options['fields']['message_summary']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['message_summary']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['message_summary']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['message_summary']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['message_summary']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['message_summary']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['message_summary']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['message_summary']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['message_summary']['hide_alter_empty'] = 1;
   /* Field: Workflow Log: Message body */
   $handler->display->display_options['fields']['message_body']['id'] = 'message_body';
   $handler->display->display_options['fields']['message_body']['table'] = 'wf_log';
   $handler->display->display_options['fields']['message_body']['field'] = 'message_body';
   $handler->display->display_options['fields']['message_body']['label'] = 'Details';
-  $handler->display->display_options['fields']['message_body']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['message_body']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['message_body']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['message_body']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['message_body']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['message_body']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['message_body']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['message_body']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['message_body']['hide_alter_empty'] = 1;
   /* Field: Realname: Real name */
   $handler->display->display_options['fields']['realname']['id'] = 'realname';
   $handler->display->display_options['fields']['realname']['table'] = 'realname';
   $handler->display->display_options['fields']['realname']['field'] = 'realname';
   $handler->display->display_options['fields']['realname']['relationship'] = 'uid';
   $handler->display->display_options['fields']['realname']['label'] = 'Owner';
-  $handler->display->display_options['fields']['realname']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['realname']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['realname']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['realname']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['realname']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['realname']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['realname']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['realname']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['realname']['hide_alter_empty'] = 1;
-  $handler->display->display_options['fields']['realname']['link_to_user'] = 1;
+  $handler->display->display_options['fields']['realname']['empty'] = 'Anonymous';
   /* Field: Workflow Log: Timestamp */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'wf_log';
   $handler->display->display_options['fields']['created']['field'] = 'created';
   $handler->display->display_options['fields']['created']['label'] = 'Created';
-  $handler->display->display_options['fields']['created']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['created']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['created']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['created']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['created']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['created']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['created']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['created']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['created']['hide_alter_empty'] = 1;
   $handler->display->display_options['fields']['created']['date_format'] = 'short';
   /* Field: Workflow Log: Link */
   $handler->display->display_options['fields']['link_wf_log']['id'] = 'link_wf_log';
   $handler->display->display_options['fields']['link_wf_log']['table'] = 'wf_log';
   $handler->display->display_options['fields']['link_wf_log']['field'] = 'link_wf_log';
   $handler->display->display_options['fields']['link_wf_log']['label'] = 'View';
-  $handler->display->display_options['fields']['link_wf_log']['alter']['alter_text'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['make_link'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['absolute'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['external'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['replace_spaces'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['trim_whitespace'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['nl2br'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['word_boundary'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['ellipsis'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['more_link'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['strip_tags'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['trim'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['alter']['html'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['element_default_classes'] = 1;
-  $handler->display->display_options['fields']['link_wf_log']['hide_empty'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['empty_zero'] = 0;
-  $handler->display->display_options['fields']['link_wf_log']['hide_alter_empty'] = 1;
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Workflow Log: Log ID */
+  $handler->display->display_options['sorts']['lid']['id'] = 'lid';
+  $handler->display->display_options['sorts']['lid']['table'] = 'wf_log';
+  $handler->display->display_options['sorts']['lid']['field'] = 'lid';
+  $handler->display->display_options['sorts']['lid']['order'] = 'DESC';
   $handler->display->display_options['defaults']['arguments'] = FALSE;
   /* Contextual filter: Workflow Log: Entity */
   $handler->display->display_options['arguments']['entity']['id'] = 'entity';
@@ -975,12 +562,10 @@ function wf_log_views_default_views() {
   $handler->display->display_options['arguments']['entity']['field'] = 'entity';
   $handler->display->display_options['arguments']['entity']['default_action'] = 'empty';
   $handler->display->display_options['arguments']['entity']['default_argument_type'] = 'fixed';
-  $handler->display->display_options['arguments']['entity']['default_argument_skip_url'] = 0;
   $handler->display->display_options['arguments']['entity']['summary']['number_of_records'] = '0';
   $handler->display->display_options['arguments']['entity']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['entity']['summary_options']['items_per_page'] = '25';
-  $handler->display->display_options['arguments']['entity']['break_phrase'] = 0;
-  $handler->display->display_options['arguments']['entity']['not'] = 0;
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Workflow Log: Entity type */
   $handler->display->display_options['filters']['entity_type']['id'] = 'entity_type';
@@ -994,6 +579,74 @@ function wf_log_views_default_views() {
   $handler->display->display_options['title'] = 'Changelog';
   $handler->display->display_options['defaults']['css_class'] = FALSE;
   $handler->display->display_options['css_class'] = 'generic-table-view';
+  $handler->display->display_options['defaults']['access'] = FALSE;
+  $handler->display->display_options['access']['type'] = 'perm';
+  $handler->display->display_options['access']['perm'] = 'view own job job';
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['row_class'] = 'wf-log-entry';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'lid' => 'lid',
+    'entity_type' => 'entity_type',
+    'entity_id' => 'entity_type',
+    'created_1' => 'created_1',
+    'created' => 'created',
+    'realname' => 'realname',
+    'message_summary' => 'message_summary',
+  );
+  $handler->display->display_options['style_options']['default'] = '-1';
+  $handler->display->display_options['style_options']['info'] = array(
+    'lid' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'entity_type' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => ', ',
+      'empty_column' => 0,
+    ),
+    'entity_id' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'created_1' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'created' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'realname' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'message_summary' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['fields'] = FALSE;
   /* Field: Workflow Log: Log ID */
   $handler->display->display_options['fields']['lid']['id'] = 'lid';
@@ -1003,20 +656,6 @@ function wf_log_views_default_views() {
   $handler->display->display_options['fields']['lid']['exclude'] = TRUE;
   $handler->display->display_options['fields']['lid']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['lid']['separator'] = '';
-  /* Field: Workflow Log: Entity type */
-  $handler->display->display_options['fields']['entity_type']['id'] = 'entity_type';
-  $handler->display->display_options['fields']['entity_type']['table'] = 'wf_log';
-  $handler->display->display_options['fields']['entity_type']['field'] = 'entity_type';
-  $handler->display->display_options['fields']['entity_type']['label'] = '';
-  $handler->display->display_options['fields']['entity_type']['exclude'] = TRUE;
-  $handler->display->display_options['fields']['entity_type']['element_label_colon'] = FALSE;
-  /* Field: Workflow Log: Entity ID */
-  $handler->display->display_options['fields']['entity_id']['id'] = 'entity_id';
-  $handler->display->display_options['fields']['entity_id']['table'] = 'wf_log';
-  $handler->display->display_options['fields']['entity_id']['field'] = 'entity_id';
-  $handler->display->display_options['fields']['entity_id']['label'] = '';
-  $handler->display->display_options['fields']['entity_id']['exclude'] = TRUE;
-  $handler->display->display_options['fields']['entity_id']['element_label_colon'] = FALSE;
   /* Field: Workflow Log: Timestamp */
   $handler->display->display_options['fields']['created_1']['id'] = 'created_1';
   $handler->display->display_options['fields']['created_1']['table'] = 'wf_log';
@@ -1033,7 +672,7 @@ function wf_log_views_default_views() {
   $handler->display->display_options['fields']['created']['alter']['make_link'] = TRUE;
   $handler->display->display_options['fields']['created']['alter']['path'] = 'wf-log/[lid]';
   $handler->display->display_options['fields']['created']['alter']['alt'] = '[created_1]';
-  $handler->display->display_options['fields']['created']['alter']['link_class'] = 'colorbox-load';
+  $handler->display->display_options['fields']['created']['alter']['link_class'] = 'log-date';
   $handler->display->display_options['fields']['created']['date_format'] = 'really_short';
   /* Field: Realname: Real name */
   $handler->display->display_options['fields']['realname']['id'] = 'realname';
@@ -1043,7 +682,8 @@ function wf_log_views_default_views() {
   $handler->display->display_options['fields']['realname']['label'] = 'User';
   $handler->display->display_options['fields']['realname']['alter']['make_link'] = TRUE;
   $handler->display->display_options['fields']['realname']['alter']['path'] = 'wf-log/[lid]';
-  $handler->display->display_options['fields']['realname']['alter']['link_class'] = 'colorbox-load';
+  $handler->display->display_options['fields']['realname']['alter']['link_class'] = 'log-user';
+  $handler->display->display_options['fields']['realname']['empty'] = 'Anonymous';
   $handler->display->display_options['fields']['realname']['link_to_user'] = FALSE;
   /* Field: Workflow Log: Message summary */
   $handler->display->display_options['fields']['message_summary']['id'] = 'message_summary';
@@ -1052,13 +692,13 @@ function wf_log_views_default_views() {
   $handler->display->display_options['fields']['message_summary']['label'] = 'Status';
   $handler->display->display_options['fields']['message_summary']['alter']['make_link'] = TRUE;
   $handler->display->display_options['fields']['message_summary']['alter']['path'] = 'wf-log/[lid]';
-  $handler->display->display_options['fields']['message_summary']['alter']['link_class'] = 'colorbox-load';
+  $handler->display->display_options['fields']['message_summary']['alter']['link_class'] = 'log-summary';
   $handler->display->display_options['defaults']['sorts'] = FALSE;
-  /* Sort criterion: Workflow Log: Timestamp */
-  $handler->display->display_options['sorts']['created']['id'] = 'created';
-  $handler->display->display_options['sorts']['created']['table'] = 'wf_log';
-  $handler->display->display_options['sorts']['created']['field'] = 'created';
-  $handler->display->display_options['sorts']['created']['order'] = 'DESC';
+  /* Sort criterion: Workflow Log: Log ID */
+  $handler->display->display_options['sorts']['lid']['id'] = 'lid';
+  $handler->display->display_options['sorts']['lid']['table'] = 'wf_log';
+  $handler->display->display_options['sorts']['lid']['field'] = 'lid';
+  $handler->display->display_options['sorts']['lid']['order'] = 'DESC';
   $handler->display->display_options['defaults']['arguments'] = FALSE;
   /* Contextual filter: Workflow Log: Entity */
   $handler->display->display_options['arguments']['entity']['id'] = 'entity';
@@ -1105,6 +745,7 @@ function wf_log_views_default_views() {
   $handler->display->display_options['fields']['realname']['relationship'] = 'uid';
   $handler->display->display_options['fields']['realname']['label'] = '';
   $handler->display->display_options['fields']['realname']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['realname']['empty'] = 'Anonymous';
   /* Field: Workflow Log: Timestamp */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'wf_log';
@@ -1119,12 +760,13 @@ function wf_log_views_default_views() {
   $handler->display->display_options['fields']['message_body']['field'] = 'message_body';
   $handler->display->display_options['fields']['message_body']['label'] = '';
   $handler->display->display_options['fields']['message_body']['element_label_colon'] = FALSE;
-  $handler->display->display_options['defaults']['arguments'] = FALSE;
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
   /* Sort criterion: Workflow Log: Log ID */
   $handler->display->display_options['sorts']['lid']['id'] = 'lid';
   $handler->display->display_options['sorts']['lid']['table'] = 'wf_log';
   $handler->display->display_options['sorts']['lid']['field'] = 'lid';
   $handler->display->display_options['sorts']['lid']['order'] = 'DESC';
+  $handler->display->display_options['defaults']['arguments'] = FALSE;
   /* Contextual filter: Workflow Log: Entity */
   $handler->display->display_options['arguments']['entity']['id'] = 'entity';
   $handler->display->display_options['arguments']['entity']['table'] = 'wf_log';
@@ -1134,6 +776,16 @@ function wf_log_views_default_views() {
   $handler->display->display_options['arguments']['entity']['summary']['number_of_records'] = '0';
   $handler->display->display_options['arguments']['entity']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['entity']['summary_options']['items_per_page'] = '25';
+  /* Contextual filter: Workflow Log: Message type */
+  $handler->display->display_options['arguments']['message_type']['id'] = 'message_type';
+  $handler->display->display_options['arguments']['message_type']['table'] = 'wf_log';
+  $handler->display->display_options['arguments']['message_type']['field'] = 'message_type';
+  $handler->display->display_options['arguments']['message_type']['default_action'] = 'not found';
+  $handler->display->display_options['arguments']['message_type']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['message_type']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['message_type']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['message_type']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['message_type']['limit'] = '0';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Workflow Log: Entity type */
@@ -1141,11 +793,6 @@ function wf_log_views_default_views() {
   $handler->display->display_options['filters']['entity_type']['table'] = 'wf_log';
   $handler->display->display_options['filters']['entity_type']['field'] = 'entity_type';
   $handler->display->display_options['filters']['entity_type']['value'] = 'wf_job';
-  /* Filter criterion: Workflow Log: Message type */
-  $handler->display->display_options['filters']['message_type']['id'] = 'message_type';
-  $handler->display->display_options['filters']['message_type']['table'] = 'wf_log';
-  $handler->display->display_options['filters']['message_type']['field'] = 'message_type';
-  $handler->display->display_options['filters']['message_type']['value'] = 'wf_job_proposed';
 
   /* Display: Job Changelog Review */
   $handler = $view->new_display('block', 'Job Changelog Review', 'job_changelog_review');
@@ -1170,11 +817,18 @@ function wf_log_views_default_views() {
   $handler->display->display_options['fields']['realname']['field'] = 'realname';
   $handler->display->display_options['fields']['realname']['relationship'] = 'uid';
   $handler->display->display_options['fields']['realname']['label'] = 'User';
+  $handler->display->display_options['fields']['realname']['empty'] = 'Anonymous';
   /* Field: Workflow Log: Message body */
   $handler->display->display_options['fields']['message_body']['id'] = 'message_body';
   $handler->display->display_options['fields']['message_body']['table'] = 'wf_log';
   $handler->display->display_options['fields']['message_body']['field'] = 'message_body';
   $handler->display->display_options['fields']['message_body']['label'] = 'Comment';
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Workflow Log: Log ID */
+  $handler->display->display_options['sorts']['lid']['id'] = 'lid';
+  $handler->display->display_options['sorts']['lid']['table'] = 'wf_log';
+  $handler->display->display_options['sorts']['lid']['field'] = 'lid';
+  $handler->display->display_options['sorts']['lid']['order'] = 'DESC';
   $handler->display->display_options['defaults']['arguments'] = FALSE;
   /* Contextual filter: Workflow Log: Entity */
   $handler->display->display_options['arguments']['entity']['id'] = 'entity';
@@ -1187,6 +841,151 @@ function wf_log_views_default_views() {
   $handler->display->display_options['arguments']['entity']['summary_options']['items_per_page'] = '25';
   $handler->display->display_options['defaults']['filter_groups'] = FALSE;
   $handler->display->display_options['defaults']['filters'] = FALSE;
+
+  /* Display: Site change log - Block */
+  $handler = $view->new_display('block', 'Site change log - Block', 'block_2');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['title'] = 'Changelog';
+  $handler->display->display_options['defaults']['css_class'] = FALSE;
+  $handler->display->display_options['css_class'] = 'generic-table-view';
+  $handler->display->display_options['defaults']['access'] = FALSE;
+  $handler->display->display_options['access']['type'] = 'perm';
+  $handler->display->display_options['access']['perm'] = 'view sites';
+  $handler->display->display_options['defaults']['style_plugin'] = FALSE;
+  $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['row_class'] = 'wf-log-entry';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'lid' => 'lid',
+    'entity_type' => 'entity_type',
+    'entity_id' => 'entity_type',
+    'created_1' => 'created_1',
+    'created' => 'created',
+    'realname' => 'realname',
+    'message_summary' => 'message_summary',
+  );
+  $handler->display->display_options['style_options']['default'] = '-1';
+  $handler->display->display_options['style_options']['info'] = array(
+    'lid' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'entity_type' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => ', ',
+      'empty_column' => 0,
+    ),
+    'entity_id' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'created_1' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'created' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'realname' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'message_summary' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
+  $handler->display->display_options['defaults']['style_options'] = FALSE;
+  $handler->display->display_options['defaults']['row_plugin'] = FALSE;
+  $handler->display->display_options['defaults']['row_options'] = FALSE;
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Workflow Log: Log ID */
+  $handler->display->display_options['fields']['lid']['id'] = 'lid';
+  $handler->display->display_options['fields']['lid']['table'] = 'wf_log';
+  $handler->display->display_options['fields']['lid']['field'] = 'lid';
+  $handler->display->display_options['fields']['lid']['label'] = '';
+  $handler->display->display_options['fields']['lid']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['lid']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['lid']['separator'] = '';
+  /* Field: Workflow Log: Timestamp */
+  $handler->display->display_options['fields']['created_1']['id'] = 'created_1';
+  $handler->display->display_options['fields']['created_1']['table'] = 'wf_log';
+  $handler->display->display_options['fields']['created_1']['field'] = 'created';
+  $handler->display->display_options['fields']['created_1']['label'] = '';
+  $handler->display->display_options['fields']['created_1']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['created_1']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['created_1']['date_format'] = 'long';
+  /* Field: Workflow Log: Timestamp */
+  $handler->display->display_options['fields']['created']['id'] = 'created';
+  $handler->display->display_options['fields']['created']['table'] = 'wf_log';
+  $handler->display->display_options['fields']['created']['field'] = 'created';
+  $handler->display->display_options['fields']['created']['label'] = 'Date';
+  $handler->display->display_options['fields']['created']['alter']['make_link'] = TRUE;
+  $handler->display->display_options['fields']['created']['alter']['path'] = 'wf-log/[lid]';
+  $handler->display->display_options['fields']['created']['alter']['alt'] = '[created_1]';
+  $handler->display->display_options['fields']['created']['alter']['link_class'] = 'log-date';
+  $handler->display->display_options['fields']['created']['date_format'] = 'really_short';
+  /* Field: Realname: Real name */
+  $handler->display->display_options['fields']['realname']['id'] = 'realname';
+  $handler->display->display_options['fields']['realname']['table'] = 'realname';
+  $handler->display->display_options['fields']['realname']['field'] = 'realname';
+  $handler->display->display_options['fields']['realname']['relationship'] = 'uid';
+  $handler->display->display_options['fields']['realname']['label'] = 'User';
+  $handler->display->display_options['fields']['realname']['alter']['make_link'] = TRUE;
+  $handler->display->display_options['fields']['realname']['alter']['path'] = 'wf-log/[lid]';
+  $handler->display->display_options['fields']['realname']['alter']['link_class'] = 'log-user';
+  $handler->display->display_options['fields']['realname']['empty'] = 'Anonymous';
+  $handler->display->display_options['fields']['realname']['link_to_user'] = FALSE;
+  /* Field: Workflow Log: Message summary */
+  $handler->display->display_options['fields']['message_summary']['id'] = 'message_summary';
+  $handler->display->display_options['fields']['message_summary']['table'] = 'wf_log';
+  $handler->display->display_options['fields']['message_summary']['field'] = 'message_summary';
+  $handler->display->display_options['fields']['message_summary']['label'] = 'Status';
+  $handler->display->display_options['fields']['message_summary']['alter']['make_link'] = TRUE;
+  $handler->display->display_options['fields']['message_summary']['alter']['path'] = 'wf-log/[lid]';
+  $handler->display->display_options['fields']['message_summary']['alter']['link_class'] = 'log-summary';
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Workflow Log: Log ID */
+  $handler->display->display_options['sorts']['lid']['id'] = 'lid';
+  $handler->display->display_options['sorts']['lid']['table'] = 'wf_log';
+  $handler->display->display_options['sorts']['lid']['field'] = 'lid';
+  $handler->display->display_options['sorts']['lid']['order'] = 'DESC';
+  $handler->display->display_options['defaults']['arguments'] = FALSE;
+  /* Contextual filter: Workflow Log: Entity */
+  $handler->display->display_options['arguments']['entity']['id'] = 'entity';
+  $handler->display->display_options['arguments']['entity']['table'] = 'wf_log';
+  $handler->display->display_options['arguments']['entity']['field'] = 'entity';
+  $handler->display->display_options['arguments']['entity']['default_action'] = 'default';
+  $handler->display->display_options['arguments']['entity']['default_argument_type'] = 'raw';
+  $handler->display->display_options['arguments']['entity']['default_argument_options']['index'] = '1';
+  $handler->display->display_options['arguments']['entity']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['entity']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['entity']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  /* Filter criterion: Workflow Log: Entity type */
+  $handler->display->display_options['filters']['entity_type']['id'] = 'entity_type';
+  $handler->display->display_options['filters']['entity_type']['table'] = 'wf_log';
+  $handler->display->display_options['filters']['entity_type']['field'] = 'entity_type';
+  $handler->display->display_options['filters']['entity_type']['value'] = 'wf_site';
 
   // Add view to list of views to provide.
   $views[$view->name] = $view;

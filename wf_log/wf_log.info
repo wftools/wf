@@ -18,3 +18,5 @@ files[] = views/wf_log.class.handler.field.link.inc
 files[] = views/wf_log.class.handler.field.link.delete.inc
 files[] = views/wf_log.class.handler.field.link.edit.inc
 files[] = views/wf_log.class.handler.field.link.entity.inc
+
+scripts[] = js/wf_log.js

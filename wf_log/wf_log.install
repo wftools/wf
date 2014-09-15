@@ -55,6 +55,7 @@ function wf_log_schema() {
         'description' => 'Message log details.',
         'type' => 'text',
         'not null' => FALSE,
+        'size' => 'big',
       ),
       'message_type' => array(
         'description' => 'The type of the log message.',
@@ -131,5 +132,48 @@ function wf_log_update_7001(&$sandbox) {
     'size' => 'big',
   );
 
-  db_change_field('wf_log', 'entity', 'entity', $new_field);
+  db_change_field('wf_log', 'entity', 'entity', $entity);
+}
+
+/**
+ * Reverts "Log List" views.
+ */
+function wf_log_revert_log_list_views() {
+  $view = views_get_view('log_list');
+  // Revert the view.
+  $view->delete();
+  // Clear its cache.
+  ctools_include('object-cache');
+  ctools_object_cache_clear('view', $view->name);
+}
+
+/**
+ * Revert "Log List" views.
+ * Changed the sort criteria of "Job change log - Block" views display to lid.
+ */
+function wf_log_update_7002(&$sandbox) {
+  wf_log_revert_log_list_views();
+}
+
+/**
+ * Revert "Log List" views.
+ * Changed each views display sort criteria to "Log Id Desc".
+ * Added "Entity ID" filter to "Log admin List" display.
+ */
+function wf_log_update_7003(&$sandbox) {
+  wf_log_revert_log_list_views();
+}
+
+/**
+ * Update message body field from text to longtext.
+ */
+function wf_log_update_7004(&$sandbox) {
+  $field = array(
+    'description' => 'Message log details.',
+    'type' => 'text',
+    'not null' => FALSE,
+    'size' => 'big',
+  );
+
+  db_change_field('wf_log', 'message_body', 'message_body', $field);
 }

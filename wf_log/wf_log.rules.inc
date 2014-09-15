@@ -44,36 +44,6 @@ function wf_log_rules_action_info() {
 }
 
 /**
- * Create new Log message entry.
- *
- * @param EntityDrupalWrapper $entity
- *   The entity object received by action parameter.
- *
- * @param string $log_bundle
- *   The bundle log value received by action parameter.
- *
- * @param string $message_type
- *   The message type value received by action parameter.
- *
- * @param string $message_body
- *   The message body value received by action parameter.
- */
-function wf_log_create_log_message(EntityDrupalWrapper $entity, $log_bundle, $message_type, $message_body) {
-  $values = array(
-    'entity_type' => $entity->type(),
-    'entity' => $entity->getIdentifier(),
-    'bundle' => $log_bundle,
-    'message_type' => $message_type,
-    'message_summary' => wf_log_get_log_info_title($message_type),
-    'message_body' => $message_body,
-    'uid' => $GLOBALS['user']->uid,
-    'created' => time(),
-  );
-
-  wf_log_add_log_entry($values);
-}
-
-/**
  * Returns the log bundle list in rules action parameter format.
  *
  * @return array
