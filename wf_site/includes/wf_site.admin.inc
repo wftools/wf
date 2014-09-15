@@ -48,6 +48,7 @@ function wf_site_bundle_form($form, &$form_state, $site_bundle, $op = 'edit') {
 function wf_site_bundle_form_submit(&$form, &$form_state) {
   $site_bundle = entity_ui_form_submit_build_entity($form, $form_state);
   $site_bundle->save();
+  cache_clear_all('wf_site_load_bundles', 'cache');
   $form_state['redirect'] = 'admin/structure/site-types';
 }
 

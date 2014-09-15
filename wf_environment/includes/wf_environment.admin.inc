@@ -48,6 +48,7 @@ function wf_environment_bundle_form($form, &$form_state, $env_bundle, $op = 'edi
 function wf_environment_bundle_form_submit(&$form, &$form_state) {
   $environment_bundle = entity_ui_form_submit_build_entity($form, $form_state);
   $environment_bundle->save();
+  cache_clear_all('wf_environment_load_bundles', 'cache');
   $form_state['redirect'] = 'admin/structure/env-types';
 }
 

@@ -48,6 +48,7 @@ function wf_job_bundle_form($form, &$form_state, $job_bundle, $op = 'edit') {
 function wf_job_bundle_form_submit(&$form, &$form_state) {
   $job_bundle = entity_ui_form_submit_build_entity($form, $form_state);
   $job_bundle->save();
+  cache_clear_all('wf_job_load_bundles', 'cache');
   $form_state['redirect'] = 'admin/structure/job-types';
 }
 

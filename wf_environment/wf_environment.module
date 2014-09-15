@@ -716,17 +716,24 @@ function wf_environment_bundle_exists($name) {
  * @return array
  */
 function wf_environment_load_bundles() {
-  $cache = &drupal_static(__FUNCTION__);
+  $bundles = &drupal_static(__FUNCTION__);
 
-  if (!isset($cache)) {
-    $cache = db_select('wf_env_bundle', 'web')
-      ->fields('web')
-      ->orderBy('bundle')
-      ->execute()
-      ->fetchAllAssoc('bundle');
+  if (empty($bundles)) {
+    $cache = cache_get('wf_environment_load_bundles');
+    if ($cache) {
+      $bundles = $cache->data;
+    }
+    else {
+      $bundles = db_select('wf_env_bundle', 'web')
+        ->fields('web')
+        ->orderBy('bundle')
+        ->execute()
+        ->fetchAllAssoc('bundle');
+      cache_set('wf_environment_load_bundles', $bundles, 'cache');
+    }
   }
 
-  return $cache;
+  return $bundles;
 }
 
 /**

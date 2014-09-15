@@ -576,23 +576,32 @@ function wf_site_bundle_exists($name) {
  *   All sites bundles.
  */
 function wf_site_load_bundles() {
-  $cache = &drupal_static(__FUNCTION__);
+  $bundles = &drupal_static(__FUNCTION__);
 
-  if (!isset($cache)) {
-    $cache = db_select('wf_site_bundle', 'wsb')
-      ->fields('wsb')
-      ->orderBy('bundle')
-      ->execute()
-      ->fetchAllAssoc('bundle');
+  if (empty($bundles)) {
+    $cache = cache_get('wf_site_load_bundles');
+    if ($cache) {
+      $bundles = $cache->data;
+    }
+    else {
+      $bundles = db_select('wf_site_bundle', 'wsb')
+        ->fields('wsb')
+        ->orderBy('bundle')
+        ->execute()
+        ->fetchAllAssoc('bundle');
+      cache_set('wf_site_load_bundles', $bundles, 'cache');
+    }
   }
 
-  return $cache;
+  return $bundles;
 }
 
 /**
  * Access callback for the entity API.
  *
- * @param text $op
+ * @see entity_access()
+ *
+ * @param string $op
  *   The operation being performed. One of 'view', 'update', 'create', 'delete'
  *   or just 'edit' (being the same as 'create' or 'update').
  * @param object $entity
