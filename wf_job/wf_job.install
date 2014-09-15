@@ -238,6 +238,32 @@ function wf_job_schema() {
         'length' => '255',
         'not null' => TRUE,
       ),
+      'machine_name' => array(
+        'type' => 'varchar',
+        'description' => 'The machine name for job status.',
+        'length' => 50,
+        'not null' => FALSE,
+      ),
+      'module' => array(
+        'type' => 'varchar',
+        'description' => 'The name of the providing module.',
+        'length' => 64,
+        'default' => 'wf_job',
+        'not null' => TRUE,
+      ),
+      'export_state' => array(
+        'type' => 'int',
+        'description' => 'The exportable status of the status.',
+        'not null' => TRUE,
+        'default' => 0x01,
+        'size' => 'tiny',
+      ),
+      'system_status' => array(
+        'type' => 'varchar',
+        'description' => 'The current system status.',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
     ),
     'primary key' => array('jsid'),
     'unique keys' => array(
@@ -359,6 +385,63 @@ function wf_job_update_7004($sandbox) {
  */
 function wf_job_update_7005(&$sandbox) {
   db_drop_unique_key('wf_job', 'reference');
+}
+
+/**
+ * Create new fields for wf_job_status table.
+ */
+function wf_job_update_7006($sandbox) {
+  $fields = array(
+    'machine_name' => array(
+      'type' => 'varchar',
+      'description' => 'The machine name for job status.',
+      'length' => 50,
+      'not null' => FALSE,
+    ),
+    'module' => array(
+      'type' => 'varchar',
+      'description' => 'The name of the providing module.',
+      'length' => 64,
+      'default' => 'wf_job',
+      'not null' => TRUE,
+    ),
+    'export_state' => array(
+      'type' => 'int',
+      'description' => 'The exportable status of the status.',
+      'not null' => TRUE,
+      'default' => 0x01,
+      'size' => 'tiny',
+    ),
+    'system_status' => array(
+      'type' => 'varchar',
+      'description' => 'The current system status.',
+      'length' => 255,
+      'not null' => FALSE,
+    ),
+  );
+
+  foreach ($fields as $field => $specification) {
+    db_add_field('wf_job_status', $field, $specification);
+  }
+}
+
+/**
+ * Update new fields for wf_job_status table.
+ */
+function wf_job_update_7007($sandbox) {
+  $wf_job_status_entity = entity_load('wf_job_status');
+
+  foreach ($wf_job_status_entity as $entity_id => $entity) {
+    $entity_wrapper = entity_metadata_wrapper('wf_job_status', $entity_id);
+
+    $status = $entity_wrapper->status->value();
+    $system_status = strtolower($status);
+    $machine_name = str_replace(' ', '_', $system_status);
+
+    $entity_wrapper->system_status->set($system_status);
+    $entity_wrapper->machine_name->set($machine_name);
+    $entity_wrapper->save();
+  }
 }
 
 /**

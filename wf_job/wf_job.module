@@ -79,6 +79,29 @@ function wf_job_entity_info() {
     );
   }
 
+  $info['wf_job_status'] = array(
+    'label' => t('Job Status'),
+    'plural label' => t('Job Statuses'),
+    'entity class' => 'Entity',
+    'controller class' => 'EntityAPIControllerExportable',
+    'base table' => 'wf_job_status',
+    'fieldable' => FALSE,
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'jsid',
+      'name' => 'machine_name',
+      'label' => 'status',
+      'status' => 'export_state',
+      'module' => 'module',
+    ),
+    'module' => 'wf_job',
+    'admin ui' => array(
+      'path' => 'admin/structure/job-statuses',
+      'file' => 'includes/wf_job.status.admin.inc',
+    ),
+    'access callback' => 'wf_job_type_access',
+  );
+
   return $info;
 }
 
@@ -603,20 +626,62 @@ function wf_job_entity_property_info() {
     'getter callback' => 'wf_job_entity_metadata_get_properties',
     'type' => 'uri',
     'computed' => TRUE,
-    'wf_extra_fields' => array('form', 'display'),
+    'extra_fields' => array('form', 'display'),
   );
 
   $info['wf_job'] = array('properties' => $properties);
   $info['wf_job_bundle'] = array('properties' => array());
 
-  return $info;
-}
+  $status_properties = array();
 
-/**
- * Implements hook_field_extra_fields().
- */
-function wf_job_field_extra_fields() {
-  return wf_generate_extra_fields('wf_job');
+  $status_properties['status'] = array(
+    'label' => t('Status'),
+    'type' => 'text',
+    'description' => t('The status label of job status.'),
+    'schema field' => 'status',
+    'extra_fields' => array('form', 'display'),
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+
+  $status_properties['machine_name'] = array(
+    'label' => t('Machine Name'),
+    'type' => 'text',
+    'description' => t('The machine name for job status.'),
+    'schema field' => 'machine_name',
+    'extra_fields' => array('form', 'display'),
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+
+  $status_properties['module'] = array(
+    'label' => t('Module'),
+    'type' => 'text',
+    'description' => t('The name of the providing module.'),
+    'schema field' => 'module',
+    'extra_fields' => array('form', 'display'),
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+
+  $status_properties['export_state'] = array(
+    'label' => t('Export State'),
+    'type' => 'integer',
+    'description' => t('The exportable status of the status.'),
+    'schema field' => 'export_state',
+    'extra_fields' => array('form', 'display'),
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+
+  $status_properties['system_status'] = array(
+    'label' => t('System Status'),
+    'type' => 'text',
+    'description' => t('The current system status.'),
+    'schema field' => 'system_status',
+    'extra_fields' => array('form', 'display'),
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+
+  $info['wf_job_status'] = array('properties' => $status_properties);
+
+  return $info;
 }
 
 /**
@@ -639,20 +704,87 @@ function wf_job_bundle_exists($name) {
  * @return array
  */
 function wf_job_load_bundles() {
-  $cache = &drupal_static(__FUNCTION__);
+  $bundles = &drupal_static(__FUNCTION__);
+
+  if (empty($bundles)) {
+    $cache = cache_get('wf_job_load_bundles');
+    if ($cache) {
+      $bundles = $cache->data;
+    }
+    else {
+      $bundles = db_select('wf_job_bundle', 'wjb')
+        ->fields('wjb')
+        ->orderBy('bundle')
+        ->execute()
+        ->fetchAllAssoc('bundle');
+      cache_set('wf_job_load_bundles', $bundles, 'cache');
+    }
+  }
+
+  return $bundles;
+}
+
+/**
+ * Checks if a status job exists.
+ *
+ * @param $name
+ *   The status to look up.
+ *
+ * @return bool
+ *   Does the status exist?
+ */
+function wf_job_status_exists($name) {
+  return (bool) db_select('wf_job_status', 'wjs')
+    ->condition('machine_name', $name)
+    ->countQuery()
+    ->execute()
+    ->fetchField();
+}
+
+/**
+ * Returns defined job status by name.
+ *
+ * @param $name
+ *   The status to look up.
+ *
+ * @return object
+ */
+function wf_job_load_status_by_name($name) {
+  $statuses = wf_job_status_load_all('status');
+  return isset($statuses[$name]) ? $statuses[$name] : array();
+}
+
+/**
+ * Returns defined job status by jsid.
+ *
+ * @param $jsid
+ *   The status id to look up.
+ *
+ * @return object
+ */
+function wf_job_load_status($jsid) {
+  $statuses = wf_job_status_load_all('jsid');
+  return isset($statuses[$jsid]) ? $statuses[$jsid] : array();
+}
+
+/**
+ * Returns all defined job status.
+ *
+ * @return array
+ */
+function wf_job_status_load_all($fetch = 'system_status') {
+  $cache = &drupal_static(__FUNCTION__ . $fetch);
 
   if (!isset($cache)) {
-    $cache = db_select('wf_job_bundle', 'wjb')
-      ->fields('wjb')
-      ->orderBy('bundle')
+    $cache = db_select('wf_job_status', 'wjs')
+      ->fields('wjs')
+      ->orderBy('status')
       ->execute()
-      ->fetchAllAssoc('bundle');
+      ->fetchAllAssoc($fetch);
   }
 
   return $cache;
 }
-
-// Entity CRUD
 
 /**
  * Creates a new job object.
@@ -731,30 +863,134 @@ function wf_job_id_by_reference($ref) {
 }
 
 /**
+ * Returns an array containing the used references by job, against a string.
+ *
+ * @param array $references
+ *   An array containing the references.
+ *
+ * @return array
+ *   An array keyed by Job Id containing the values ​​of the references.
+ */
+function wf_job_get_jobs_by_references($references) {
+  $jobs = array();
+
+  foreach ($references as $reference) {
+    $result = db_select('wf_job', 'wf')
+      ->fields('wf', array('jid', 'reference'))
+      ->condition('reference', '%' . db_like(trim($reference)) . '%', 'LIKE')
+      ->execute()
+      ->fetchAllKeyed();
+
+    if ($result) {
+      foreach ($result as $jid => $retrieved_references) {
+        $splitted_references = wf_job_split_references($retrieved_references);
+        if (in_array($reference, $splitted_references)) {
+          $jobs[$jid][] = $reference;
+        }
+      }
+    }
+  }
+
+  return $jobs;
+}
+
+/**
+ * Splits a reference string value, separeted by comma and space to an array.
+ *
+ * @param string $references
+ *   The references string to be splitted.
+ */
+function wf_job_split_references($references) {
+  preg_match_all("/[^\s,]+/", $references, $matches);
+
+  return reset($matches);
+}
+
+/**
  * Fetches a list of job status values.
  *
  * @return array
  *   List of job statuses.
  */
-function wf_job_status_list() {
+function wf_job_status_list($key = 'jsid') {
+  $cache_key = 'wf_job_status_list';
+
+  if ('machine_name' == $key) {
+    $cache_key = 'wf_job_status_list_machine_name';
+  }
+
   $statuses = &drupal_static(__FUNCTION__);
   if (empty($statuses)) {
-    $cached = cache_get('wf_job_status_list');
+    $cached = cache_get($cache_key);
     if ($cached) {
       $statuses = $cached->data;
     }
     else {
       $statuses = db_select('wf_job_status', 'wfs')
-        ->fields('wfs')
-        ->orderBy('jsid')
+        ->fields('wfs', array($key, 'status'))
+        ->orderBy('status')
         ->execute()
         ->fetchAllKeyed();
-      cache_set('wf_job_status_list', $statuses, 'cache');
+
+      cache_set($cache_key, $statuses, 'cache');
     }
   }
   return $statuses;
 }
 
+/**
+ * Fetches a list of job statuses keyed by machine name.
+ */
+function wf_job_machine_name_status_list() {
+  return wf_job_status_list('machine_name');
+}
+
+/**
+ * List of job system status values.
+ *
+ * @return array
+ *   List of system statuses.
+ */
+function wf_job_system_status_list() {
+  $system_statuses = array(
+    'new',
+    'started',
+    'in review',
+    'approved',
+    'being deployed',
+    'completed',
+    'needs attention',
+    'custom',
+  );
+
+  return array_combine($system_statuses, $system_statuses);
+}
+
+/**
+ * List of job machine name status values.
+ *
+ * @return array
+ *   List of machine name statuses.
+ */
+function wf_job_machine_name_list() {
+  $status = &drupal_static(__FUNCTION__, array());
+
+  if (!empty($status)) {
+    return $status;
+  }
+
+  $machine_name_statuses = wf_job_status_load_all();
+
+  foreach ($machine_name_statuses as $machine_name_status) {
+    $status[$machine_name_status->machine_name] = $machine_name_status->status;
+  }
+
+  return $status;
+}
+
+/**
+ * Preprocess function for wf_job.
+ */
 function wf_job_preprocess_wf_job(&$variables) {
   $sanitize = array(
     'jid',
@@ -1320,8 +1556,13 @@ function wf_job_wf_job_acl() {
 /**
  * Update the status of a job.
  */
-function wf_job_update_status(WfJob $job, $status_id) {
-  $job->jsid = $status_id;
+function wf_job_update_status(WfJob $job, $system_status) {
+  $statuses = wf_job_status_load_all('machine_name');
+  $job->jsid = $statuses[$system_status]->jsid;
+
+  // Avoiding recursion.
+  unset($job->rules_event);
+
   wf_job_save($job);
 }
 

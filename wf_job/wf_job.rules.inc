@@ -101,8 +101,8 @@ function wf_job_rules_action_info() {
         'label' => t('Job'),
       ),
       'status' => array(
-        'type' => 'integer',
-        'options list' => 'wf_job_status_list',
+        'type' => 'text',
+        'options list' => 'wf_job_machine_name_status_list',
         'label' => t('New status'),
       ),
     ),
