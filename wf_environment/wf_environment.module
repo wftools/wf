@@ -108,6 +108,13 @@ function wf_environment_menu() {
     'page arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
   );
+  $items['environment/%wf_environment/delete'] = array(
+    'title' => 'Delete',
+    'access arguments' => array('manage environments'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wf_environment_delete_form', 1),
+    'type' => MENU_LOCAL_TASK,
+  );
   $items['environment/add'] = array(
     'title' => 'Add new environment',
     'access arguments' => array('manage environments'),
@@ -464,13 +471,14 @@ function wf_environment_edit_form($form, $form_state, $env) {
       '#value' => t('Save')
     ),
   );
-  // TODO implement delete support.
-  // if (!empty($env->id)) {
-  if (FALSE) {
+
+  if (!empty($env->id) && user_access('manage environments')) {
+    $env_uri = entity_uri('wf_environment', $env);
     $form['actions']['delete'] = array(
-      '#type' => 'submit',
-      '#value' => t('Delete'),
-      '#submit' => 'wf_environment_form_delete_submit',
+      '#type' => 'link',
+      '#title' => t('Delete'),
+      '#href' => $env_uri['path'] . '/delete',
+      '#weight' => 15,
     );
   }
 
@@ -519,19 +527,6 @@ function wf_environment_save($env) {
   entity_save('wf_environment', $env);
 
   return $env;
-}
-
-/**
- * Delete button callback
- */
-function wf_environment_form_delete_submit($form, &$form_state) {
-  $destination = array();
-  if (isset($_GET['destination'])) {
-    $destination = drupal_get_destination();
-    unset($_GET['destination']);
-  }
-
-  $form_state['redirect'] = array('environment/' . ((int) $form_state['values']['id']) . '/delete', array('query' => $destination));
 }
 
 /**
@@ -825,4 +820,30 @@ function wf_environment_dev() {
   $environments = wf_environment_load_multiple(FALSE, array('drush_alias' => $dev_alias));
   $dev_env = reset($environments);
   return $dev_env;
+}
+
+/**
+ * Form for deleting environments.
+ */
+function wf_environment_delete_form($form, $form_state, $env) {
+  $env_uri = entity_uri('wf_environment', $env);
+  $title = entity_label('wf_environment', $env);
+  return confirm_form(
+    $form,
+    t("Are you sure you want to delete <strong>@title</strong>?", array('@title' => $title)),
+    $env_uri['path'] . '/view',
+    t("Deleting this environment cannot be undone. By deleting this environment may cause jobs to be undeployable."),
+    t("Delete")
+  );
+}
+
+/**
+ * Submit handler wf_environment_delete_form.
+ */
+function wf_environment_delete_form_submit($form, &$form_state) {
+  $env = reset($form_state['build_info']['args']);
+  $title = entity_label('wf_environment', $env);
+  entity_delete('wf_environment', $env->id);
+  drupal_set_message(t("Environment '@title' was successfully deleted.", array('@title' => $title)));
+  $form_state['redirect'] = url('admin/content/environments');
 }
