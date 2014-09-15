@@ -41,7 +41,7 @@ function wf_environment_entity_info() {
     'uri callback' => 'entity_class_uri',
     'module' => 'wf_environment',
     'uuid' => TRUE,
-    'access callback' => 'wf_job_access',
+    'access callback' => 'wf_environment_access',
     'default_revision' => TRUE,
   );
 
@@ -243,9 +243,10 @@ function wf_environment_strongarm_export_value_alter(&$value, $name) {
  */
 function wf_environment_strongarm_import_value_alter(&$value, $name) {
   if ('wf_environment_default' == $name) {
-    $env = entity_uuid_load('wf_environment', array($value));
+    $envs = entity_uuid_load('wf_environment', array($value));
     $value = NULL;
-    if ($env) {
+    if ($envs) {
+      $env = reset($envs);
       $value = $env->id;
     }
   }
