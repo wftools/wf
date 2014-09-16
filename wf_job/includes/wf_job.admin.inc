@@ -180,20 +180,13 @@ function wf_job_action_propose_form($form, &$form_state, $job) {
     '#markup' => l($job->label(), reset($job_uri)),
   );
 
-  $env = wf_environment_load($job->eid);
-  $next_env = wf_environment_load($env->next_env_id);
-  $next_env_uri = $next_env->uri();
+  $next_env = $job_wrapper->eid->next_env_id;
+  $next_env_uri = $next_env->value()->uri();
   $form['env'] = array(
     '#type' => 'item',
     '#title' => t('Target environment'),
-    '#markup' => l($next_env->label(), reset($next_env_uri)),
+    '#markup' => l($next_env->label(), $next_env_uri['path']),
   );
-
-  global $user;
-  $reviewers = wf_job_users('review others jobs');
-  if (!user_access('review own jobs') && isset($reviewers[$user->uid])) {
-    unset($reviewers[$user->uid]);
-  }
 
   $form['reviewer'] = array(
     '#type' => 'select',
