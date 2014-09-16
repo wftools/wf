@@ -365,6 +365,43 @@ function wf_job_list_permissions($type) {
 }
 
 /**
+ * Implements hook_wf_job_url_login().
+ */
+function wf_job_wf_job_url_login() {
+  return wf_job_login_plugins();
+}
+
+/**
+ * Implements hook_wf_job_url_visit().
+ */
+function wf_job_wf_job_url_visit() {
+  return wf_job_login_plugins();
+}
+
+/**
+ * Implements hook_wf_job_sandbox_domain().
+ */
+function wf_job_wf_job_sandbox_domain() {
+  return wf_job_login_plugins();
+}
+
+/**
+ * Helper function to return the WF Job URL plugin info.
+ */
+function wf_job_login_plugins() {
+  $plugins = array();
+
+  $plugins['wf_job_links'] = array(
+    'title' => t('Generic WF Job'),
+    'description' => t('Generic URL generator plugin.'),
+    'handler' => 'WfJobLinks ',
+    'file' => 'plugins/wf_job.url.inc',
+  );
+
+  return $plugins;
+}
+
+/**
  * Access callback for the entity API.
  *
  * @param $op
@@ -1363,6 +1400,28 @@ function wf_job_entity_metadata_get_properties($entity, array $options, $name, $
 }
 
 /**
+ * Returns the instantiated ctools wf_job visit plugin handler class.
+ *
+ * @throw WfJobUrlException
+ *   When the plugin is undefined or problems lower in the stack.
+ */
+function wf_job_get_visit_plugin_handler() {
+  ctools_include('plugins');
+  $handler = &drupal_static(__FUNCTION__);
+  if (!$handler) {
+    $plugin = variable_get('wf_job_visit_plugin');
+    if (!$plugin) {
+      throw new WfJobUrlException(t('Undefined visit URL plugin'));
+    }
+
+    $class_name = ctools_plugin_load_class('wf_job', 'url_visit', $plugin, 'handler');
+    $handler = new $class_name();
+  }
+
+  return $handler;
+}
+
+/**
  * Generates the sandbox URL.
  *
  * @param WfJob $job
@@ -1370,20 +1429,9 @@ function wf_job_entity_metadata_get_properties($entity, array $options, $name, $
  *
  * @return string
  *  The sandbox URL.
- *
- * @throw WfJobUrlException
- *   When the plugin is undefined or problems lower in the stack.
  */
 function wf_job_sandbox_url(WfJob $job) {
-  ctools_include('plugins');
-
-  $plugin = variable_get('wf_job_visit_plugin');
-  if (!$plugin) {
-    throw new WfJobUrlException(t('Undefined visit URL plugin'));
-  }
-
-  $class_name = ctools_plugin_load_class('wf_job', 'url_visit', $plugin, 'handler');
-  $handler = new $class_name();
+  $handler = wf_job_get_visit_plugin_handler();
 
   $url = $handler->generateVisitLink($job);
   return $url;
