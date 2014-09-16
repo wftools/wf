@@ -216,18 +216,60 @@ function wf_job_sandbox_login($job = NULL) {
  */
 function wf_job_edit_form_validate($form, &$form_state) {
   // Hack to set the assigned value to the owner.
-  if ($form_state['values']['is_new']) {
+  if ($form_state['values']['is_new'] && isset($form_state['values']['owner'])) {
     $form_state['values']['assigned'] = $form_state['values']['owner'];
   }
 
-  $ref = $form_state['values']['reference'];
-  $existing = wf_job_id_by_reference($ref);
-  if (!empty($ref) && !empty($existing['wf_job'])
-    && !isset($existing['wf_job'][$form_state['values']['jid']])) {
+  $references = wf_job_split_references($form_state['values']['reference']);
+  if (!empty($references)) {
+    wf_job_edit_form_validate_input_duplicate_references($form_state, $references);
+    wf_job_edit_form_validate_references_already_exist($form_state, $references);
 
-    $uri = reset(entity_load('wf_job', array_keys($existing['wf_job'])))->uri();
-    $link = url($uri['path'], $uri);
-    form_set_error('reference', t('Job with reference <a href="!link">@ref</a> already exists.', array('!link' => $link, '@ref' => $ref)));
+    // After validation, clean references field values.
+    $form_state['values']['reference'] = implode(', ', $references);
+  }
+}
+
+/**
+ * Form validation to check if the form input values has duplicate references.
+ */
+function wf_job_edit_form_validate_input_duplicate_references($form_state, $references) {
+  // Check if has duplicate references.
+  $has_duplicates = count(array_unique($references)) < count($references);
+  if ($has_duplicates) {
+    $duplicate_references = array();
+
+    // Count values.
+    $count_values = array_count_values($references);
+    foreach ($count_values as $reference => $amount) {
+      if ($amount > 1) {
+        // List duplicate references.
+        $duplicate_references[] = $reference;
+      }
+    }
+
+    form_set_error('reference', t('You are trying to save duplicate references: @duplicate', array('@duplicate' => implode(', ', $duplicate_references))));
+  }
+}
+
+/**
+ * Form validation to check that given references already exist.
+ */
+function wf_job_edit_form_validate_references_already_exist($form_state, $references) {
+  $jid = $form_state['values']['jid'];
+  $existing_references = wf_job_get_jobs_by_references($references);
+  $link_list = '';
+
+  foreach ($existing_references as $job_id => $duplicated_references) {
+    if ((int) $job_id != (int) $jid) {
+      foreach ($duplicated_references as $reference_name) {
+        $link_list .= l($reference_name, 'job/' . $job_id) . ', ';
+      }
+    }
+  }
+
+  if (!empty($link_list)) {
+    form_set_error('reference', t('Job with reference(s) !link_list already exists.', array('!link_list' => rtrim($link_list, ', '))));
   }
 }
 
