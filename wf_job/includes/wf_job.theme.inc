@@ -20,8 +20,10 @@ function theme_wf_job_add_list($variables) {
 
   if ($content) {
     foreach ($content as $item) {
-      $title = l(t('<span class="icon"></span>@label', array('@label' => $item->label)), 'job/add/' . $item->bundle, array('html' => TRUE));
-      $job_types[str_replace(' ', '', $item->label) . '_' . $i] = '<li>' . $title . '</li>';
+      $title = l(t('<span class="icon"></span>@label', array('@label' => $item->label)),
+                'job/add/' . $item->bundle, array('html' => TRUE));
+      $detail = '<div class="detail">' . check_plain($item->detail) . '</div>';
+      $job_types[str_replace(' ', '', $item->label) . '_' . $i] = '<li class="wf-job-add-list-item">' . $title . $detail .'</li>';
       $i++;
     }
     ksort($blocks);

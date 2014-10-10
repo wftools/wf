@@ -205,6 +205,10 @@ function wf_job_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'detail' => array(
+        'description' => 'The detail of this wf_job type.',
+        'type' => 'text',
+      ),
       'status' => array(
         'type' => 'int',
         'not null' => TRUE,
@@ -454,4 +458,20 @@ function wf_job_update_7008($sandbox) {
   if (db_field_exists($table, $field)) {
     db_drop_field($table, $field);
   }
+}
+
+/**
+ * Add new column 'detail' to the wf_job_bundle table
+ */
+function wf_job_update_7009($sandbox) {
+
+  if (db_field_exists('wf_job_bundle', 'detail')) {
+    return;
+  }
+
+  $spec = array(
+    'description' => 'The detail of this wf_job type.',
+    'type' => 'text',
+  );
+  db_add_field( 'wf_job_bundle', 'detail', $spec);
 }

@@ -21,6 +21,12 @@ function wf_job_bundle_form($form, &$form_state, $job_bundle, $op = 'edit') {
     '#default_value' => !empty($job_bundle->label) ? $job_bundle->label : '',
   );
 
+  $form['detail'] = array(
+    '#title' => t('Detail'),
+    '#type' => 'textarea',
+    '#default_value' => !empty($job_bundle->detail) ? $job_bundle->detail : '',
+  );
+
   $form['bundle'] = array(
     '#type' => 'machine_name',
     '#default_value' => isset($job_bundle->bundle) ? $job_bundle->bundle : '',
