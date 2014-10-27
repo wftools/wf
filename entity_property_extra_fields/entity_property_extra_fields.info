@@ -1,3 +1,0 @@
-name = Entity Property Extra Fields
-description = This module provides a simple way to expose the entity properties in the field UI's "Manage fields" and "Manage display".
-core = 7.x
