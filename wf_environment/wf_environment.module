@@ -15,6 +15,7 @@ function wf_environment_entity_info() {
     'label' => t('Workflow Environment'),
     'entity class' => 'WfEnvironment',
     'controller class' => 'EntityAPIController',
+    'extra fields controller class' => 'EntityPropertyExtraFieldsController',
     'base table' => 'wf_env',
     'revision table' => 'wf_env_revision',
     'fieldable' => TRUE,

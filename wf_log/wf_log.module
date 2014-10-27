@@ -19,6 +19,7 @@ function wf_log_entity_info() {
     'label' => t('Workflow Log'),
     'entity class' => 'WfLog',
     'controller class' => 'WfLogController',
+    'extra fields controller class' => 'EntityPropertyExtraFieldsController',
     'base table' => 'wf_log',
     'entity keys' => array(
       'id' => 'lid',
