@@ -27,11 +27,10 @@ class WfJobAclStandard implements WfJobAcl {
     global $user;
 
     $job_wrapper = entity_metadata_wrapper('wf_job', $job);
-    $statuses = wf_job_status_load_all('machine_name');
-    $status = $job_wrapper->jsid->value();
+    $status = $job_wrapper->jsid->machine_name->value();
 
     switch ($status) {
-      case $statuses['in_review']->jsid:
+      case 'in_review':
         $users = $this->getUsers('rewiew job before ' . $job_wrapper->eid->next_env_id->env->value());
         if (user_access('review own jobs')) {
           $users[$user->uid] = $user->name;
@@ -47,10 +46,11 @@ class WfJobAclStandard implements WfJobAcl {
    * {@inheritdoc}
    */
   public function hasAccess($action, WfJob $job = NULL, StdClass $user, $bundle = NULL) {
-    if ('create' == $action) {
-      return $this->checkAction($action, NULL, $user, $bundle);
+    if (is_object($job) && $bundle == $job->entityType()) {
+      $bundle = $job->bundle;
     }
-    else {
+
+    if ('create' != $action) {
       $bundle = $job->bundle;
     }
 
@@ -88,9 +88,6 @@ class WfJobAclStandard implements WfJobAcl {
 
     switch ($action) {
       case 'create':
-        $perm = "create {$bundle} job";
-        return user_access($perm, $user);
-
       case 'view':
       case 'visit':
         return $this->userAccess($action, $job, $user, $bundle);
@@ -115,8 +112,8 @@ class WfJobAclStandard implements WfJobAcl {
         $owner = $job->owner->value();
         return isset($owner) && $owner->uid == $user->uid && user_access($perm, $user);
 
-      case 'to-dev':
-        return user_access('return job to dev', $user);
+      case 'restart':
+        return user_access('restart job', $user);
 
       case 'reallocate':
         return user_access('reallocate job', $user);
@@ -146,20 +143,23 @@ class WfJobAclStandard implements WfJobAcl {
    */
   protected function checkState($action, EntityDrupalWrapper $job) {
     // Allow everything when creating a new job.
-    if ('create' == $action || empty($job->raw()->jid)) {
+    $jid = $job->getIdentifier();
+    if ('create' == $action || empty($jid)) {
       return TRUE;
     }
 
-    $statuses = wf_job_status_load_all('machine_name');
-    $status = $job->jsid->value();
+    $status = $job->jsid->machine_name->value();
     $default_status = variable_get('wf_job_jsid_new');
     if (!$status) {
       $status = $default_status;
     }
 
     $env = $job->eid;
-    $has_next_env = (bool) $env->next_env_id->id->value();
-    $is_default_env = ($env->id->value() == wf_environment_get_default());
+    $has_next_env = FALSE;
+    if ($env->next_env_id->raw() && $env->next_env_id->id->value()) {
+      $has_next_env = (bool) $env->next_env_id->id->value();
+    }
+    $is_default_env = $job->value()->isInDefaultEnv();
 
     switch ($action) {
       case 'start':
@@ -169,26 +169,25 @@ class WfJobAclStandard implements WfJobAcl {
         return $is_default_env && $status != $default_status;
 
       case 'update_code':
-        $is_default_env = ($env->id->value() == wf_environment_get_default());
-        $is_job_started = ($status == $statuses['started']->jsid);
+        $is_job_started = ('started' == $status);
 
         return $is_default_env && $is_job_started;
 
       case 'propose':
-        return $has_next_env && ($status == $statuses['started']->jsid);
+        return $has_next_env && ('started' == $status);
 
       case 'review':
-        return $has_next_env && ($status == $statuses['in_review']->jsid);
+        return $has_next_env && ('in_review' == $status);
 
-      case 'to-dev':
+      case 'restart':
         $is_completed = ($status !== variable_get('wf_job_jsid_completed'));
-        return !$is_default_env && $is_completed;
+        return !$is_default_env && !$is_completed;
 
       case 'reallocate':
         return $status != variable_get('wf_job_jsid_completed');
 
       case 'diff':
-        $invalid_states = array($statuses['new']->jsid);
+        $invalid_states = array('new');
 
         return !in_array($status, $invalid_states);
 
@@ -232,6 +231,27 @@ class WfJobAclStandard implements WfJobAcl {
   }
 
   /**
+   * Gets a list of users based on role.
+   *
+   * @param string $role
+   *   The role to use to filter the users.
+   *
+   * @return array
+   *   A list of users with the uid as the key and user as the value.
+   */
+  protected function getUsersByRole($role) {
+    $query = db_select('realname', 'rn');
+    $query->innerJoin('users_roles', 'ur', 'rn.uid = ur.uid');
+    $query->innerJoin('role', 'r', 'r.rid = ur.rid');
+    $users = $query->fields('rn', array('uid', 'realname'))
+      ->condition('r.name', $role, '=')
+      ->execute()
+      ->fetchAllKeyed();
+
+    return $users;
+  }
+
+  /**
    * Checks user's access to perform an action on a job.
    *
    * @param string $action
@@ -251,7 +271,18 @@ class WfJobAclStandard implements WfJobAcl {
    */
   protected function userAccess($action, EntityDrupalWrapper $job = NULL, $user, $bundle) {
     if ('create' == $action) {
-      return user_access("create $bundle job");
+      if ($bundle) {
+        return user_access("create $bundle job");
+      }
+
+      // Give access if the user has at least one Job creation permission.
+      foreach (array_keys(wf_job_load_bundles()) as $bundle) {
+        if (user_access("create $bundle job")) {
+          return TRUE;
+        }
+      }
+
+      return FALSE;
     }
 
     $owner = $job->owner->value();

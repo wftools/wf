@@ -5,7 +5,7 @@
  * as fields.
  */
 
- /**
+/**
  * Class which handles displaying of links.
  */
 class WfJobHandlerFieldLink extends views_handler_field {
@@ -65,10 +65,10 @@ class WfJobHandlerFieldLink extends views_handler_field {
    * Generate the base job view URI.
    *
    * @param int $job_id
-   *  The job id to generate the URI for.
+   *   The job id to generate the URI for.
    *
    * @return string
-   *  The generated URI.
+   *   The generated URI.
    */
   protected function wf_job_render_link($job_id, $default_text, $action = '') {
     $job = entity_load_single('wf_job', $job_id);

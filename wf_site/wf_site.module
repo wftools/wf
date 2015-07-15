@@ -15,6 +15,7 @@ function wf_site_entity_info() {
     'label' => t('Workflow Site'),
     'entity class' => 'WfSite',
     'controller class' => 'WfSiteController',
+    'extra fields controller class' => 'EntityPropertyExtraFieldsController',
     'base table' => 'wf_site',
     'revision table' => 'wf_site_revision',
     'fieldable' => TRUE,
@@ -211,7 +212,7 @@ function wf_site_entity_property_info() {
   );
 
   $properties['site_name'] = array(
-    'label' => t('Site Name'),
+    'label' => t('Name'),
     'type' => 'text',
     'description' => t('The name of the site.'),
     'setter callback' => 'entity_property_verbatim_set',
@@ -220,7 +221,7 @@ function wf_site_entity_property_info() {
   );
 
   $properties['active'] = array(
-    'label' => t('Site is Active'),
+    'label' => t('Active'),
     'type' => 'boolean',
     'description' => t('Is the site active?'),
     'schema field' => 'active',
@@ -228,7 +229,7 @@ function wf_site_entity_property_info() {
   );
 
   $properties['created'] = array(
-    'label' => t('Date Created'),
+    'label' => t('Created'),
     'type' => 'date',
     'description' => t('The date the site was created.'),
     'schema field' => 'created',
@@ -236,7 +237,7 @@ function wf_site_entity_property_info() {
   );
 
   $properties['changed'] = array(
-    'label' => t('Date Changed'),
+    'label' => t('Last Modified'),
     'type' => 'date',
     'description' => t('The date the site was last modified.'),
     'schema field' => 'changed',
@@ -364,7 +365,6 @@ function wf_site_edit_form($form, $form_state, $site) {
     );
   }
   else {
-    $sid = NULL;
     $form['is_new'] = array(
       '#type' => 'value',
       '#value' => TRUE,
@@ -634,13 +634,10 @@ function wf_site_load_bundles() {
  * @param string $entity_type
  *   (optional) Leave it to NULL to get the property from $entity.
  *
- * @return boolean
+ * @return bool
  *   Whether access is allowed or not.
  */
 function wf_site_access($op, $entity = NULL, $account = NULL, $entity_type = NULL) {
-
-  global $user;
-
   if (user_access('administer sites', $account)) {
     return TRUE;
   }
@@ -707,7 +704,7 @@ function wf_site_create_access() {
  *   (optional) The user to check for.
  *   Leave it to NULL to check for the global user.
  *
- * @return boolean
+ * @return bool
  *   Whether access is allowed or not.
  */
 function wf_site_type_access($op, $type = NULL, $account = NULL) {
@@ -812,8 +809,8 @@ function wf_site_get_job_count($site_id) {
   $fields = array();
   $field_info = field_info_instances('wf_job');
 
-  foreach ($field_info as $bundle => $info) {
-    foreach ($info as $field => $data) {
+  foreach ($field_info as $info) {
+    foreach ($info as $data) {
       if (!empty($data['widget']['module']) && 'entityreference' == $data['widget']['module']) {
         $field_info = field_info_field($data['field_name']);
         if ('wf_site' == $field_info['settings']['target_type']) {

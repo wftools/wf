@@ -1,0 +1,12 @@
+.wf-deploy-serices-client-diff .old-label {
+  float: left;
+  text-decoration: line-through;
+}
+
+.wf-deploy-serices-client-diff .new-label {
+  float: right;
+}
+
+.wf-deploy-serices-client-diff h4 {
+  clear: both;
+}

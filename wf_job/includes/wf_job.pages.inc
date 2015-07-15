@@ -10,10 +10,38 @@
  */
 function wf_job_page_add() {
   $bundles = wf_job_load_bundles();
+  $raw_count = count($bundles);
+
+  foreach ($bundles as $name => &$bundle) {
+    $entity = entity_create('wf_job', array('bundle' => $name));
+    if (!entity_access('create', 'wf_job', $entity)) {
+      unset($bundles[$name]);
+      continue;
+    }
+
+    $bundle->uri = array(
+      'path' => "job/add/{$name}",
+      'options' => array(),
+    );
+  }
+
+  drupal_alter('wf_job_add_list', $bundles);
 
   switch (count($bundles)) {
     case 0:
-      return '<p>' . t('You have not created any job types yet.') . '</p>';
+      $message = t('You have not created any job types yet.');
+      if ($raw_count) {
+        $message = t("You don't have access to any job types.");
+      }
+
+      return array(
+        'no_types' => array(
+          '#type' => 'markup',
+          '#markup' => $message,
+          '#prefix' => '<p class="detail warning">',
+          '#suffix' => '</p>',
+        ),
+      );
 
     case 1:
       $bundle = array_shift($bundles);
@@ -21,7 +49,14 @@ function wf_job_page_add() {
       break;
 
     default:
-      return theme('wf_job_add_list', array('content' => $bundles));
+      return array(
+        'job_types' => array(
+          '#theme' => 'wf_job_add_list',
+          '#bundles' => $bundles,
+          '#prefix' => '<div id="wf_job_add_list">',
+          '#suffix' => '</div>',
+        ),
+      );
   }
 }
 
@@ -29,7 +64,14 @@ function wf_job_page_add() {
  * Job add menu callback.
  */
 function wf_job_add($bundle) {
-  $info = array('bundle' => $bundle);
+  global $user;
+
+  $info = array(
+    'bundle' => $bundle,
+    'jsid' => variable_get('wf_job_default_status', 1),
+    'owner' => $user->uid,
+    'assigned' => $user->uid,
+  );
 
   $job = entity_create('wf_job', $info);
 
@@ -49,7 +91,7 @@ function wf_job_edit($job = NULL) {
 /**
  * Job edit form.
  */
-function wf_job_edit_form($form, $form_state, $job) {
+function wf_job_edit_form($form, &$form_state, $job) {
   global $user;
 
   ctools_include('plugins');
@@ -67,12 +109,9 @@ function wf_job_edit_form($form, $form_state, $job) {
   $default_owner = $job->owner;
   $default_assigned = $job->assigned;
   $revision = TRUE;
+
   if (!empty($job->is_new)) {
-    $is_new = TRUE;
     $status_type = 'value';
-    $default_status = variable_get('wf_job_default_status', 1);
-    $default_owner = $GLOBALS['user']->uid;
-    $default_assigned = $GLOBALS['user']->uid;
     $revision = FALSE;
   }
 
@@ -105,7 +144,7 @@ function wf_job_edit_form($form, $form_state, $job) {
 
   $form['title'] = array(
     '#type' => 'textfield',
-    '#title' => t('Job Name'),
+    '#title' => t('Title'),
     '#default_value' => $job->title,
     '#required' => TRUE,
     '#maxlength' => 255,
@@ -113,10 +152,10 @@ function wf_job_edit_form($form, $form_state, $job) {
 
   $form['reference'] = array(
     '#type' => 'textfield',
-    '#title' => t('External Reference'),
+    '#title' => t('Ticket Reference/s'),
     '#default_value' => $job->reference,
     '#required' => FALSE,
-    '#maxlength' => 50,
+    '#maxlength' => 100,
   );
 
   $form['details'] = array(
@@ -137,7 +176,7 @@ function wf_job_edit_form($form, $form_state, $job) {
 
   $form['owner'] = array(
     '#type' => 'select',
-    '#title' => t('Owner'),
+    '#title' => t('Job Owner'),
     '#options' => $handler->getOwners($job),
     '#default_value' => $default_owner,
     '#required' => TRUE,
@@ -284,8 +323,8 @@ function wf_job_edit_form_submit($form, &$form_state) {
 
   if ($form_state['values']['op'] == t('Create and Start')) {
     $job->revision = TRUE;
+    $job->log_message = $form_state['values']['log'];
     $job->rules_event = 'started';
-    wf_job_attach_form_log_value_to_entity($job, $form_state, 'wf_job_started');
     wf_job_save($job);
   }
 }
@@ -364,4 +403,3 @@ function wf_job_delete_form_submit($form, &$form_state) {
   drupal_set_message(t("Job '@title' was successfully deleted.", array('@title' => $title)));
   $form_state['redirect'] = url('admin/content/jobs');
 }
-

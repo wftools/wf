@@ -149,18 +149,18 @@ function wf_log_revert_log_list_views() {
 
 /**
  * Revert "Log List" views.
- * Changed the sort criteria of "Job change log - Block" views display to lid.
  */
 function wf_log_update_7002(&$sandbox) {
+  // Changed the sort criteria of 'Job change log Block' views display to lid.
   wf_log_revert_log_list_views();
 }
 
 /**
  * Revert "Log List" views.
- * Changed each views display sort criteria to "Log Id Desc".
- * Added "Entity ID" filter to "Log admin List" display.
  */
 function wf_log_update_7003(&$sandbox) {
+  // Changed each views display sort criteria to "Log Id Desc".
+  // Added "Entity ID" filter to "Log admin List" display.
   wf_log_revert_log_list_views();
 }
 

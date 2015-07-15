@@ -13,7 +13,7 @@ class WfLogHandlerFieldLinkDelete extends WfLogHandlerFieldLink {
    * Method to make a new render to related field.
    * @see WfLogHandlerFieldLink::render()
    */
-  function render($values) {
+  public function render($values) {
     $type = 'wf_log';
     $dummy_wf_log = (object) array('type' => $type);
     if (!wf_log_access('edit', $dummy_wf_log)) {

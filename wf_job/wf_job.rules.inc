@@ -15,27 +15,56 @@ function wf_job_rules_event_info() {
   );
 
   $default_variables = array(
-    'job' => array('type' => 'wf_job', 'label' => t('The job affected')),
-    'environment' => array('type' => 'wf_environment', 'label' => t('The job\'s current environment')),
-    'next_environment' => array('type' => 'wf_environment', 'label' => t('The job\'s next environment or NULL')),
-    'owner' => array('type' => 'user', 'label' => t('The owner of the job')),
-    'assigned' => array('type' => 'user', 'label' => t('The user assigned the job')),
+    'job' => array(
+      'type' => 'wf_job',
+      'label' => t('The job affected'),
+    ),
+    'environment' => array(
+      'type' => 'wf_environment',
+      'label' => t("The job's current environment"),
+    ),
+    'next_environment' => array(
+      'type' => 'wf_environment',
+      'label' => t("The job's next environment or NULL"),
+    ),
+    'owner' => array(
+      'type' => 'user',
+      'label' => t('The owner of the job'),
+    ),
+    'assigned' => array(
+      'type' => 'user',
+      'label' => t('The user assigned the job'),
+    ),
+    'log' => array(
+      'type' => 'text',
+      'label' => t('The Log message'),
+    ),
   );
 
   return array(
     'wf_job_started_failed' => $defaults + array(
       'label' => t('When a job started failed'),
       'variables' => array(
-        'job' => array('type' => 'wf_job', 'label' => t('The job affected')),
-        'sites' => array('type' => 'wf_site', 'label' => t('The site affected')),
+        'job' => array(
+          'type' => 'wf_job',
+          'label' => t('The job affected'),
+        ),
+        'sites' => array(
+          'type' => 'wf_site',
+          'label' => t('The site affected'),
+        ),
+        'log' => array(
+          'type' => 'text',
+          'label' => t('The Log message'),
+        ),
       ),
     ),
     'wf_job_started' => $defaults + array(
       'label' => t('After a job is started'),
       'variables' => $default_variables,
     ),
-    'wf_job_returned_to_dev' => $defaults + array(
-      'label' => t('After a job is returned to dev'),
+    'wf_job_restarted' => $defaults + array(
+      'label' => t('After a job is restarted'),
       'variables' => $default_variables,
     ),
     'wf_job_reassigned' => $defaults + array(
@@ -59,8 +88,13 @@ function wf_job_rules_event_info() {
       'variables' => $default_variables,
     ),
     'wf_job_deployment_failed' => $defaults + array(
-      'label' => t('After a job\'s deployment to a new environment fails'),
-      'variables' => $default_variables + array('sites' => array('type' => 'wf_site', 'label' => t('The site affected'))),
+      'label' => t("After a job's deployment to a new environment fails"),
+      'variables' => $default_variables + array(
+        'sites' => array(
+          'type' => 'wf_site',
+          'label' => t('The site affected'),
+        ),
+      ),
     ),
     'wf_job_completed' => $defaults + array(
       'label' => t('After a job is deployed to the final environment'),
@@ -68,27 +102,81 @@ function wf_job_rules_event_info() {
     ),
     'wf_job_update_code_submit' => $defaults + array(
       'label' => t('When a user clicks the Update code button.'),
-      'variables' => array('job' => array('type' => 'wf_job', 'label' => t('The job affected'))),
+      'variables' => array(
+        'job' => array(
+          'type' => 'wf_job',
+          'label' => t('The job affected'),
+        ),
+        'log' => array(
+          'type' => 'text',
+          'label' => t('The Log message'),
+        ),
+      ),
     ),
     'wf_job_start_update_code' => $defaults + array(
       'label' => t('When a code update is started for a job.'),
-      'variables' => array('job' => array('type' => 'wf_job', 'label' => t('The job affected'))),
+      'variables' => array(
+        'job' => array(
+          'type' => 'wf_job',
+          'label' => t('The job affected'),
+        ),
+        'log' => array(
+          'type' => 'text',
+          'label' => t('The Log message'),
+        ),
+      ),
     ),
     'wf_job_updated_code' => $defaults + array(
-      'label' => t('After a job\'s code has been updated.'),
-      'variables' => array('job' => array('type' => 'wf_job', 'label' => t('The job affected'))),
+      'label' => t("After a job's code has been updated."),
+      'variables' => array(
+        'job' => array(
+          'type' => 'wf_job',
+          'label' => t('The job affected'),
+        ),
+        'log' => array(
+          'type' => 'text',
+          'label' => t('The Log message'),
+        ),
+      ),
     ),
     'wf_job_sandbox_built' => $defaults + array(
       'label' => t('After a job sandbox is created'),
-      'variables' => array('job' => array('type' => 'wf_job', 'label' => t('The job affected'))),
+      'variables' => array(
+        'job' => array(
+          'type' => 'wf_job',
+          'label' => t('The job affected'),
+        ),
+        'log' => array(
+          'type' => 'text',
+          'label' => t('The Log message'),
+        ),
+      ),
     ),
     'wf_job_sandbox_fail' => $defaults + array(
       'label' => t('After a job sandbox is fails to be created'),
-      'variables' => array('job' => array('type' => 'wf_job', 'label' => t('The job affected'))),
+      'variables' => array(
+        'job' => array(
+          'type' => 'wf_job',
+          'label' => t('The job affected'),
+        ),
+        'log' => array(
+          'type' => 'text',
+          'label' => t('The Log message'),
+        ),
+      ),
     ),
     'wf_job_updated_code_fail' => $defaults + array(
       'label' => t("After a job's code has failed to update."),
-      'variables' => array('job' => array('type' => 'wf_job', 'label' => t('The job affected'))),
+      'variables' => array(
+        'job' => array(
+          'type' => 'wf_job',
+          'label' => t('The job affected'),
+        ),
+        'log' => array(
+          'type' => 'text',
+          'label' => t('The Log message'),
+        ),
+      ),
     ),
   );
 }

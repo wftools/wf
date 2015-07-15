@@ -8,17 +8,19 @@
 /**
  * WF Job Entity Controller class.
  */
-class WfJobController extends EntityAPIController {
+class WfJobController extends WfEntityAPIController {
 
   /**
    * {@inheritdoc}
    */
   public function create(array $values = array()) {
-    $values += array(
-      'eid' => wf_environment_get_default(),
-    );
+    $job = parent::create($values);
 
-    return parent::create($values);
+    if (empty($job->eid)) {
+      $job->eid = wf_environment_get_default($job);
+    }
+
+    return $job;
   }
 
   /**
@@ -27,19 +29,22 @@ class WfJobController extends EntityAPIController {
    * The content built for the entity will vary depending on the $view_mode
    * parameter.
    *
-   * @param $entity
+   * @param object $entity
    *   An entity object.
-   * @param $view_mode
+   *
+   * @param string $view_mode
    *   View mode, for example 'full', 'teaser'...
-   * @param $langcode
+   *
+   * @param object $langcode
    *   (optional) A language code to use for rendering. Defaults to the global
    *   content language of the current request.
-   * @return
+   *
+   * @return array
    *   The renderable array.
    */
   public function buildContent($entity, $view_mode = 'full', $langcode = NULL, $page = TRUE) {
 
-    $entity->content = array();
+    $entity->content = parent::buildContent($entity, $view_mode, $langcode, $page);
     $entity->content += array(
       '#theme' => 'wf_job',
       '#job' => $entity,
@@ -63,11 +68,6 @@ class WfJobController extends EntityAPIController {
     module_invoke_all('entity_view', $entity, $this->entityType, $view_mode, $langcode);
 
     // Remove the build array information from the entity and return it.
-    $build = $entity->content;
-    unset($entity->content);
-
-    return $build;
+    return $entity->content;
   }
-
 }
-

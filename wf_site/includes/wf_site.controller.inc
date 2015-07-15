@@ -5,10 +5,10 @@
  * Workflow site controller class.
  */
 
-class WfSiteController extends EntityAPIController {
+class WfSiteController extends WfEntityAPIController {
 
   /**
-   * @overridden
+   * {@inheritdoc}
    */
   public function create(array $values = array()) {
     $values += array(

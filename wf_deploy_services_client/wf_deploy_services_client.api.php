@@ -12,7 +12,7 @@
 /**
  * Alter the diff data before the content is processed.
  *
- * @param array $data
+ * @param array $diff
  *   An structured array containing the diff information.
  *
  * @param object $job

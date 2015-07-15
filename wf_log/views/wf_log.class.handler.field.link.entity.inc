@@ -12,7 +12,7 @@ class WfLogHandlerFieldEntityID extends WfLogHandlerFieldLink {
    * Method to make a new render to related field.
    * @see WfLogHandlerFieldLink::render()
    */
-  function render($values) {
+  public function render($values) {
     $entity_log = wf_log_load($values->lid);
     $entity_id = $entity_log->entity;
 

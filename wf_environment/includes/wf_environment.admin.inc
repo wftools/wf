@@ -2,7 +2,7 @@
 
 /**
  * @file
- *   Workflow environment admin functions.
+ * Workflow environment admin functions.
  */
 
 /**
@@ -63,7 +63,7 @@ function wf_environment_admin_list() {
       'data' => 'Title',
       'type' => 'property',
       'specifier' => 'env',
-      'sort' => 'asc'
+      'sort' => 'asc',
     ),
     'operations' => array('data' => t('Operations')),
   );

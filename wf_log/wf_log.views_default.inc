@@ -25,7 +25,7 @@ function wf_log_views_default_views() {
   $handler->display->display_options['title'] = 'Logs';
   $handler->display->display_options['use_more_always'] = FALSE;
   $handler->display->display_options['access']['type'] = 'perm';
-  $handler->display->display_options['access']['perm'] = 'manage workflow logs';
+  $handler->display->display_options['access']['perm'] = 'view workflow log entities';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['query']['options']['query_comment'] = FALSE;
@@ -270,6 +270,8 @@ function wf_log_views_default_views() {
   $handler->display->display_options['fields']['lid']['id'] = 'lid';
   $handler->display->display_options['fields']['lid']['table'] = 'wf_log';
   $handler->display->display_options['fields']['lid']['field'] = 'lid';
+  $handler->display->display_options['fields']['lid']['label'] = 'ID';
+  $handler->display->display_options['fields']['lid']['separator'] = '';
   /* Field: Workflow Log: Entity type */
   $handler->display->display_options['fields']['entity_type']['id'] = 'entity_type';
   $handler->display->display_options['fields']['entity_type']['table'] = 'wf_log';
@@ -327,6 +329,13 @@ function wf_log_views_default_views() {
   $handler->display->display_options['filters']['entity_type']['expose']['label'] = 'Entity type';
   $handler->display->display_options['filters']['entity_type']['expose']['operator'] = 'entity_type_op';
   $handler->display->display_options['filters']['entity_type']['expose']['identifier'] = 'entity_type';
+  $handler->display->display_options['filters']['entity_type']['expose']['autocomplete_filter'] = 1;
+  $handler->display->display_options['filters']['entity_type']['expose']['autocomplete_items'] = '10';
+  $handler->display->display_options['filters']['entity_type']['expose']['autocomplete_min_chars'] = '0';
+  $handler->display->display_options['filters']['entity_type']['expose']['autocomplete_field'] = 'entity_type';
+  $handler->display->display_options['filters']['entity_type']['expose']['autocomplete_raw_suggestion'] = 1;
+  $handler->display->display_options['filters']['entity_type']['expose']['autocomplete_raw_dropdown'] = 1;
+  $handler->display->display_options['filters']['entity_type']['expose']['autocomplete_dependent'] = 0;
   /* Filter criterion: Workflow Log: Message summary */
   $handler->display->display_options['filters']['message_summary']['id'] = 'message_summary';
   $handler->display->display_options['filters']['message_summary']['table'] = 'wf_log';
@@ -355,27 +364,7 @@ function wf_log_views_default_views() {
   $handler->display->display_options['filters']['entity']['expose']['label'] = 'Entity ID';
   $handler->display->display_options['filters']['entity']['expose']['operator'] = 'entity_op';
   $handler->display->display_options['filters']['entity']['expose']['identifier'] = 'entity';
-  $handler->display->display_options['filters']['entity']['expose']['remember_roles'] = array(
-    2 => '2',
-    1 => 0,
-    3 => 0,
-    7 => 0,
-    9 => 0,
-    11 => 0,
-    12 => 0,
-    14 => 0,
-    15 => 0,
-    18 => 0,
-    17 => 0,
-    21 => 0,
-    26 => 0,
-    31 => 0,
-    36 => 0,
-    41 => 0,
-    61 => 0,
-    66 => 0,
-  );
-  $handler->display->display_options['path'] = 'admin/content/wf-logs';
+  $handler->display->display_options['path'] = 'admin/content/wf-log';
   $handler->display->display_options['menu']['type'] = 'tab';
   $handler->display->display_options['menu']['title'] = 'Logs';
   $handler->display->display_options['menu']['description'] = 'List wf logs';
@@ -986,6 +975,7 @@ function wf_log_views_default_views() {
   $handler->display->display_options['filters']['entity_type']['table'] = 'wf_log';
   $handler->display->display_options['filters']['entity_type']['field'] = 'entity_type';
   $handler->display->display_options['filters']['entity_type']['value'] = 'wf_site';
+
 
   // Add view to list of views to provide.
   $views[$view->name] = $view;

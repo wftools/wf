@@ -5,3 +5,5 @@ core = 7.x
 
 dependencies[] = diff
 dependencies[] = wf_job
+
+stylesheets[all][] = wf_deploy_services_client.css

@@ -22,7 +22,7 @@ function wf_uninstall() {
     'wf_sandbox_remote_host',
   );
 
-  foreach ($variable as $variable) {
+  foreach ($variables as $variable) {
     variable_del($variable);
   }
 }

@@ -14,10 +14,10 @@ interface WfJobUrlExternalReferencePluginInterface {
    * Converts the external reference field into links.
    *
    * @param WFJob $job
-   *  The job to create the references for.
+   *   The job to create the references for.
    *
    * @return array
-   *  A render array with the link/s.
+   *   A render array with the link/s.
    */
   public function generateExternalRef(WfJob $job);
 }
