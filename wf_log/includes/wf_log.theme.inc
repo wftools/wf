@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- *   Theme hook implementations for wf_log module
+ * Theme hook implementations for wf_log module
  */
 
 /**
  * Returns HTML for a list of available log types for log creation.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - content: An array of log types.
  *

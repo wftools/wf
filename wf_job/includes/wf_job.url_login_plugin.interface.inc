@@ -15,13 +15,13 @@ interface WfJobUrlLoginPluginInterface {
    *
    * @param WfJob $job
    *   The job to generate the link for.
-   * @param string $role
-   *   The name of the role to use for the login.
+   * @param string $env
+   *   The name of the environment. Current environment used if NULL.
    *
    * @return string
    *   The login URL
    *
    * @throws WfJobUrlException
    */
-  public function generateLoginLink(WfJob $job, $role = 'admin');
+  public function generateLoginLink(WfJob $job, $env = NULL);
 }

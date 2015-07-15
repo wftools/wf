@@ -1,6 +1,0 @@
-name = WF Gitolite
-description = WF gitolite integration.
-core = 7.x
-package = WF
-project = wf_git
-dependencies[] = gitolite

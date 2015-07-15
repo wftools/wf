@@ -2,7 +2,7 @@
 
 /**
  * @file
- * WF drush commands.
+ * Workflow Tools drush commands.
  */
 
 /**
@@ -77,13 +77,26 @@ function wf_sql_db_create() {
   $grant_stmt = $pdo->prepare("GRANT ALL PRIVILEGES ON {$escaped_db_name}.* TO :db_user@:db_host");
   $grant_stmt->bindValue(':db_user', $db_user, PDO::PARAM_STR);
   $grant_stmt->bindParam(':db_host', $db_host, PDO::PARAM_STR);
+
   foreach ($allow_hosts as $db_host) {
     if (FALSE === $user_stmt->execute()) {
-      return drush_set_error(dt('Failed to create user @db_user@db_host with password "@db_pass"', array('@db_user' => $db_user, '@db_pass' => $db_pass, '@db_host' => $db_host)));
+      $args = array(
+        '@db_user' => $db_user,
+        '@db_pass' => $db_pass,
+        '@db_host' => $db_host,
+      );
+
+      return drush_set_error(dt('Failed to create user @db_user@db_host with password "@db_pass"', $args));
     }
 
     if (FALSE === $grant_stmt->execute()) {
-      return drush_set_error(dt('Failed to grant access to @db_user@@db_host for database "@db_name"', array('@db_user' => $db_user, '@db_host' => $db_host, '@db_name' => $db_name)));
+      $args = array(
+        '@db_user' => $db_user,
+        '@db_host' => $db_host,
+        '@db_name' => $db_name,
+      );
+
+      return drush_set_error(dt('Failed to grant access to @db_user@@db_host for database "@db_name"', $args));
     }
   }
 

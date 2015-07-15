@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Contains a Views controller.
+ */
 
 /**
  * Workflow log Views Controller.

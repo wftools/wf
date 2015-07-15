@@ -65,7 +65,6 @@ function wf_job_action_start_form($form, &$form_state, $job) {
   drupal_set_title(t('Start'));
 
   $uid = $GLOBALS['user']->uid;
-  $user_entity = entity_load_single('user', $uid);
 
   $form['message'] = array(
     '#markup' => '<p>To begin work on this job please click "Start job".</p><p>This will prepare the sandbox server. You will be emailed when it is ready for use.</p>',
@@ -89,7 +88,7 @@ function wf_job_action_start_form_submit($form, &$form_state) {
 
   $job->revision = TRUE;
   $job->rules_event = 'started';
-  wf_job_attach_log_to_entity($job, t('Job Started.'), 'wf_job_started');
+  $job->log_message = t('Job Started');
   wf_job_save($job);
 
   $form_state['redirect'] = $job->uri();
@@ -101,12 +100,19 @@ function wf_job_action_start_form_submit($form, &$form_state) {
 function wf_job_action_to_dev_form($form, &$form_state, $job) {
   $job_uri = entity_uri('wf_job', $job);
   $title = entity_label('wf_job', $job);
+  $env = entity_load_single('wf_environment', wf_environment_get_default($job))->env;
+  $env_arg = array('@env' => $env);
+  $args = array(
+    '@title' => $title,
+    '@env' => $env,
+  );
+
   return confirm_form(
     $form,
-    t("Do you want to return <strong>@title</strong> to <strong>dev</strong> environment?", array('@title' => $title)),
+    t("Do you want to return <strong>@title</strong> to <strong>@env</strong> environment?", $args),
     $job_uri['path'],
-    t("Returning this job will trigger the update environment action to dev."),
-    t("Return to dev")
+    t("This job will be returned to the @env environment so further work can be performed.", $env_arg),
+    t("Return to @env", $env_arg)
   );
 }
 
@@ -118,11 +124,11 @@ function wf_job_action_to_dev_form_submit($form, &$form_state) {
   $title = entity_label('wf_job', $job);
   $job_uri = entity_uri('wf_job', $job);
 
-  wf_job_attach_log_to_entity($job, t('Returned job to dev environment.'), 'wf_job_to_dev');
-  $job->rules_event = 'returned_to_dev';
+  $job->log_message = t('Restarted work.');
+  $job->rules_event = 'restarted';
   $job->save();
 
-  drupal_set_message(t("Job '@title' was successfully returned to dev environment.", array('@title' => $title)));
+  drupal_set_message(t("Work has restarted on job '@title'.", array('@title' => $title)));
   $form_state['redirect'] = $job_uri['path'];
 }
 
@@ -157,8 +163,7 @@ function wf_job_action_reallocate_form_submit($form, &$form_state) {
   $job->owner = $form_state['values']['owner'];
   $job->assigned = $form_state['values']['assigned'];
 
-  wf_job_attach_log_to_entity($job, t('Job assigned and owner has been updated.'), 'wf_job_reallocate');
-
+  $job->log_message = t('Job assigned and owner has been updated.');
   $job->rules_event = 'reassigned';
   wf_job_save($job);
 
@@ -232,12 +237,11 @@ function wf_job_action_propose_form_validate($form, &$form_state) {
 function wf_job_action_propose_form_submit($form, &$form_state) {
   $job = reset($form_state['build_info']['args']);
   $env = wf_environment_load($job->eid);
-  $next_env = wf_environment_load($env->next_env_id);
 
   $job->revision = TRUE;
   $job->assigned = $form_state['values']['reviewer'];
   $job->rules_event = 'proposed';
-  wf_job_attach_form_log_value_to_entity($job, $form_state, 'wf_job_proposed');
+  $job->log_message = $form_state['values']['log'];
   wf_job_save($job);
 
   $form_state['redirect'] = $job->uri();
@@ -294,20 +298,17 @@ function wf_job_action_review_form_submit($form, &$form_state) {
   $job = reset($form_state['build_info']['args']);
   if (strpos($form_state['values']['op'], t('Approve for')) === 0) {
     $event = 'approved';
-    $log_type = 'wf_job_approved';
   }
   else {
     $event = 'rejected';
-    $log_type = 'wf_job_rejected';
   }
 
   $env = wf_environment_load($job->eid);
-  $next_env = wf_environment_load($env->next_env_id);
 
   $job->revision = TRUE;
   $job->assigned = $job->owner;
   $job->rules_event = $event;
-  wf_job_attach_form_log_value_to_entity($job, $form_state, $log_type);
+  $job->log_message = $form_state['values']['log'];
   wf_job_save($job);
 
   $form_state['redirect'] = $job->uri();
@@ -324,7 +325,7 @@ function wf_job_admin_settings() {
     '#title' => t('Job Status New'),
     '#description' => t('The new status of the job.'),
     '#default_value' => variable_get('wf_job_jsid_new'),
-    '#options' => wf_job_status_list(),
+    '#options' => wf_job_status_list('machine_name'),
     '#required' => FALSE,
   );
 
@@ -333,7 +334,7 @@ function wf_job_admin_settings() {
     '#title' => t('Job Status Completed'),
     '#description' => t('The completed status of the job.'),
     '#default_value' => variable_get('wf_job_jsid_completed'),
-    '#options' => wf_job_status_list(),
+    '#options' => wf_job_status_list('machine_name'),
     '#required' => FALSE,
   );
 
@@ -385,7 +386,7 @@ function wf_job_admin_settings_validate($form, &$form_state) {
 
   if (isset($values['wf_job_jsid_new']) && isset($values['wf_job_jsid_completed'])) {
     if ($values['wf_job_jsid_new'] === $values['wf_job_jsid_completed']) {
-      form_set_error('wf_job_jsid_completed', t('The status completed can\'t use the same value as new.'));
+      form_set_error('wf_job_jsid_completed', t("The status completed can't use the same value as new."));
     }
   }
 

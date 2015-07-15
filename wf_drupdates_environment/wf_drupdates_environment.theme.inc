@@ -21,11 +21,14 @@ function theme_wf_drupdates_environment($variables) {
   // Build the rows.
   $rows = array();
   foreach (element_children($element) as $key) {
+    $env_label = $element[$key]['env_id']['#label'];
+
     $rows[$key] = array(
-      'environment' => $element[$key]['env_id']['#label'],
-      'project_release' => array(
-        'data' => drupal_render($element[$key]['drupdates_release_id']),
+      'data' => array(
+        'environment' => array('data' => $env_label),
+        'project_release' => array('data' => drupal_render($element[$key]['drupdates_release_id'])),
       ),
+      'class' => array(drupal_html_class("env $env_label")),
     );
   }
 

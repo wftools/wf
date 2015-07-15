@@ -43,7 +43,7 @@ function wf_job_status_form($form, &$form_state, $job_status, $op = 'edit') {
     '#options' => array_combine($system_statuses, $system_statuses),
     '#default_value' => isset($job_status->system_status) ? $job_status->system_status : '',
     '#description' => t('The current system status.'),
-   );
+  );
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(

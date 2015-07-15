@@ -30,9 +30,7 @@ function wf_deploy_services_client_menu() {
 function wf_deploy_services_client_permission() {
   $perms = array();
 
-  $perms['view job entity diff'] = array(
-    'title' => t('View job entity diff')
-  );
+  $perms['view job entity diff'] = array('title' => t('View job entity diff'));
 
   return $perms;
 }
@@ -52,6 +50,8 @@ function wf_deploy_services_client_remote_config(WfJob $job) {
     ),
   );
 
+  drupal_alter('wf_deploy_services_client_remote_config', $config, $job);
+
   // Handle CSRF token.
   $token_url = "{$base_url}services/session/token";
   $token_response = drupal_http_request($token_url);
@@ -69,6 +69,7 @@ function wf_deploy_services_client_remote_config(WfJob $job) {
  *   Request configuration.
  *
  * @return array
+ *   An array containing the diff content.
  */
 function wf_deploy_services_client_get_diff(array $config) {
   $url = $config['url'];
@@ -76,7 +77,7 @@ function wf_deploy_services_client_get_diff(array $config) {
 
   $options = $config + array(
     'method' => 'POST',
-    'timeout' => 120, // 2 minutes
+    'timeout' => 120,
     'headers' => array(
       'Accept' => 'application/json',
       'Content-Type' => 'application/json',
@@ -85,7 +86,7 @@ function wf_deploy_services_client_get_diff(array $config) {
 
   $response = drupal_http_request($url, $options);
   if (200 != $response->code) {
-    // handle this in a try catch in calling method
+    // Handle this in a try catch in calling method.
     throw new Exception("Unable to load diff", $response->code);
   }
 

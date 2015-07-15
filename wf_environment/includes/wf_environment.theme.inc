@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- *   Theme hook implementations for wf_environment module
+ * Theme hook implementations for wf_environment module
  */
 
 /**
  * Returns HTML for a list of available environment types for job creation.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - content: An array of environment types.
  *
@@ -28,4 +28,3 @@ function theme_wf_evironment_add_list($variables) {
 
   return $output;
 }
-

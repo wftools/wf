@@ -14,7 +14,7 @@ class WfLogHandlerFieldLink extends views_handler_field {
    * Implements method __construct().
    * @see views_handler_field::construct()
    */
-  function construct() {
+  public function construct() {
     parent::construct();
     $this->additional_fields['lid'] = 'lid';
   }
@@ -23,7 +23,7 @@ class WfLogHandlerFieldLink extends views_handler_field {
    * Information about options for all kinds of purposes will be held here.
    * @see views_handler_field::option_definition()
    */
-  function option_definition() {
+  public function option_definition() {
     $options = parent::option_definition();
     $options['text'] = array('default' => '', 'translatable' => TRUE);
     return $options;
@@ -33,7 +33,7 @@ class WfLogHandlerFieldLink extends views_handler_field {
    * Build the options form.
    * @see views_handler_field::options_form()
    */
-  function options_form(&$form, &$form_state) {
+  public function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
     $form['text'] = array(
       '#type' => 'textfield',
@@ -46,7 +46,7 @@ class WfLogHandlerFieldLink extends views_handler_field {
    * Adds the field to a query.
    * @see views_handler_field::query()
    */
-  function query() {
+  public function query() {
     $this->ensure_my_table();
     $this->add_additional_fields();
   }
@@ -55,7 +55,7 @@ class WfLogHandlerFieldLink extends views_handler_field {
    * Method to make a new render to related field.
    * @see views_handler_field::render()
    */
-  function render($values) {
+  public function render($values) {
     $text = !empty($this->options['text']) ? $this->options['text'] : t('view');
     $wf_log_id = $values->{$this->aliases['lid']};
     return l($text, 'wf-log/' . $wf_log_id);

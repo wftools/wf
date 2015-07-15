@@ -13,7 +13,11 @@ function wf_job_services_resources() {
     'job' => array(
       'retrieve' => array(
         'help' => t('This method returns a job.'),
-        'file' => array('type' => 'inc', 'module' => 'wf_job', 'name' => 'wf_job.services'),
+        'file' => array(
+          'type' => 'inc',
+          'module' => 'wf_job',
+          'name' => 'wf_job.services',
+        ),
         'callback' => 'wf_job_services_retrieve',
         'access arguments' => array('administer jobs'),
         'args' => array(
@@ -28,7 +32,11 @@ function wf_job_services_resources() {
       ),
       'create' => array(
         'help' => t('This method creates a job.'),
-        'file' => array('type' => 'inc', 'module' => 'wf_job', 'name' => 'wf_job.services'),
+        'file' => array(
+          'type' => 'inc',
+          'module' => 'wf_job',
+          'name' => 'wf_job.services',
+        ),
         'callback' => 'wf_job_services_create',
         'access callback' => 'wf_job_services_access',
         'access arguments' => array('create'),
@@ -45,10 +53,14 @@ function wf_job_services_resources() {
       ),
       'update' => array(
         'help' => t('This method updates a job.'),
-        'file' => array('type' => 'inc', 'module' => 'wf_job', 'name' => 'wf_job.services'),
+        'file' => array(
+          'type' => 'inc',
+          'module' => 'wf_job',
+          'name' => 'wf_job.services',
+        ),
         'callback' => 'wf_job_services_update',
         'access callback' => 'wf_job_services_access',
-        'access arguments' => array('update'),
+        'access arguments' => array('edit'),
         'access arguments append' => TRUE,
         'args' => array(
           array(
@@ -69,7 +81,11 @@ function wf_job_services_resources() {
       ),
       'delete' => array(
         'help' => t('This method deletes a job.'),
-        'file' => array('type' => 'inc', 'module' => 'wf_job', 'name' => 'wf_job.services'),
+        'file' => array(
+          'type' => 'inc',
+          'module' => 'wf_job',
+          'name' => 'wf_job.services',
+        ),
         'callback' => 'wf_job_services_delete',
         'access callback' => 'wf_job_services_access',
         'access arguments' => array('delete'),
@@ -86,7 +102,11 @@ function wf_job_services_resources() {
       ),
       'index' => array(
         'help' => t('This method returns a listing of jobs.'),
-        'file' => array('type' => 'inc', 'module' => 'wf_job', 'name' => 'wf_job.services'),
+        'file' => array(
+          'type' => 'inc',
+          'module' => 'wf_job',
+          'name' => 'wf_job.services',
+        ),
         'callback' => 'wf_job_services_index',
         'access arguments' => array('administer jobs'),
         'args' => array(
@@ -126,10 +146,14 @@ function wf_job_services_resources() {
       ),
       'relationships' => array(
         'environment' => array(
-          'file' => array('type' => 'inc', 'module' => 'wf_job', 'name' => 'wf_job.services'),
-          'help' => t('This method returns the job\'s current environment.'),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'wf_job',
+            'name' => 'wf_job.services',
+          ),
+          'help' => t("This method returns the job's current environment."),
           'access callback' => 'wf_job_services_access',
-          'access arguments' => array('environment'),
+          'access arguments' => array('view'),
           'access arguments append' => TRUE,
           'callback' => 'wf_job_services_environment',
           'args' => array(
@@ -151,43 +175,19 @@ function wf_job_services_resources() {
           ),
         ),
       ),
-      'targeted_actions' => array(
-        'deployment' => array(
-          'file' => array('type' => 'inc', 'module' => 'wf_job', 'name' => 'wf_job.services'),
-          'help' => t('Record the outcome of a deployment.'),
-          'access callback' => 'wf_job_services_access',
-          'access arguments' => array('deployment'),
-          'access arguments append' => TRUE,
-          'callback' => 'wf_job_services_deployment',
-          'args' => array(
-            array(
-              'name' => 'jid',
-              'type' => 'int',
-              'description' => t('The id of the job for which to get an environment.'),
-              'source' => array('path' => '0'),
-              'optional' => FALSE,
-            ),
-            array(
-              'name' => 'succeeded',
-              'type' => 'struct',
-              'description' => t("An object with properties 'succeeded' and a 'message'Ê."),
-              'source' => 'data',
-              'optional' => FALSE,
-            ),
-          ),
-        )
-      ),
     ),
   );
+
   return $resources;
 }
 
 /**
  * Returns a specified job.
  *
- * @param $jid
+ * @param int $jid
  *   Unique identifier for the specified job.
- * @return
+ *
+ * @return object
  *   The job object.
  */
 function wf_job_services_retrieve($jid) {
@@ -203,9 +203,10 @@ function wf_job_services_retrieve($jid) {
 /**
  * Adds a new job to a node and returns the jid.
  *
- * @param $job
+ * @param object $job
  *   An object as would be returned from wf_job_load().
- * @return
+ *
+ * @return array
  *   Unique identifier for the job (jid) or errors if there was a problem.
  */
 function wf_job_services_create($job) {
@@ -228,11 +229,13 @@ function wf_job_services_create($job) {
 /**
  * Updates a job and returns the jid.
  *
- * @param $jid
+ * @param int $jid
  *   Unique identifier for this wf_job.
- * @param $job
+ *
+ * @param object $job
  *   An object as would be returned from wf_job_load().
- * @return
+ *
+ * @return int
  *   Unique identifier for the job (jid) or FALSE if there was a problem.
  */
 function wf_job_services_update($jid, $job) {
@@ -251,9 +254,10 @@ function wf_job_services_update($jid, $job) {
 /**
  * Delete a job.
  *
- * @param $jid
+ * @param int $jid
  *   Unique identifier of the job to delete.
- * @return
+ *
+ * @return bool
  *   True.
  */
 function wf_job_services_delete($jid) {
@@ -264,6 +268,7 @@ function wf_job_services_delete($jid) {
   }
 
   wf_job_delete($jid);
+
   return TRUE;
 }
 
@@ -277,16 +282,20 @@ function wf_job_services_delete($jid) {
  * This would return an array of objects with only jid and label defined, where
  * type = 'mytype'.
  *
- * @param $page
+ * @param int $page
  *   Page number of results to return (in pages of 20).
- * @param $fields
+ *
+ * @param array $fields
  *   The fields you want returned.
- * @param $parameters
+ *
+ * @param array $parameters
  *   An array containing fields and values used to build a sql WHERE clause
  *   indicating items to retrieve.
- * @param $page_size
+ *
+ * @param int $page_size
  *   Integer number of items to be returned.
- * @return
+ *
+ * @return array
  *   An array of job objects.
  */
 function wf_job_services_index($page, $fields, $parameters, $page_size) {
@@ -304,11 +313,13 @@ function wf_job_services_index($page, $fields, $parameters, $page_size) {
 /**
  * Returns the current or next environment for a specified job.
  *
- * @param $jid
+ * @param int $jid
  *   Unique identifier for the specified job.
+ *
  * @param string $which
  *   'current' or 'next' environment
- * @return
+ *
+ * @return object
  *   The WfEnv object.
  */
 function wf_job_services_environment($jid, $which) {
@@ -347,8 +358,12 @@ function wf_job_services_environment($jid, $which) {
  *
  * @param int $jid
  *   Unique identifier for the specified job.
+ *
  * @param array $data
  *   An array with 2 keys: 'succeeded' & 'message'
+ *
+ * @return bool
+ *   True.
  */
 function wf_job_services_deployment($jid, $data) {
   $job = wf_job_load($jid);
@@ -363,14 +378,17 @@ function wf_job_services_deployment($jid, $data) {
 /**
  * Access callback for the job resource.
  *
- * @param $op
- *  The operation that's going to be performed.
- * @param $args
- *  The arguments that will be passed to the callback.
- * @return
- *  Whether access is given or not.
+ * @param string $op
+ *   The operation that's going to be performed.
+ *
+ * @param array $args
+ *   The arguments that will be passed to the callback.
+ *
+ * @return bool
+ *   Whether access is given or not.
  */
 function wf_job_services_access($op, $args) {
   $job = empty($args[0]) ? NULL : $args[0];
+
   return wf_job_access($op, $job);
 }

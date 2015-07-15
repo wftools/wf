@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- *   Workflow module
+ * Workflow module
  */
 
 define('WF_CODE_INDENT_SPACES', 2);
@@ -12,7 +12,7 @@ define('WF_CODE_INDENT_SPACES', 2);
 function wf_menu() {
   $items['admin/config/development/wf'] = array(
     'title' => 'WF Base',
-    'description' => t('Configure base settings for WF.'),
+    'description' => 'Configure base settings for WF.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('wf_settings_form'),
     'access arguments' => array('administer'),

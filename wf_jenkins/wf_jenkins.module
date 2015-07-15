@@ -1,59 +1,253 @@
 <?php
 /**
  * @file
- * Code for the wf_jenkins feature. Drupal requires this blank file.
+ * WF Job / Jenkins integration module functions.
  */
 
 /**
- * The Action function for 'wf_jenkins_update_code_submit'.
+ * Implements hook_menu().
  */
-function wf_jenkins_update_code_submit($job) {
-  wf_jenkins_start_update_code($job);
-}
+function wf_jenkins_menu() {
+  $items = array();
 
-/**
- * Inform Drupal that a job's code has been updated.
- */
-function wf_jenkins_updated_code($job, $succeeded) {
-  $outcome = ($succeeded ? 'completed' : 'failed');
-  $reply = wf_job_reply_save(
-    $job,
-    t('Job code update @outcome', array('@outcome' => $outcome)),
-    t('A code update has @outcome.', array('@outcome' => $outcome))
+  $items['job/%wf_job/jenkins-log'] = array(
+    'title' => 'View build log',
+    'description' => 'View the log of the current jenkins build for the job.',
+    'page callback' => 'wf_jenkins_stream_log',
+    'page arguments' => array(1),
+    'access callback' => 'wf_jenkins_access_log',
+    'access arguments' => array('wf_job', 1),
+    'type' => MENU_LOCAL_ACTION,
   );
 
-  wf_jenkins_action_event_invoke('updated_code', $job);
+  return $items;
 }
 
+
 /**
- * Inform Drupal that a job's code has been updated.
+ * Implements hook_permission().
  */
-function wf_jenkins_start_update_code($job) {
-  $path = 'job/update-code/buildWithParameters';
-  $query = array(
-    'GIT_BRANCH' => wf_job_slug($job->jid),
+function wf_jenkins_permission() {
+  $perms = array();
+
+  $perms['view wf jenkins log'] = array(
+    'title' => t('View Jenkins job for WF Job'),
   );
-  // Schedule the code update in Jenkins.
-  jenkins_request($path, $query);
 
-  drupal_set_message(t('A code update for this job has commenced'));
-  $reply = wf_job_reply_save($job, t('Starting code update'), t('A code update has commenced.'));
-
-  wf_jenkins_action_event_invoke('start_update_code', $job);
+  return $perms;
 }
 
 /**
- * Trigger a rules event for the given job.
+ * Checks if the current user has access to the Jenkins log.
  */
-function wf_jenkins_action_event_invoke($event, $job) {
-  $owner = user_load($job->owner);
-  $assigned = user_load($job->assigned);
-  $env = wf_environment_load($job->eid);
+function wf_jenkins_access_log($entity_type, $entity) {
 
-  rules_invoke_event_by_args("wf_job_$event", array(
+  // Work from least expensive to most expensive.
+  if (!user_access('view wf jenkins log')) {
+    return FALSE;
+  }
+
+  $entity_id = entity_id($entity_type, $entity);
+  if (is_null(wf_jenkins_get_build($entity_id))) {
+    return FALSE;
+  }
+
+  return entity_access('view', $entity_type, $entity);
+}
+
+/**
+ * Waits for a Jenkins build to commence.
+ *
+ * @param int $jid
+ *   The WF job id.
+ * @param string $job
+ *   The name of the Jenkins job.
+ * @param int $queue_id
+ *   The id of the build in the Jenkins queue.
+ * @param array $context
+ *   The batch API context info.
+ *
+ * @return bool
+ *   Returns TRUE when build has commenced.
+ */
+function wf_jenkins_batch_wait_for_build($jid, $job, $queue_id, &$context) {
+  if (!isset($context['sandbox']['start_time'])) {
+    $context['sandbox']['start_time'] = REQUEST_TIME;
+    $context['finished'] = 0;
+  }
+
+  $build_info = jenkins_build_get_info_from_queue_id($queue_id);
+  $building = $build_info['building'];
+  if ($building) {
+    wf_jenkins_set_build($jid, $job, $queue_id, $build_info['build_id']);
+    $context['finished'] = 1;
+    $context['message'] = t('Build is running. Redirecting to log.');
+    return TRUE;
+  }
+
+  // 1200 = 20 mins * 60 seconds.
+  $wait_time = 1200;
+  $context['finished'] = (REQUEST_TIME - $context['sandbox']['start_time']) / $wait_time;
+  $context['message'] = t('Reason for delay: @message', array('@message' => $build_info['message']));
+}
+
+/**
+ * Streams the Jenkins log for a WF Job.
+ *
+ * @param WfJob $job
+ *   The job to use for the log streaming.
+ *
+ * @return string
+ *   The log contents or NULL if printed inline.
+ */
+function wf_jenkins_stream_log($job) {
+  $jid = (int) $job->jid;
+  $inline = !empty($_GET['colorbox']);
+  $build = wf_jenkins_get_build($jid);
+
+  if (is_null($build)) {
+    return wf_jenkins_render_output(t('No pending Jenkins build found.'), $inline);
+  }
+
+  // Sometimes there is no queue ID because the job is already building.
+  if (!$build['queue_id']) {
+    $build['build_id'] = jenkins_build_get_latest_id($build['job']);
+  }
+
+  if (isset($build['build_id'])) {
+    $output = jenkins_log($build['job'], $build['build_id']);
+    return wf_jenkins_render_output($output, $inline);
+  }
+
+  $build_info = jenkins_build_get_info_from_queue_id($build['queue_id']);
+
+  if ($build_info['error']) {
+    wf_jenkins_unset_build($jid);
+    return wf_jenkins_render_output($build_info['message'], $inline);
+  }
+
+  $uri = entity_uri('wf_job', $job);
+  $link = l(t('Return to job.'), $uri['path'], $uri['options']);
+  $batch = array(
+    'title' => t('Jenkins build pending'),
+    'operations' => array(
+      array(
+        'wf_jenkins_batch_wait_for_build',
+        array($jid, $build['job'], $build['queue_id']),
+      ),
+    ),
+    'progress_message' => t('Waiting for build to commence. Request sent @elapsed ago. !link', array('!link' => $link)),
+  );
+
+  batch_set($batch);
+  batch_process("job/{$jid}/jenkins-log");
+  return wf_jenkins_render_output($build_info['message'], $inline);
+}
+
+/**
+ * Fetches the current Jenkins build for a WF job.
+ *
+ * @param int $jid
+ *   The id of the WF job.
+ *
+ * @return array|NULL
+ *   The build information if found, or NULL.
+ */
+function wf_jenkins_get_build($jid) {
+  $mappings = variable_get('wf_jenkins_mapping', array());
+  if (!empty($mappings[$jid])) {
+    return $mappings[$jid];
+  }
+
+  return NULL;
+}
+
+/**
+ * Records the current Jenkins build for a WF job.
+ *
+ * @param int $jid
+ *   The id of the WF job.
+ * @param string $job
+ *   The name of the jenkins job.
+ * @param int $qid
+ *   The queue id of the pending jenkins build.
+ * @param int $bid
+ *   The build id of the jenkins job.
+ */
+function wf_jenkins_set_build($jid, $job, $qid, $bid = NULL) {
+  $mappings = variable_get('wf_jenkins_mapping', array());
+  $mappings[$jid] = array(
     'job' => $job,
-    'environment' => $env,
-    'owner' => $owner,
-    'assigned' => $assigned,
-  ));
+    'queue_id' => $qid,
+  );
+
+  // Rules passes the config as the last arg,
+  // the garbage data breaks the mapping.
+  if ($bid && !is_array($bid)) {
+    $mappings[$jid]['build_id'] = $bid;
+  }
+
+  variable_set('wf_jenkins_mapping', $mappings);
+}
+
+/**
+ * Removes the Jenkins job information for a WF job.
+ *
+ * @param int $jid
+ *   The id of the WF job.
+ */
+function wf_jenkins_unset_build($jid) {
+  $mappings = variable_get('wf_jenkins_mapping', array());
+  if (!empty($mappings[$jid])) {
+    unset($mappings[$jid]);
+    variable_set('wf_jenkins_mapping', $mappings);
+  }
+}
+
+/**
+ * Implements hook_preprocess_menu_local_task().
+ */
+function wf_jenkins_preprocess_menu_local_action(&$variables) {
+  $link = &$variables['element']['#link'];
+
+  if (!isset($link['path']) || 'job/%/jenkins-log' != $link['path'] || !module_exists('colorbox')) {
+    return;
+  }
+
+  if (!isset($link['localized_options'])) {
+    $link['localized_options'] = array();
+  }
+
+  $link['localized_options'] += array(
+    'query' => array(
+      'colorbox' => TRUE,
+      'height' => '90%',
+      'iframe' => 'true',
+      'width' => '90%',
+    ),
+    'attributes' => array(
+      'class' => 'colorbox-load',
+    ),
+  );
+}
+
+/**
+ * Helps render output for wf_jenkins logs.
+ *
+ * @param string $output
+ *   The output to be rendered.
+ * @param bool $inline
+ *   Is the content to be rendered inline?
+ *
+ * @return string
+ *   The markup to be rendered to the user.
+ */
+function wf_jenkins_render_output($output, $inline) {
+  if (!$inline) {
+    return $output;
+  }
+
+  $markup = '<html><head><title></title>' . drupal_get_css() . drupal_get_js() . '</head><body style="background-color: #fff;">' . $output . '</body></html>';
+  print $markup;
+  drupal_exit();
 }

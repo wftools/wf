@@ -121,7 +121,7 @@ function wf_drupdates_environment_element_process($element, &$form_state, &$form
   $element['drupdates_release_id'] = array(
     '#type' => 'select',
     '#options' => $element['#release'],
-    '#empty_option' => t('- Select -'),
+    '#empty_option' => t('- Select a value -'),
     '#empty_value' => 0,
     '#default_value' => $element['#default_value'],
   );
