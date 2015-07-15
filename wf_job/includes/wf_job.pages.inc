@@ -323,7 +323,11 @@ function wf_job_edit_form_submit($form, &$form_state) {
 
   if ($form_state['values']['op'] == t('Create and Start')) {
     $job->revision = TRUE;
-    $job->log_message = $form_state['values']['log'];
+
+    if (isset($form_state['values']['log'])) {
+      $job->log_message = $form_state['values']['log'];
+    }
+
     $job->rules_event = 'started';
     wf_job_save($job);
   }

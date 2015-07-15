@@ -6,6 +6,7 @@ project = wf
 
 dependencies[] = wf_job
 dependencies[] = entity
+dependencies[] = realname
 dependencies[] = views
 dependencies[] = rules
 dependencies[] = uuid
