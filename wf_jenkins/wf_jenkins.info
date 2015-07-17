@@ -1,6 +1,8 @@
 name = WF Jenkins
-description = WF Jenkins support functions.
+description = WF / Jenkins integration.
 core = 7.x
 package = WF
-project = wf_jenkins
+dependencies[] = entity
 dependencies[] = jenkins
+dependencies[] = rules
+dependencies[] = wf_job
