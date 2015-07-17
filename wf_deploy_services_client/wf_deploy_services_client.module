@@ -50,6 +50,8 @@ function wf_deploy_services_client_remote_config(WfJob $job) {
     ),
   );
 
+  drupal_alter('wf_deploy_services_client_remote_config', $config, $job);
+
   // Handle CSRF token.
   $token_url = "{$base_url}services/session/token";
   $token_response = drupal_http_request($token_url);
