@@ -15,6 +15,4 @@ class WfLogController extends EntityAPIController {
 
     return parent::create($values);
   }
-
 }
-

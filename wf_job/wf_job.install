@@ -300,7 +300,7 @@ function wf_job_uninstall() {
     'wf_job_login_plugin',
   );
 
-  foreach ($variable as $variable) {
+  foreach ($variables as $variable) {
     variable_del($variable);
   }
 }
@@ -308,7 +308,7 @@ function wf_job_uninstall() {
 /**
  * Create default job status records.
  *
- * @param $table_name string
+ * @param string $table_name
  *   The name of the table to insert the records into.
  */
 function _wf_job_set_default_statuses($table_name) {
@@ -348,7 +348,7 @@ function wf_job_update_7001($sandbox) {
 }
 
 /**
- * Add bundle table
+ * Add bundle table.
  */
 function wf_job_update_7002($sandbox) {
   $name = 'wf_job_bundle';
@@ -461,10 +461,9 @@ function wf_job_update_7008($sandbox) {
 }
 
 /**
- * Add new column 'detail' to the wf_job_bundle table
+ * Add new column 'detail' to the wf_job_bundle table.
  */
 function wf_job_update_7009($sandbox) {
-
   if (db_field_exists('wf_job_bundle', 'detail')) {
     return;
   }

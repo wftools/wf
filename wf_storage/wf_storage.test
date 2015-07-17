@@ -22,7 +22,7 @@ class WfStorageUnitTest extends DrupalUnitTestCase {
   }
 
   /**
-   *  {@inheritdoc}
+   * {@inheritdoc}
    */
   public function setUp() {
     drupal_load('module', 'wf_storage');
@@ -55,7 +55,7 @@ class WfStorageTest extends DrupalWebTestCase {
   }
 
   /**
-   *  {@inheritdoc}
+   * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp('wf_storage');
@@ -90,7 +90,7 @@ class WfStorageTest extends DrupalWebTestCase {
   /**
    * Tests deleting data.
    */
-  function testDelete() {
+  public function testDelete() {
     $key = wf_storage_generate_key('test', 3, 'test');
 
     $value = $this->randomString();
@@ -105,7 +105,7 @@ class WfStorageTest extends DrupalWebTestCase {
   /**
    * Tests wildcard deleting of data.
    */
-  function testDeleteWildcard() {
+  public function testDeleteWildcard() {
     $base_key = 'test:4:';
     $count = 3;
 

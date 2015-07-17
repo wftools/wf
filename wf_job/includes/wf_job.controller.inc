@@ -27,19 +27,22 @@ class WfJobController extends EntityAPIController {
    * The content built for the entity will vary depending on the $view_mode
    * parameter.
    *
-   * @param $entity
+   * @param object $entity
    *   An entity object.
-   * @param $view_mode
+   *
+   * @param string $view_mode
    *   View mode, for example 'full', 'teaser'...
-   * @param $langcode
+   *
+   * @param object $langcode
    *   (optional) A language code to use for rendering. Defaults to the global
    *   content language of the current request.
-   * @return
+   *
+   * @return array
    *   The renderable array.
    */
   public function buildContent($entity, $view_mode = 'full', $langcode = NULL, $page = TRUE) {
 
-    $entity->content = array();
+    $entity->content = parent::buildContent($entity, $view_mode, $langcode, $page);
     $entity->content += array(
       '#theme' => 'wf_job',
       '#job' => $entity,

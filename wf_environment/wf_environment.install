@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Workflow Environment Management install.
+ */
 
 /**
  * Implements hook_schema().
@@ -222,4 +226,3 @@ function wf_environment_update_7000($sandbox) {
   $table = $schema[$name];
   db_create_table($name, $table);
 }
-

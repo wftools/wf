@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * WF log entity Views controller.
+ */
 
 /**
  * Workflow log Views Controller.

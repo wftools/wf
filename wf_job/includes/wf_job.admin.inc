@@ -385,7 +385,7 @@ function wf_job_admin_settings_validate($form, &$form_state) {
 
   if (isset($values['wf_job_jsid_new']) && isset($values['wf_job_jsid_completed'])) {
     if ($values['wf_job_jsid_new'] === $values['wf_job_jsid_completed']) {
-      form_set_error('wf_job_jsid_completed', t('The status completed can\'t use the same value as new.'));
+      form_set_error('wf_job_jsid_completed', t("The status completed can't use the same value as new."));
     }
   }
 

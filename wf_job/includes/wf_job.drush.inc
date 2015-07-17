@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- *  Workflow Job Drush Commands
+ * Workflow Job Drush Commands
  */
 
 /**
@@ -21,7 +21,7 @@ function wf_job_drush_command() {
     ),
   );
 
-  // Services wrapper commands
+  // Services wrapper commands.
   $items['job-retrieve'] = array(
     'description' => t('Returns a JSON encoded job.'),
     'examples' => array(
@@ -47,7 +47,7 @@ function wf_job_drush_command() {
   );
 
   $items['job-delete'] = array(
-    'description' => t('Deleted a job by it\'s jid'),
+    'description' => t("Deleted a job by it's jid"),
     'examples' => array(
       'drush job-delete <jid>' => dt('Deletes the job specified by <jid>'),
     ),
@@ -78,9 +78,9 @@ function wf_job_drush_command() {
   );
 
   $items['job-deployment'] = array(
-    'description' =>  dt('Record the outcome of a deployment.'),
+    'description' => dt('Record the outcome of a deployment.'),
     'options' => array(
-      'succeeded' => dt('Whether the job suceeded (1) or failed (0).'),
+      'succeeded' => dt('Whether the job succeeded (1) or failed (0).'),
       'message' => dt('A message about the deployment'),
     ),
     'examples' => array(
@@ -93,7 +93,7 @@ function wf_job_drush_command() {
 }
 
 /**
- * Implementation of job-drush-aliases drush command. Renders aliases.drush.rc file.
+ * Implementation of job-drush-aliases drush command.
  */
 function drush_wf_job_job_drush_aliases() {
   $aliases = wf_job_drush_aliases();
@@ -108,7 +108,7 @@ function drush_wf_job_job_drush_aliases() {
 }
 
 /**
- * Services wrappers
+ * Services wrappers.
  */
 function wf_job_drush_services_invoke($command) {
   module_load_include('inc', 'wf_job', 'wf_job.services');

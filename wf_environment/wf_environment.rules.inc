@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- *  Rules module hook implementations.
+ * Rules module hook implementations.
  */
 
 /**
@@ -77,12 +77,12 @@ function wf_environment_add_user_ssh_private_key($variables) {
     $filename = basename($keypair['private_key']);
     $new_file = "/tmp/$filename";
 
-    // Copy the private key to the server
+    // Copy the private key to the server.
     if (FALSE === $shell->run('scp', array(), array($keypair['private_key'], "$env_url:$new_file"))) {
       throw new RuntimeException(t("Could not copy the new private key to @env: @error", array('@env' => $env->env, '@error' => $shell->getError())));
     }
 
-    // Install the file on the remote server
+    // Install the file on the remote server.
     $commands = array(
       "chmod 644 $new_file",
       "sudo -u $owner -H install-ssh-file.sh $new_file",
@@ -102,4 +102,3 @@ function wf_environment_add_user_ssh_private_key($variables) {
     watchdog_exception('wf_environment', $e);
   }
 }
-

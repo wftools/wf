@@ -46,7 +46,7 @@ function wf_storage_put($key, $data) {
  */
 function wf_storage_get($key) {
   $data = db_select('wf_storage', 'wfs')
-    ->fields('wfs',  array('data'))
+    ->fields('wfs', array('data'))
     ->condition('skid', $key)
     ->execute()
     ->fetchField();
@@ -82,9 +82,11 @@ function wf_storage_delete_wildcard($key) {
     case 2:
       $lookup = implode(':', $parts) . ':';
       break;
+
     case 3:
       $lookup = "{$parts[0]}:{$parts[1]}:%";
       break;
+
     default:
       throw new Exception('Invalid key');
   }

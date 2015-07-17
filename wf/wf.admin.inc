@@ -1,11 +1,11 @@
 <?php
 /**
  * @file
- *  Workflow admin pages
+ * WF admin pages
  */
 
 /**
- * Settings form for workflow module.
+ * Settings form for WF Tools module.
  */
 function wf_settings_form($form, &$form_state) {
   $form = array();
@@ -38,6 +38,6 @@ function wf_settings_form_validate($form, &$form_state) {
   $values =& $form_state['values'];
 
   if (!empty($values['wf_sandbox_remote_host']) && $values['wf_sandbox_remote_host'] === gethostbyname($values['wf_sandbox_remote_host'])) {
-    form_set_error('wf_sandbox_remote_host', t('The Remote host address isn\'t corresponding to a given Internet host name.'));
+    form_set_error('wf_sandbox_remote_host', t("The Remote host address isn't corresponding to a given Internet host name."));
   }
 }

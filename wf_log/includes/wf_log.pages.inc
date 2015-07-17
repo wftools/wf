@@ -145,7 +145,7 @@ function wf_log_admin_form_validate($form, &$form_state) {
   $user_name = $form_state['values']['uid'];
   $user = wf_log_get_user_id_by_name($user_name);
   if (!$user) {
-    // User doesn't exist
+    // User doesn't exist.
     $error_message = t('The selected user does not exist.');
     form_set_error('uid', $error_message);
   }
@@ -216,6 +216,7 @@ function wf_log_entity_types_list() {
  * Returns the user ID, giving the user name.
  *
  * @param string $user_name
+ *   The given user.
  */
 function wf_log_get_user_id_by_name($user_name) {
   $user_id = &drupal_static(__FUNCTION__);
@@ -232,6 +233,7 @@ function wf_log_get_user_id_by_name($user_name) {
  * Returns the user name, giving the user ID.
  *
  * @param string $uid
+ *   The given user ID.
  */
 function wf_log_get_user_name_by_id($uid) {
   $user = user_load($uid);
@@ -296,7 +298,7 @@ function wf_log_page_add() {
     case 0:
       $create_link = '';
       if (user_access('administer workflow log entities')) {
-        $create_link = l('Create new log type', 'admin/structure/wf-log-types/add');
+        $create_link = l(t('Create new log type'), 'admin/structure/wf-log-types/add');
       }
       return '<p>' . t('You have not created any Log types yet. ') . $create_link . '</p>';
 

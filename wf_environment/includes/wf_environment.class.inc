@@ -4,6 +4,7 @@
  * @file
  * Workflow Environment class.
  */
+
 class WfEnvironment extends Entity {
 
   public $is_new = FALSE;

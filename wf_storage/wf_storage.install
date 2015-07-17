@@ -6,18 +6,6 @@
  */
 
 /**
- * Implements hook_install().
- */
-function wf_storage_install() {
-}
-
-/**
- * Implements hook_uninstall().
- */
-function wf_storage_uninstall() {
-}
-
-/**
  * Implements hook_schema().
  */
 function wf_storage_schema() {

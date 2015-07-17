@@ -364,7 +364,6 @@ function wf_site_edit_form($form, $form_state, $site) {
     );
   }
   else {
-    $sid = NULL;
     $form['is_new'] = array(
       '#type' => 'value',
       '#value' => TRUE,
@@ -634,13 +633,10 @@ function wf_site_load_bundles() {
  * @param string $entity_type
  *   (optional) Leave it to NULL to get the property from $entity.
  *
- * @return boolean
+ * @return bool
  *   Whether access is allowed or not.
  */
 function wf_site_access($op, $entity = NULL, $account = NULL, $entity_type = NULL) {
-
-  global $user;
-
   if (user_access('administer sites', $account)) {
     return TRUE;
   }
@@ -707,7 +703,7 @@ function wf_site_create_access() {
  *   (optional) The user to check for.
  *   Leave it to NULL to check for the global user.
  *
- * @return boolean
+ * @return bool
  *   Whether access is allowed or not.
  */
 function wf_site_type_access($op, $type = NULL, $account = NULL) {
@@ -812,8 +808,8 @@ function wf_site_get_job_count($site_id) {
   $fields = array();
   $field_info = field_info_instances('wf_job');
 
-  foreach ($field_info as $bundle => $info) {
-    foreach ($info as $field => $data) {
+  foreach ($field_info as $info) {
+    foreach ($info as $data) {
       if (!empty($data['widget']['module']) && 'entityreference' == $data['widget']['module']) {
         $field_info = field_info_field($data['field_name']);
         if ('wf_site' == $field_info['settings']['target_type']) {

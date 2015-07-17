@@ -49,7 +49,7 @@ function wf_job_edit($job = NULL) {
 /**
  * Job edit form.
  */
-function wf_job_edit_form($form, $form_state, $job) {
+function wf_job_edit_form($form, &$form_state, $job) {
   global $user;
 
   ctools_include('plugins');
@@ -364,4 +364,3 @@ function wf_job_delete_form_submit($form, &$form_state) {
   drupal_set_message(t("Job '@title' was successfully deleted.", array('@title' => $title)));
   $form_state['redirect'] = url('admin/content/jobs');
 }
-

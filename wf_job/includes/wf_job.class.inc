@@ -4,6 +4,7 @@
  * @file
  * Workflow Job class.
  */
+
 class WfJob extends Entity {
 
   public $is_new = FALSE;
@@ -62,6 +63,17 @@ class WfJob extends Entity {
   }
 
   /**
+   * Checks if the job is in the default environment.
+   *
+   * @return bool
+   *   Returns TRUE if the job is in the default environment.
+   */
+  public function isInDefaultEnv() {
+    $default_env = wf_environment_get_default($this);
+    return $this->eid == $default_env;
+  }
+
+  /**
    * Saves the entity.
    */
   public function save() {
@@ -76,7 +88,7 @@ class WfJob extends Entity {
       $this->revision = TRUE;
     }
 
-    parent::save();
+    return parent::save();
   }
 
   /**
@@ -86,7 +98,7 @@ class WfJob extends Entity {
    *   The name of the status to set for the job.
    *
    * @return bool
-   *  Returns TRUE if the status name is valid, otherwise FALSE.
+   *   Returns TRUE if the status name is valid, otherwise FALSE.
    */
   public function setStatusName($status_name) {
     $status = wf_job_load_status_by_name($status_name);

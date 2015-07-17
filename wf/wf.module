@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- *   Workflow module
+ * WF module functions.
  */
 
 define('WF_CODE_INDENT_SPACES', 2);

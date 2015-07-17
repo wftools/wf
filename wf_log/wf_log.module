@@ -361,7 +361,7 @@ function wf_log_view(WfLog $log, $view_mode = 'full') {
   $output = reset($out['wf_log']);
 
   if (module_exists('colorbox') && isset($_GET['iframe'])) {
-    print(render($output));
+    print render($output);
     drupal_exit();
   }
 
@@ -463,7 +463,7 @@ function wf_log_permission() {
 /**
  * Check if the user has all permissions.
  *
- * @return boolean
+ * @return bool
  *   Whether access is allowed or not.
  */
 function wf_log_manage_logs_access() {
@@ -490,7 +490,7 @@ function wf_log_manage_logs_access() {
  *   (optional) The user to check for. Leave it to NULL to check for the global
  *    user.
  *
- * @return boolean
+ * @return bool
  *   Whether access is allowed or not.
  */
 function wf_log_bundle_access($op, $type = NULL, $account = NULL) {
@@ -651,7 +651,7 @@ function wf_log_block_view_views_log_list_job_change_log_block_alter(&$data, $bl
 
   $data['content']['#attached']['js'][$js] = array(
     'type' => 'file',
-   'scope' => 'header',
+    'scope' => 'header',
   );
 }
 
@@ -748,11 +748,11 @@ function wf_log_attach_log_to_entity(&$entity, $log_value, $log_type) {
 /**
  * Returns an array containing the log IDs of a given entity_id.
  *
- * @param number $entity_id
- *   The given entity_id.
- *
  * @param string $entity_type
  *   The given entity type.
+ *
+ * @param int $entity_id
+ *   The given entity_id.
  *
  * @return array
  *   An array containing the Log IDs.

@@ -3,6 +3,7 @@ description = WF Job management component.
 core = 7.x
 package = WF
 project = wf
+
 dependencies[] = ctools
 dependencies[] = entity
 dependencies[] = rules
