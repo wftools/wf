@@ -292,7 +292,7 @@ function wf_environment_entity_property_info() {
   );
 
   $properties['bundle'] = array(
-    'label' => t('Environment Type'),
+    'label' => t('Type'),
     'type' => 'token',
     'description' => t('The environment type.'),
     'schema field' => 'bundle',
@@ -332,7 +332,7 @@ function wf_environment_entity_property_info() {
   );
 
   $properties['active'] = array(
-    'label' => t('Environment is Active'),
+    'label' => t('Active'),
     'type' => 'boolean',
     'description' => t('Is the environment active?'),
     'schema field' => 'active',
@@ -340,7 +340,7 @@ function wf_environment_entity_property_info() {
   );
 
   $properties['created'] = array(
-    'label' => t('Date Created'),
+    'label' => t('Created'),
     'type' => 'date',
     'description' => t('The date the environment was created.'),
     'schema field' => 'created',
@@ -348,7 +348,7 @@ function wf_environment_entity_property_info() {
   );
 
   $properties['changed'] = array(
-    'label' => t('Date Changed'),
+    'label' => t('Last Modified'),
     'type' => 'date',
     'description' => t('The date the environment was last modified.'),
     'schema field' => 'changed',

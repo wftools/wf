@@ -45,9 +45,9 @@ function wf_job_schema() {
         'not null' => TRUE,
       ),
       'reference' => array(
-        'description' => 'Reference number for the job.',
+        'description' => 'External references for the job.',
         'type' => 'varchar',
-        'length' => '50',
+        'length' => '100',
         'not null' => FALSE,
       ),
       'details' => array(
@@ -132,9 +132,9 @@ function wf_job_schema() {
         'not null' => TRUE,
       ),
       'reference' => array(
-        'description' => 'Reference number for the job.',
+        'description' => 'External references for the job.',
         'type' => 'varchar',
-        'length' => '50',
+        'length' => '100',
         'not null' => TRUE,
       ),
       'details' => array(
@@ -472,5 +472,22 @@ function wf_job_update_7009($sandbox) {
     'description' => 'The detail of this wf_job type.',
     'type' => 'text',
   );
-  db_add_field( 'wf_job_bundle', 'detail', $spec);
+
+  db_add_field('wf_job_bundle', 'detail', $spec);
+}
+
+/**
+ * Extend the length of the references field.
+ */
+function wf_job_update_7010($sandbox) {
+  $spec = array(
+    'description' => 'External references for the job.',
+    'type' => 'varchar',
+    'length' => '100',
+    'not null' => FALSE,
+  );
+
+  foreach (array('wf_job', 'wf_job_revision') as $table) {
+    db_change_field($table, 'reference', 'reference', $spec);
+  }
 }

@@ -105,7 +105,7 @@ function wf_job_edit_form($form, &$form_state, $job) {
 
   $form['title'] = array(
     '#type' => 'textfield',
-    '#title' => t('Job Name'),
+    '#title' => t('Title'),
     '#default_value' => $job->title,
     '#required' => TRUE,
     '#maxlength' => 255,
@@ -113,10 +113,10 @@ function wf_job_edit_form($form, &$form_state, $job) {
 
   $form['reference'] = array(
     '#type' => 'textfield',
-    '#title' => t('External Reference'),
+    '#title' => t('Ticket Reference/s'),
     '#default_value' => $job->reference,
     '#required' => FALSE,
-    '#maxlength' => 50,
+    '#maxlength' => 100,
   );
 
   $form['details'] = array(
@@ -137,7 +137,7 @@ function wf_job_edit_form($form, &$form_state, $job) {
 
   $form['owner'] = array(
     '#type' => 'select',
-    '#title' => t('Owner'),
+    '#title' => t('Job Owner'),
     '#options' => $handler->getOwners($job),
     '#default_value' => $default_owner,
     '#required' => TRUE,

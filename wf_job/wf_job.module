@@ -216,7 +216,7 @@ function wf_job_menu() {
     'weight' => -10,
   );
   $items['job/%wf_job/visit'] = array(
-    'title' => 'Visit Sandbox',
+    'title' => 'Visit job',
     'access callback' => 'wf_job_access',
     'access arguments' => array('visit', 1),
     'page callback' => 'wf_job_visit',
@@ -225,7 +225,7 @@ function wf_job_menu() {
     'weight' => 10,
   );
   $items['job/%wf_job/login'] = array(
-    'title' => 'Login to dev sandbox',
+    'title' => 'Login to job',
     'access callback' => 'wf_job_access',
     'access arguments' => array('login', 1),
     'page callback' => 'wf_job_login_page',
@@ -602,9 +602,9 @@ function wf_job_entity_property_info() {
   );
 
   $properties['bundle'] = array(
-    'label' => t('Bundle'),
-    'type' => 'text',
-    'description' => t('The job bundle.  This value is always job.'),
+    'label' => t('Job Type'),
+    'type' => 'wf_job_bundle',
+    'description' => t('The type bundle.'),
     'schema field' => 'bundle',
     'extra_fields' => array('display'),
   );
@@ -1613,8 +1613,8 @@ function wf_job_wf_log_info() {
   );
 
   $logs['wf_job_to_dev'] = array(
-    'title' => t('Returned to dev'),
-    'description' => t('Returned job to dev environment.'),
+    'title' => t('Restarted work'),
+    'description' => t('Returned job to default environment.'),
   );
 
   $logs['wf_job_reallocate'] = array(
