@@ -115,8 +115,8 @@ class WfJobAclStandard implements WfJobAcl {
         $owner = $job->owner->value();
         return isset($owner) && $owner->uid == $user->uid && user_access($perm, $user);
 
-      case 'to-dev':
-        return user_access('return job to dev', $user);
+      case 'restart':
+        return user_access('restart job', $user);
 
       case 'reallocate':
         return user_access('reallocate job', $user);
@@ -169,26 +169,25 @@ class WfJobAclStandard implements WfJobAcl {
         return $is_default_env && $status != $default_status;
 
       case 'update_code':
-        $is_default_env = ($env->id->value() == wf_environment_get_default());
-        $is_job_started = ($status == $statuses['started']->jsid);
+        $is_job_started = ('started' == $status);
 
         return $is_default_env && $is_job_started;
 
       case 'propose':
-        return $has_next_env && ($status == $statuses['started']->jsid);
+        return $has_next_env && ('started' == $status);
 
       case 'review':
-        return $has_next_env && ($status == $statuses['in_review']->jsid);
+        return $has_next_env && ('in_review' == $status);
 
-      case 'to-dev':
+      case 'restart':
         $is_completed = ($status !== variable_get('wf_job_jsid_completed'));
-        return !$is_default_env && $is_completed;
+        return !$is_default_env && !$is_completed;
 
       case 'reallocate':
         return $status != variable_get('wf_job_jsid_completed');
 
       case 'diff':
-        $invalid_states = array($statuses['new']->jsid);
+        $invalid_states = array('new');
 
         return !in_array($status, $invalid_states);
 

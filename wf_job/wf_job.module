@@ -172,11 +172,10 @@ function wf_job_menu() {
     'file' => 'includes/wf_job.admin.inc',
     'weight' => -10,
   );
-  $items['job/%wf_job/to-dev'] = array(
-    'title callback' => 'wf_job_action_title',
-    'title arguments' => array(1, 'return to dev'),
+  $items['job/%wf_job/restart'] = array(
+    'title' => 'Restart work',
     'access callback' => 'wf_job_access',
-    'access arguments' => array('to-dev', 1),
+    'access arguments' => array('restart', 1),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('wf_job_action_to_dev_form', 1),
     'type' => MENU_LOCAL_ACTION,
@@ -313,8 +312,8 @@ function wf_job_permission() {
     'title' => t('Review own jobs'),
   );
 
-  $perms['return job to dev'] = array(
-    'title' => t('Return job to dev'),
+  $perms['restart job'] = array(
+    'title' => t('Restart working on a job'),
   );
 
   $perms['reallocate job'] = array(

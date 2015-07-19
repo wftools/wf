@@ -63,8 +63,8 @@ function wf_job_rules_event_info() {
       'label' => t('After a job is started'),
       'variables' => $default_variables,
     ),
-    'wf_job_returned_to_dev' => $defaults + array(
-      'label' => t('After a job is returned to dev'),
+    'wf_job_restarted' => $defaults + array(
+      'label' => t('After a job is restarted'),
       'variables' => $default_variables,
     ),
     'wf_job_reassigned' => $defaults + array(

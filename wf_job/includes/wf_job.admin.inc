@@ -100,12 +100,19 @@ function wf_job_action_start_form_submit($form, &$form_state) {
 function wf_job_action_to_dev_form($form, &$form_state, $job) {
   $job_uri = entity_uri('wf_job', $job);
   $title = entity_label('wf_job', $job);
+  $env = entity_load_single('wf_environment', wf_environment_get_default($job))->env;
+  $env_arg = array('@env' => $env);
+  $args = array(
+    '@title' => $title,
+    '@env' => $env,
+  );
+
   return confirm_form(
     $form,
-    t("Do you want to return <strong>@title</strong> to <strong>dev</strong> environment?", array('@title' => $title)),
+    t("Do you want to return <strong>@title</strong> to <strong>@env</strong> environment?", $args),
     $job_uri['path'],
-    t("Returning this job will trigger the update environment action to dev."),
-    t("Return to dev")
+    t("This job will be returned to the @env environment so further work can be performed.", $env_arg),
+    t("Return to @env", $env_arg)
   );
 }
 
@@ -117,11 +124,11 @@ function wf_job_action_to_dev_form_submit($form, &$form_state) {
   $title = entity_label('wf_job', $job);
   $job_uri = entity_uri('wf_job', $job);
 
-  wf_job_attach_log_to_entity($job, t('Returned job to dev environment.'), 'wf_job_to_dev');
-  $job->rules_event = 'returned_to_dev';
+  $job->log_message = t('Restarted work.');
+  $job->rules_event = 'restarted';
   $job->save();
 
-  drupal_set_message(t("Job '@title' was successfully returned to dev environment.", array('@title' => $title)));
+  drupal_set_message(t("Work has restarted on job '@title'.", array('@title' => $title)));
   $form_state['redirect'] = $job_uri['path'];
 }
 
@@ -317,7 +324,7 @@ function wf_job_admin_settings() {
     '#title' => t('Job Status New'),
     '#description' => t('The new status of the job.'),
     '#default_value' => variable_get('wf_job_jsid_new'),
-    '#options' => wf_job_status_list(),
+    '#options' => wf_job_status_list('machine_name'),
     '#required' => FALSE,
   );
 
@@ -326,7 +333,7 @@ function wf_job_admin_settings() {
     '#title' => t('Job Status Completed'),
     '#description' => t('The completed status of the job.'),
     '#default_value' => variable_get('wf_job_jsid_completed'),
-    '#options' => wf_job_status_list(),
+    '#options' => wf_job_status_list('machine_name'),
     '#required' => FALSE,
   );
 
