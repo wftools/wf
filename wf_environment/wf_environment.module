@@ -223,8 +223,19 @@ function wf_environment_permission() {
  * @return int
  *   The id of the default environment.
  */
-function wf_environment_get_default() {
-  return (int) variable_get('wf_environment_default');
+function wf_environment_get_default(WfJob $job = NULL, $bundle = '') {
+  $default_env = (int) variable_get('wf_environment_default');
+  if (!$job && !$bundle) {
+    return $default_env;
+  }
+
+  if (!$bundle && $job && !empty($job->bundle)) {
+    $bundle = $job->bundle;
+  }
+
+  drupal_alter('wf_environment_default_env', $default_env, $job, $bundle);
+
+  return $default_env;
 }
 
 /**
