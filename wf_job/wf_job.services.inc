@@ -167,32 +167,6 @@ function wf_job_services_resources() {
           ),
         ),
       ),
-      'targeted_actions' => array(
-        'deployment' => array(
-          'file' => array('type' => 'inc', 'module' => 'wf_job', 'name' => 'wf_job.services'),
-          'help' => t('Record the outcome of a deployment.'),
-          'access callback' => 'wf_job_services_access',
-          'access arguments' => array('deployment'),
-          'access arguments append' => TRUE,
-          'callback' => 'wf_job_services_deployment',
-          'args' => array(
-            array(
-              'name' => 'jid',
-              'type' => 'int',
-              'description' => t('The id of the job for which to get an environment.'),
-              'source' => array('path' => '0'),
-              'optional' => FALSE,
-            ),
-            array(
-              'name' => 'succeeded',
-              'type' => 'struct',
-              'description' => t("An object with properties 'succeeded' and a 'message'Ê."),
-              'source' => 'data',
-              'optional' => FALSE,
-            ),
-          ),
-        )
-      ),
     ),
   );
 
