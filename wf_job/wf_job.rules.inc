@@ -221,6 +221,38 @@ function wf_job_rules_action_info() {
     ),
   );
 
+  $actions['wf_job_update_owner'] = array(
+    'group' => t('Workflow Job'),
+    'label' => t('Update job owner'),
+    'base' => 'wf_job_update_owner',
+    'parameter' => array(
+      'job' => array(
+        'type' => 'wf_job',
+        'label' => t('Job'),
+      ),
+      'new_owner' => array(
+        'type' => 'user',
+        'label' => t('New owner'),
+      ),
+    ),
+  );
+
+  $actions['wf_job_update_assigned_user'] = array(
+    'group' => t('Workflow Job'),
+    'label' => t('Update job assigned user'),
+    'base' => 'wf_job_update_assigned_user',
+    'parameter' => array(
+      'job' => array(
+        'type' => 'wf_job',
+        'label' => t('Job'),
+      ),
+      'new_owner' => array(
+        'type' => 'user',
+        'label' => t('New assigned user'),
+      ),
+    ),
+  );
+
   return $actions;
 }
 

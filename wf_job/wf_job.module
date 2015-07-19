@@ -1656,6 +1656,30 @@ function wf_job_update_environment(WfJob $job, $env_id) {
 }
 
 /**
+ * Update the job owner.
+ */
+function wf_job_update_owner(WfJob $job, stdClass $user) {
+  $job->owner = $user->uid;
+
+  // Avoiding recursion.
+  unset($job->rules_event);
+
+  wf_job_save($job);
+}
+
+/**
+ * Update the job assigned user.
+ */
+function wf_job_update_assigned_user(WfJob $job, stdClass $user) {
+  $job->assigned = $user->uid;
+
+  // Avoiding recursion.
+  unset($job->rules_event);
+
+  wf_job_save($job);
+}
+
+/**
  * Extracts the system_status from the current status on a job.
  *
  * @param EntityDrupalWrapper $job
