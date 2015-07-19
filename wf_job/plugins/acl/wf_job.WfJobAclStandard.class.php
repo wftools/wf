@@ -27,11 +27,10 @@ class WfJobAclStandard implements WfJobAcl {
     global $user;
 
     $job_wrapper = entity_metadata_wrapper('wf_job', $job);
-    $statuses = wf_job_status_load_all('machine_name');
-    $status = $job_wrapper->jsid->value();
+    $status = $job_wrapper->jsid->machine_name->value();
 
     switch ($status) {
-      case $statuses['in_review']->jsid:
+      case 'in_review':
         $users = $this->getUsers('rewiew job before ' . $job_wrapper->eid->next_env_id->env->value());
         if (user_access('review own jobs')) {
           $users[$user->uid] = $user->name;

@@ -603,7 +603,7 @@ function wf_job_entity_property_info() {
 
   $properties['jsid'] = array(
     'label' => t('Status'),
-    'type' => 'integer',
+    'type' => 'wf_job_status',
     'description' => t('The current status of the job.'),
     'options list' => 'wf_job_status_list',
     'schema field' => 'jsid',
@@ -780,6 +780,29 @@ function wf_job_status_exists($name) {
     ->countQuery()
     ->execute()
     ->fetchField();
+}
+
+/**
+ * Returns defined job status by machine name.
+ *
+ * @param string $machine_name
+ *   The status to look up.
+ *
+ * @return object
+ *   An array containing the loaded job status.
+ */
+function wf_job_load_status_by_machine_name($machine_name) {
+  $job_statuses = wf_job_status_load_all('status');
+
+  $status = new stdClass();
+  foreach ($job_statuses as $job_status) {
+    if ($job_status->machine_name == $machine_name) {
+      $status = $job_status;
+      break;
+    }
+  }
+
+  return $status;
 }
 
 /**
@@ -1092,7 +1115,7 @@ function wf_job_drush_aliases() {
   $query = new EntityFieldQuery();
   // Implement hook_entity_query_alter() if you need to change this.
   $jids = $query->entityCondition('entity_type', 'wf_job')
-        ->propertyCondition('jsid', array($new_id, $completed_id), 'NOT IN')
+        ->propertyCondition('machine_name', array($new_id, $completed_id), 'NOT IN')
         ->propertyOrderBy('jid')
         ->execute();
 
