@@ -34,16 +34,31 @@ function wf_deploy_services_client_render_entity_diff(WfJob $job) {
  */
 function theme_wf_deploy_services_client_plan_diff($variables) {
   $diffs = $variables['diffs'];
-  $remote_url = $variables['remote_url'];
 
   drupal_add_css(drupal_get_path('module', 'diff') . '/css/diff.default.css');
   $header = array('&nbsp;', t('Old Revision'), '&nbsp;', t('Current Revision'));
-  $output = '';
+  $output = '<div class="wf-deploy-serices-client-diff">';
 
   if (is_array($diffs)) {
-    foreach ($diffs as $diff) {
+    foreach ($diffs as $diff_key => $diff) {
       // FIXME create a render array.
-      $output .= '<h3>' . l($diff['info']['label'], $diff['info']['url']) . '</h3>';
+      $key_parts = explode('-', $diff_key);
+      $entity_type = $key_parts[0];
+      $args = array(
+        '!label' => l($diff['info']['label'], $diff['info']['url']),
+        '@entity_type' => $entity_type,
+      );
+
+      if (empty($diff['info']['old_label']) || $diff['info']['label'] == $diff['info']['old_label']) {
+        $label = t('<h3>@entity_type: !label</h3>', $args);
+      }
+      else {
+        $args['@old_label'] = $diff['info']['old_label'];
+        $label = t('<h3 class="old-label">@old_label</h3><h3 class="new-label">@entity_type: !label</h3>', $args);
+      }
+
+      $output .= $label;
+
       if (is_array($diff['diff'])) {
         foreach ($diff['diff'] as $field => $data) {
           $output .= '<h4>' . filter_xss($diff['info']['fields'][$field]['label']) . '</h4>';
@@ -53,8 +68,10 @@ function theme_wf_deploy_services_client_plan_diff($variables) {
     }
   }
 
+  $output .= "</div>";
+
   if (empty($output)) {
-    $output = '<div class="diff-unavailable">' . t('Unable to display changes.') . '</div>';
+    $output = t('No content changes.');
   }
 
   return $output;
