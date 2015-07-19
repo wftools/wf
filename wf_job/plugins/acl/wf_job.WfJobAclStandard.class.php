@@ -231,6 +231,27 @@ class WfJobAclStandard implements WfJobAcl {
   }
 
   /**
+   * Gets a list of users based on role.
+   *
+   * @param string $role
+   *   The role to use to filter the users.
+   *
+   * @return array
+   *   A list of users with the uid as the key and user as the value.
+   */
+  protected function getUsersByRole($role) {
+    $query = db_select('realname', 'rn');
+    $query->innerJoin('users_roles', 'ur', 'rn.uid = ur.uid');
+    $query->innerJoin('role', 'r', 'r.rid = ur.rid');
+    $users = $query->fields('rn', array('uid', 'realname'))
+      ->condition('r.name', $role, '=')
+      ->execute()
+      ->fetchAllKeyed();
+
+    return $users;
+  }
+
+  /**
    * Checks user's access to perform an action on a job.
    *
    * @param string $action
