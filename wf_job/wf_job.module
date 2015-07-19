@@ -88,6 +88,7 @@ function wf_job_entity_info() {
     'base table' => 'wf_job_status',
     'fieldable' => FALSE,
     'exportable' => TRUE,
+    'load hook' => 'wf_job_load_status',
     'entity keys' => array(
       'id' => 'jsid',
       'name' => 'machine_name',
@@ -680,7 +681,6 @@ function wf_job_entity_property_info() {
     'description' => t('The status label of job status.'),
     'schema field' => 'status',
     'extra_fields' => array('form', 'display'),
-    'setter callback' => 'entity_property_verbatim_set',
   );
 
   $status_properties['machine_name'] = array(
@@ -689,7 +689,6 @@ function wf_job_entity_property_info() {
     'description' => t('The machine name for job status.'),
     'schema field' => 'machine_name',
     'extra_fields' => array('form', 'display'),
-    'setter callback' => 'entity_property_verbatim_set',
   );
 
   $status_properties['module'] = array(
@@ -698,7 +697,6 @@ function wf_job_entity_property_info() {
     'description' => t('The name of the providing module.'),
     'schema field' => 'module',
     'extra_fields' => array('form', 'display'),
-    'setter callback' => 'entity_property_verbatim_set',
   );
 
   $status_properties['export_state'] = array(
@@ -707,7 +705,6 @@ function wf_job_entity_property_info() {
     'description' => t('The exportable status of the status.'),
     'schema field' => 'export_state',
     'extra_fields' => array('form', 'display'),
-    'setter callback' => 'entity_property_verbatim_set',
   );
 
   $status_properties['system_status'] = array(
@@ -716,7 +713,6 @@ function wf_job_entity_property_info() {
     'description' => t('The current system status.'),
     'schema field' => 'system_status',
     'extra_fields' => array('form', 'display'),
-    'setter callback' => 'entity_property_verbatim_set',
   );
 
   $info['wf_job_status'] = array('properties' => $status_properties);
@@ -1225,6 +1221,14 @@ function wf_job_action_title($job, $action) {
         $next_env = wf_environment_load($env->next_env_id);
         return t('@action for @environment', array('@action' => ucfirst($action), '@environment' => $next_env->env));
       }
+    case 'review':
+      $env = wf_environment_load($job->eid);
+      $parameters = array(
+        '@environment' => ucfirst($env->env),
+        '@action' => ucfirst($action),
+      );
+      return t('@environment @action', $parameters);
+
     default:
       return t(ucfirst($action));
   }

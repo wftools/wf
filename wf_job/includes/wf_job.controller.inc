@@ -49,10 +49,8 @@ class WfJobController extends WfEntityAPIController {
       '#theme' => 'wf_job',
       '#job' => $entity,
       '#view_mode' => $view_mode,
-      '#language' => $langcode,
+      '#language' => isset($langcode) ? $langcode : $GLOBALS['language_content']->language,
     );
-
-    $langcode = isset($langcode) ? $langcode : $GLOBALS['language_content']->language;
 
     // Add in fields.
     if (!empty($this->entityInfo['fieldable'])) {

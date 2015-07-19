@@ -64,7 +64,14 @@ function wf_job_page_add() {
  * Job add menu callback.
  */
 function wf_job_add($bundle) {
-  $info = array('bundle' => $bundle);
+  global $user;
+
+  $info = array(
+    'bundle' => $bundle,
+    'jsid' => variable_get('wf_job_default_status', 1),
+    'owner' => $user->uid,
+    'assigned' => $user->uid,
+  );
 
   $job = entity_create('wf_job', $info);
 
@@ -102,12 +109,9 @@ function wf_job_edit_form($form, &$form_state, $job) {
   $default_owner = $job->owner;
   $default_assigned = $job->assigned;
   $revision = TRUE;
+
   if (!empty($job->is_new)) {
-    $is_new = TRUE;
     $status_type = 'value';
-    $default_status = variable_get('wf_job_default_status', 1);
-    $default_owner = $GLOBALS['user']->uid;
-    $default_assigned = $GLOBALS['user']->uid;
     $revision = FALSE;
   }
 
