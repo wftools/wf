@@ -10,10 +10,38 @@
  */
 function wf_job_page_add() {
   $bundles = wf_job_load_bundles();
+  $raw_count = count($bundles);
+
+  foreach ($bundles as $name => &$bundle) {
+    $entity = entity_create('wf_job', array('bundle' => $name));
+    if (!entity_access('create', 'wf_job', $entity)) {
+      unset($bundles[$name]);
+      continue;
+    }
+
+    $bundle->uri = array(
+      'path' => "job/add/{$name}",
+      'options' => array(),
+    );
+  }
+
+  drupal_alter('wf_job_add_list', $bundles);
 
   switch (count($bundles)) {
     case 0:
-      return '<p>' . t('You have not created any job types yet.') . '</p>';
+      $message = t('You have not created any job types yet.');
+      if ($raw_count) {
+        $message = t("You don't have access to any job types.");
+      }
+
+      return array(
+        'no_types' => array(
+          '#type' => 'markup',
+          '#markup' => $message,
+          '#prefix' => '<p class="detail warning">',
+          '#suffix' => '</p>',
+        ),
+      );
 
     case 1:
       $bundle = array_shift($bundles);
@@ -21,7 +49,14 @@ function wf_job_page_add() {
       break;
 
     default:
-      return theme('wf_job_add_list', array('content' => $bundles));
+      return array(
+        'job_types' => array(
+          '#theme' => 'wf_job_add_list',
+          '#bundles' => $bundles,
+          '#prefix' => '<div id="wf_job_add_list">',
+          '#suffix' => '</div>',
+        ),
+      );
   }
 }
 

@@ -113,8 +113,8 @@ function wf_job_menu() {
   $items = array();
   $items['job/add'] = array(
     'title' => 'Create new job',
-    // Grant the user access to this page regardless of other permissions.
-    'access callback' => TRUE,
+    'access callback' => 'wf_job_access',
+    'access arguments' => array('create', NULL),
     'page callback' => 'wf_job_page_add',
     'file' => 'includes/wf_job.pages.inc',
   );
@@ -365,60 +365,27 @@ function wf_job_list_permissions($type) {
 }
 
 /**
- * Implements hook_wf_job_url_login().
- */
-function wf_job_wf_job_url_login() {
-  return wf_job_login_plugins();
-}
-
-/**
- * Implements hook_wf_job_url_visit().
- */
-function wf_job_wf_job_url_visit() {
-  return wf_job_login_plugins();
-}
-
-/**
- * Implements hook_wf_job_sandbox_domain().
- */
-function wf_job_wf_job_sandbox_domain() {
-  return wf_job_login_plugins();
-}
-
-/**
- * Helper function to return the WF Job URL plugin info.
- */
-function wf_job_login_plugins() {
-  $plugins = array();
-
-  $plugins['wf_job_links'] = array(
-    'title' => t('Generic WF Job'),
-    'description' => t('Generic URL generator plugin.'),
-    'handler' => 'WfJobLinks ',
-    'file' => 'plugins/wf_job.url.inc',
-  );
-
-  return $plugins;
-}
-
-/**
  * Access callback for the entity API.
  *
- * @param $op
+ * @param string $op
  *   The operation being performed. One of 'view', 'update', 'create', 'delete'
  *   or just 'edit' (being the same as 'create' or 'update').
- * @param $entity
+ *
+ * @param object $entity
  *   (optional) A profile to check access for. If nothing is given, access for
  *   all profiles is determined.
- * @param $account
- *   (optional) The user to check for. Leave it to NULL to check for the global user.
- * @param $entity_type
+ *
+ * @param object $account
+ *   (optional) The user to check for.
+ *   Leave it to NULL to check for the global user.
+ *
+ * @param string $entity_type
  *   (optional) Leave it to NULL to get the property from $entity.
  *
- * @return boolean
+ * @return bool
  *   Whether access is allowed or not.
  */
-function wf_job_access($op, $entity, $account = NULL, $entity_type = NULL) {
+function wf_job_access($op, $entity = NULL, $account = NULL, $entity_type = NULL) {
   ctools_include('plugins');
   $handler = &drupal_static(__FUNCTION__);
   if (!$handler) {
@@ -432,7 +399,7 @@ function wf_job_access($op, $entity, $account = NULL, $entity_type = NULL) {
     $account = $user;
   }
 
-  if (!isset($entity_type)) {
+  if (!isset($entity_type) && !empty($entity)) {
     $entity_type = $entity->bundle;
   }
 
@@ -1166,7 +1133,9 @@ function wf_job_theme() {
 
   $themes['wf_job_add_list'] = array(
     'file' => 'wf_job.theme.inc',
-    'variables' => array('content' => NULL),
+    'variables' => array(
+      'bundles' => array(),
+    ),
     'path' => $templates,
   );
 

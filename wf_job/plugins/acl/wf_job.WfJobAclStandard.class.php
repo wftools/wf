@@ -47,10 +47,11 @@ class WfJobAclStandard implements WfJobAcl {
    * {@inheritdoc}
    */
   public function hasAccess($action, WfJob $job = NULL, StdClass $user, $bundle = NULL) {
-    if ('create' == $action) {
-      return $this->checkAction($action, NULL, $user, $bundle);
+    if (is_object($job) && $bundle == $job->entityType()) {
+      $bundle = $job->bundle;
     }
-    else {
+
+    if ('create' != $action) {
       $bundle = $job->bundle;
     }
 
@@ -88,9 +89,6 @@ class WfJobAclStandard implements WfJobAcl {
 
     switch ($action) {
       case 'create':
-        $perm = "create {$bundle} job";
-        return user_access($perm, $user);
-
       case 'view':
       case 'visit':
         return $this->userAccess($action, $job, $user, $bundle);
@@ -146,20 +144,23 @@ class WfJobAclStandard implements WfJobAcl {
    */
   protected function checkState($action, EntityDrupalWrapper $job) {
     // Allow everything when creating a new job.
-    if ('create' == $action || empty($job->raw()->jid)) {
+    $jid = $job->getIdentifier();
+    if ('create' == $action || empty($jid)) {
       return TRUE;
     }
 
-    $statuses = wf_job_status_load_all('machine_name');
-    $status = $job->jsid->value();
+    $status = $job->jsid->machine_name->value();
     $default_status = variable_get('wf_job_jsid_new');
     if (!$status) {
       $status = $default_status;
     }
 
     $env = $job->eid;
-    $has_next_env = (bool) $env->next_env_id->id->value();
-    $is_default_env = ($env->id->value() == wf_environment_get_default());
+    $has_next_env = FALSE;
+    if ($env->next_env_id->raw() && $env->next_env_id->id->value()) {
+      $has_next_env = (bool) $env->next_env_id->id->value();
+    }
+    $is_default_env = $job->value()->isInDefaultEnv();
 
     switch ($action) {
       case 'start':
@@ -250,7 +251,18 @@ class WfJobAclStandard implements WfJobAcl {
    */
   protected function userAccess($action, EntityDrupalWrapper $job = NULL, $user, $bundle) {
     if ('create' == $action) {
-      return user_access("create $bundle job");
+      if ($bundle) {
+        return user_access("create $bundle job");
+      }
+
+      // Give access if the user has at least one Job creation permission.
+      foreach (array_keys(wf_job_load_bundles()) as $bundle) {
+        if (user_access("create $bundle job")) {
+          return TRUE;
+        }
+      }
+
+      return FALSE;
     }
 
     $owner = $job->owner->value();
