@@ -524,7 +524,8 @@ function wf_job_update_job_code_form_submit($form, &$form_state) {
   // Then redirects to the view of the job.
   $job = reset($form_state['build_info']['args']);
 
-  rules_invoke_event('wf_job_update_code_submit', $job);
+  $log_message = t('Update code requested.');
+  rules_invoke_event('wf_job_update_code_submit', $job, $log_message);
 
   $uri = entity_uri('wf_job', $job);
   $form_state['redirect'] = url($uri['path'], $uri['options']);
@@ -1246,6 +1247,7 @@ function wf_job_action_event_invoke($event, $job) {
   $assigned = user_load($job->assigned);
   $env = wf_environment_load($job->eid);
   $next_env = FALSE;
+  $log = isset($job->log_message) ? array('log' => $job->log_message) : array();
 
   if (!empty($env->next_env_id)) {
     $next_env = wf_environment_load($env->next_env_id);
@@ -1255,53 +1257,57 @@ function wf_job_action_event_invoke($event, $job) {
     $next_env = entity_create('wf_environment', array('env' => 'None'));
   }
 
-  rules_invoke_event_by_args("wf_job_$event", array(
-    'job' => $job,
-    'environment' => $env,
-    'next_environment' => $next_env,
-    'owner' => $owner,
-    'assigned' => $assigned,
-  ));
+  $args = array_merge(
+    array(
+      'job' => $job,
+      'environment' => $env,
+      'next_environment' => $next_env,
+      'owner' => $owner,
+      'assigned' => $assigned,
+    ),
+    $log
+  );
+
+  rules_invoke_event_by_args("wf_job_$event", $args);
 }
 
 /**
  * Records the outcome of a deployment.
  *
  * @param object $job
- *   The WfJob
+ *   The WfJob.
+ *
  * @param bool $succeeded
- *   Whether the deployment succeeded
+ *   Whether the deployment succeeded.
+ *
  * @param string $message
  *   A comment about the deployment outcome.
- * @return
+ *
+ * @return bool
  *   TRUE
  */
 function wf_job_deployment($job, $succeeded, $message) {
   $env = wf_environment_load($job->eid);
   $next_env = wf_environment_load($env->next_env_id);
-
   if ($succeeded) {
     $job->eid = $env->next_env_id;
     if ($next_env->next_env_id) {
       $job->setStatusName('Started');
       $rules_event = 'deployed';
-      $log_type = 'wf_job_deployed';
     }
     else {
       $job->setStatusName('Completed');
       $rules_event = 'completed';
-      $log_type = 'wf_job_completed';
     }
   }
   else {
     $job->setStatusName('Needs Attention');
     $rules_event = 'deployment_failed';
-    $log_type = 'wf_job_deployment_failed';
   }
 
+  $job->log_message = $message;
   $job->rules_event = $rules_event;
 
-  wf_job_attach_log_to_entity($job, $message, $log_type);
   wf_job_save($job);
 
   return TRUE;
@@ -1561,6 +1567,11 @@ function wf_job_wf_log_info() {
   $logs['wf_job_started'] = array(
     'title' => t('Job started'),
     'description' => t('A new Job was started.'),
+  );
+
+  $logs['wf_job_started_failed'] = array(
+    'title' => t('Job started failed'),
+    'description' => t('Failed to start a Job.'),
   );
 
   $logs['wf_job_proposed'] = array(

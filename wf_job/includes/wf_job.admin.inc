@@ -88,7 +88,7 @@ function wf_job_action_start_form_submit($form, &$form_state) {
 
   $job->revision = TRUE;
   $job->rules_event = 'started';
-  wf_job_attach_log_to_entity($job, t('Job Started.'), 'wf_job_started');
+  $job->log_message = t('Job Started');
   wf_job_save($job);
 
   $form_state['redirect'] = $job->uri();
@@ -156,8 +156,7 @@ function wf_job_action_reallocate_form_submit($form, &$form_state) {
   $job->owner = $form_state['values']['owner'];
   $job->assigned = $form_state['values']['assigned'];
 
-  wf_job_attach_log_to_entity($job, t('Job assigned and owner has been updated.'), 'wf_job_reallocate');
-
+  $job->log_message = t('Job assigned and owner has been updated.');
   $job->rules_event = 'reassigned';
   wf_job_save($job);
 
@@ -231,12 +230,11 @@ function wf_job_action_propose_form_validate($form, &$form_state) {
 function wf_job_action_propose_form_submit($form, &$form_state) {
   $job = reset($form_state['build_info']['args']);
   $env = wf_environment_load($job->eid);
-  $next_env = wf_environment_load($env->next_env_id);
 
   $job->revision = TRUE;
   $job->assigned = $form_state['values']['reviewer'];
   $job->rules_event = 'proposed';
-  wf_job_attach_form_log_value_to_entity($job, $form_state, 'wf_job_proposed');
+  $job->log_message = $form_state['values']['log'];
   wf_job_save($job);
 
   $form_state['redirect'] = $job->uri();
@@ -293,20 +291,16 @@ function wf_job_action_review_form_submit($form, &$form_state) {
   $job = reset($form_state['build_info']['args']);
   if (strpos($form_state['values']['op'], t('Approve for')) === 0) {
     $event = 'approved';
-    $log_type = 'wf_job_approved';
   }
   else {
     $event = 'rejected';
-    $log_type = 'wf_job_rejected';
   }
 
   $env = wf_environment_load($job->eid);
-  $next_env = wf_environment_load($env->next_env_id);
 
   $job->revision = TRUE;
-  $job->assigned = $job->owner;
   $job->rules_event = $event;
-  wf_job_attach_form_log_value_to_entity($job, $form_state, $log_type);
+  $job->log_message = $form_state['values']['log'];
   wf_job_save($job);
 
   $form_state['redirect'] = $job->uri();
