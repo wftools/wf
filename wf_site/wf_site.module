@@ -15,6 +15,7 @@ function wf_site_entity_info() {
     'label' => t('Workflow Site'),
     'entity class' => 'WfSite',
     'controller class' => 'WfSiteController',
+    'extra fields controller class' => 'EntityPropertyExtraFieldsController',
     'base table' => 'wf_site',
     'revision table' => 'wf_site_revision',
     'fieldable' => TRUE,

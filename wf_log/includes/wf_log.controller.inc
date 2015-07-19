@@ -5,8 +5,11 @@
  * Workflow log controller class.
  */
 
-class WfLogController extends EntityAPIController {
+class WfLogController extends WfEntityAPIController {
 
+  /**
+   * {@inheritdoc}
+   */
   public function create(array $values = array()) {
     $values += array(
       'uid' => $GLOBALS['user']->uid,

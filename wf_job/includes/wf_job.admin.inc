@@ -65,7 +65,6 @@ function wf_job_action_start_form($form, &$form_state, $job) {
   drupal_set_title(t('Start'));
 
   $uid = $GLOBALS['user']->uid;
-  $user_entity = entity_load_single('user', $uid);
 
   $form['message'] = array(
     '#markup' => '<p>To begin work on this job please click "Start job".</p><p>This will prepare the sandbox server. You will be emailed when it is ready for use.</p>',

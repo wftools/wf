@@ -8,17 +8,19 @@
 /**
  * WF Job Entity Controller class.
  */
-class WfJobController extends EntityAPIController {
+class WfJobController extends WfEntityAPIController {
 
   /**
    * {@inheritdoc}
    */
   public function create(array $values = array()) {
-    $values += array(
-      'eid' => wf_environment_get_default(),
-    );
+    $job = parent::create($values);
 
-    return parent::create($values);
+    if (empty($job->eid)) {
+      $job->eid = wf_environment_get_default($job);
+    }
+
+    return $job;
   }
 
   /**
@@ -66,11 +68,6 @@ class WfJobController extends EntityAPIController {
     module_invoke_all('entity_view', $entity, $this->entityType, $view_mode, $langcode);
 
     // Remove the build array information from the entity and return it.
-    $build = $entity->content;
-    unset($entity->content);
-
-    return $build;
+    return $entity->content;
   }
-
 }
-
