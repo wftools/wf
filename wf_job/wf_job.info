@@ -18,7 +18,6 @@ files[] = includes/wf_job.class.handler.field.link.edit.inc
 files[] = includes/wf_job.class.handler.field.link.login.inc
 files[] = includes/wf_job.controller.inc
 files[] = includes/wf_job.views.controller.inc
-files[] = includes/wf_job.drush.inc
 files[] = includes/wf_job.external_reference_plugin.interface.inc
 files[] = includes/wf_job.domain_sandbox_plugin.interface.inc
 files[] = includes/wf_job.url_login_plugin.interface.inc
