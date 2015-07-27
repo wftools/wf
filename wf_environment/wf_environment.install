@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Workflow Environment Management install.
+ * WF Environment installation functions.
  */
 
 /**
@@ -13,7 +13,7 @@ function wf_environment_schema() {
   $uuid_field = uuid_schema_field_definition();
   $schema = array();
   $schema['wf_env'] = array(
-    'description' => 'Environments managed by workflow system.',
+    'description' => 'Environments managed by WF.',
     'fields' => array(
       'id' => array(
         'type' => 'serial',
@@ -103,7 +103,7 @@ function wf_environment_schema() {
     ),
   );
   $schema['wf_env_revision'] = array(
-    'description' => 'Revision history for environments managed by workflow system.',
+    'description' => 'Revision history for environments managed by WF.',
     'fields' => array(
       'id' => array(
         'type' => 'int',

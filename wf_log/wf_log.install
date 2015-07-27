@@ -15,7 +15,7 @@ function wf_log_schema() {
   $schema = array();
 
   $schema['wf_log'] = array(
-    'description' => 'Logs managed by workflow system.',
+    'description' => 'Logs managed by WF.',
     'fields' => array(
       'lid' => array(
         'type' => 'serial',

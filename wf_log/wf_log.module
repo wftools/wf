@@ -16,7 +16,7 @@ function wf_log_entity_info() {
   $info = array();
 
   $info['wf_log'] = array(
-    'label' => t('Workflow Log'),
+    'label' => t('WF Log'),
     'entity class' => 'WfLog',
     'controller class' => 'WfLogController',
     'extra fields controller class' => 'EntityPropertyExtraFieldsController',
@@ -33,7 +33,7 @@ function wf_log_entity_info() {
     'load hook' => 'wf_log_load',
     'view modes' => array(
       'full' => array(
-        'label' => t('Full Workflow Log'),
+        'label' => t('Full WF Log'),
         'custom settings' => FALSE,
       ),
     ),
@@ -216,7 +216,7 @@ function wf_log_menu() {
   $items['wf-log/add'] = array(
     'title' => 'New Log',
     'page callback' => 'wf_log_page_add',
-    'access arguments' => array('administer workflow log entities'),
+    'access arguments' => array('administer wf log entities'),
     'file' => 'includes/wf_log.pages.inc',
     'type' => MENU_LOCAL_ACTION,
   );
@@ -401,21 +401,21 @@ function wf_log_access($op, $log, $account = NULL, $entity_type = NULL) {
   }
   switch ($op) {
     case 'create':
-      return user_access('administer workflow log entities', $account)
-          || user_access('create workflow log entities', $account);
+      return user_access('administer wf log entities', $account)
+          || user_access('create wf log entities', $account);
 
     case 'view':
-      return user_access('administer workflow log entities', $account)
-          || user_access('view workflow log entities', $account);
+      return user_access('administer wf log entities', $account)
+          || user_access('view wf log entities', $account);
 
     case 'delete':
-      return user_access('administer workflow log entities', $account)
-          || user_access('delete workflow log entities', $account);
+      return user_access('administer wf log entities', $account)
+          || user_access('delete wf log entities', $account);
 
     case 'edit':
-      return user_access('administer workflow log entities')
-          || user_access('edit any workflow log entities')
-          || (user_access('edit own workflow log entities') && ($log->uid == $account->uid));
+      return user_access('administer wf log entities')
+          || user_access('edit any wf log entities')
+          || (user_access('edit own wf log entities') && ($log->uid == $account->uid));
   }
 }
 
@@ -424,32 +424,32 @@ function wf_log_access($op, $log, $account = NULL, $entity_type = NULL) {
  */
 function wf_log_permission() {
   $permissions = array(
-    'administer workflow log entities' => array(
-      'title' => t('Administer Workflow Logs'),
-      'description' => t('Allows users to configure workflow logs and their fields.'),
+    'administer wf log entities' => array(
+      'title' => t('Administer WF Logs'),
+      'description' => t('Allows users to configure WF logs and their fields.'),
       'restrict access' => TRUE,
     ),
-    'create workflow log entities' => array(
-      'title' => t('Create Workflow Logs'),
-      'description' => t('Allows users to create Workflow Logs.'),
+    'create wf log entities' => array(
+      'title' => t('Create WF Logs'),
+      'description' => t('Allows users to create WF Logs.'),
     ),
-    'view workflow log entities' => array(
-      'title' => t('View Workflow Logs'),
-      'description' => t('Allows users to view Workflow Logs.'),
+    'view wf log entities' => array(
+      'title' => t('View WF Logs'),
+      'description' => t('Allows users to view WF Logs.'),
     ),
-    'edit any workflow log entities' => array(
-      'title' => t('Edit any Workflow Logs'),
-      'description' => t('Allows users to edit Workflow Logs.'),
+    'edit any wf log entities' => array(
+      'title' => t('Edit any WF Logs'),
+      'description' => t('Allows users to edit WF Logs.'),
     ),
-    'edit own workflow log entities' => array(
-      'title' => t('Edit own Workflow Logs'),
+    'edit own wf log entities' => array(
+      'title' => t('Edit own WF Logs'),
       'description' => t('Allows users to edit own Logs.'),
     ),
-    'delete workflow log entities' => array(
-      'title' => t('Delete Workflow Logs'),
+    'delete wf log entities' => array(
+      'title' => t('Delete WF Logs'),
       'description' => t('Allows users to delete the Logs.'),
     ),
-    'manage workflow logs' => array(
+    'manage wf logs' => array(
       'title' => t('Manage log creation, updating and deleting'),
     ),
   );
@@ -495,7 +495,7 @@ function wf_log_manage_logs_access() {
  *   Whether access is allowed or not.
  */
 function wf_log_bundle_access($op, $type = NULL, $account = NULL) {
-  return user_access('administer workflow log entities', $account);
+  return user_access('administer wf log entities', $account);
 }
 
 /**

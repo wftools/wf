@@ -17,7 +17,7 @@ function wf_environment_rules_action_info() {
   );
 
   $actions['wf_environment_add_user_ssh_private_key'] = $defaults + array(
-    'label' => t('Add an SSH Private Key to a Workflow Environment'),
+    'label' => t('Add an SSH Private Key to a WF Environment'),
     'base' => 'wf_environment_add_user_ssh_private_key',
     'parameter' => array(
       'user' => array(
@@ -27,7 +27,7 @@ function wf_environment_rules_action_info() {
       ),
       'environment' => array(
         'type' => 'wf_environment',
-        'label' => t('Workflow Environment'),
+        'label' => t('WF Environment'),
         'save' => FALSE,
       ),
       'owner' => array(

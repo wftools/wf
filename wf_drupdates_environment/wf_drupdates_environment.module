@@ -65,7 +65,7 @@ function wf_drupdates_environment_property_callback(&$info, $entity_type, $field
 }
 
 /**
- * Fetches a list of workflow environments.
+ * Fetches a list of WF environments.
  */
 function wf_drupdates_environment_list_environments() {
   $list_environments = array();

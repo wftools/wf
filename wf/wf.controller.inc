@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow Tools Entity API controller class
+ * WF Entity API controller class.
  */
 
 class WfEntityAPIController extends EntityAPIController {

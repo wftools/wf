@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow job management page functions.
+ * WF job management page functions.
  */
 
 /**

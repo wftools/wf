@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow log controller class.
+ * WF log controller class.
  */
 
 class WfLogController extends WfEntityAPIController {

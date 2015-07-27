@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow Log class.
+ * WF Log class.
  */
 
 class WfLog extends Entity {

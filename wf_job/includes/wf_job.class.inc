@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow Job class.
+ * WF Job class.
  */
 
 class WfJob extends Entity {

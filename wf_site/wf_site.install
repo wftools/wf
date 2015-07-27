@@ -16,7 +16,7 @@ function wf_site_schema() {
   $schema = array();
 
   $schema['wf_site'] = array(
-    'description' => 'Sites managed by workflow system.',
+    'description' => 'Sites managed by WF.',
     'fields' => array(
       'sid' => array(
         'type' => 'serial',
@@ -91,7 +91,7 @@ function wf_site_schema() {
   );
 
   $schema['wf_site_revision'] = array(
-    'description' => 'Revision history for sites managed by workflow system.',
+    'description' => 'Revision history for sites managed by WF.',
     'fields' => array(
       'sid' => array(
         'type' => 'int',

@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow job module installation functions.
+ * WF job module installation functions.
  */
 
 /**
@@ -14,7 +14,7 @@ function wf_job_schema() {
   $uuid_field = uuid_schema_field_definition();
   $schema = array();
   $schema['wf_job'] = array(
-    'description' => 'Workflow Jobs',
+    'description' => 'WF Jobs',
     'fields' => array(
       'jid' => array(
         'description' => 'Primary key.',
@@ -102,7 +102,7 @@ function wf_job_schema() {
   );
 
   $schema['wf_job_revision'] = array(
-    'description' => 'Workflow Job Revisions',
+    'description' => 'WF Job Revisions',
     'fields' => array(
       'jid' => array(
         'description' => 'Primary key.',
@@ -228,7 +228,7 @@ function wf_job_schema() {
   );
 
   $schema['wf_job_status'] = array(
-    'description' => 'Workflow Job Status',
+    'description' => 'WF Job Status',
     'fields' => array(
       'jsid' => array(
         'description' => 'Primary key.',

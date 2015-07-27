@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow Log management page functions.
+ * WF Log management page functions.
  */
 
 /**
@@ -125,7 +125,7 @@ function wf_log_admin_form($form, $form_state, $log) {
   );
 
   // Delete Button.
-  if (!empty($log->lid) && user_access('delete workflow log entities')) {
+  if (!empty($log->lid) && user_access('delete wf log entities')) {
     $log_uri = entity_uri('wf_log', $log);
     $form['actions']['delete'] = array(
       '#type' => 'link',
@@ -297,7 +297,7 @@ function wf_log_page_add() {
   switch (count($bundles)) {
     case 0:
       $create_link = '';
-      if (user_access('administer workflow log entities')) {
+      if (user_access('administer wf log entities')) {
         $create_link = l(t('Create new log type'), 'admin/structure/wf-log-types/add');
       }
       return '<p>' . t('You have not created any Log types yet. ') . $create_link . '</p>';

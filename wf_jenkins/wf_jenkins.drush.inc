@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Drush command for Workflow Jenkins
+ * Drush command for WF Jenkins
  */
 
 /**

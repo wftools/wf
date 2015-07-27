@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Workflow job rules.
+ * WF job rules.
  */
 
 /**
@@ -9,7 +9,7 @@
  */
 function wf_job_rules_event_info() {
   $defaults = array(
-    'group' => t('Workflow Job'),
+    'group' => t('WF Job'),
     'module' => 'wf_job',
     'access callback' => 'wf_job_rules_integration_access',
   );
@@ -188,7 +188,7 @@ function wf_job_rules_action_info() {
   $actions = array();
 
   $actions['wf_job_update_status'] = array(
-    'group' => t('Workflow Job'),
+    'group' => t('WF Job'),
     'label' => t('Update job status'),
     'base' => 'wf_job_update_status',
     'parameter' => array(
@@ -205,7 +205,7 @@ function wf_job_rules_action_info() {
   );
 
   $actions['wf_job_update_environment'] = array(
-    'group' => t('Workflow Job'),
+    'group' => t('WF Job'),
     'label' => t('Update job environment'),
     'base' => 'wf_job_update_environment',
     'parameter' => array(
@@ -222,7 +222,7 @@ function wf_job_rules_action_info() {
   );
 
   $actions['wf_job_update_owner'] = array(
-    'group' => t('Workflow Job'),
+    'group' => t('WF Job'),
     'label' => t('Update job owner'),
     'base' => 'wf_job_update_owner',
     'parameter' => array(
@@ -238,7 +238,7 @@ function wf_job_rules_action_info() {
   );
 
   $actions['wf_job_update_assigned_user'] = array(
-    'group' => t('Workflow Job'),
+    'group' => t('WF Job'),
     'label' => t('Update job assigned user'),
     'base' => 'wf_job_update_assigned_user',
     'parameter' => array(

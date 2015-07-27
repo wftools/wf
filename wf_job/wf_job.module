@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow job module functions.
+ * WF job module functions.
  */
 
 /**
@@ -12,7 +12,7 @@ function wf_job_entity_info() {
   $info = array();
 
   $info['wf_job'] = array(
-    'label' => t('Workflow Job'),
+    'label' => t('WF Job'),
     'entity class' => 'WfJob',
     'controller class' => 'WfJobController',
     'extra fields controller class' => 'EntityPropertyExtraFieldsController',

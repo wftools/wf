@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow job status admin functions.
+ * WF job status admin functions.
  */
 
 /**

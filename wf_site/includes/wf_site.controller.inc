@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow site controller class.
+ * WF site controller class.
  */
 
 class WfSiteController extends WfEntityAPIController {

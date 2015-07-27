@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow Site class.
+ * WF Site class.
  */
 
 class WfSite extends Entity {

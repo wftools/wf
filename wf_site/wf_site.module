@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow Site Management functions.
+ * WF Site Management functions.
  */
 
 /**
@@ -12,7 +12,7 @@ function wf_site_entity_info() {
   $info = array();
 
   $info['wf_site'] = array(
-    'label' => t('Workflow Site'),
+    'label' => t('WF Site'),
     'entity class' => 'WfSite',
     'controller class' => 'WfSiteController',
     'extra fields controller class' => 'EntityPropertyExtraFieldsController',
@@ -524,7 +524,7 @@ function wf_site_load_multiple($sids = array(), $conditions = array(), $reset = 
 }
 
 /**
- * Provides workflow site entity URI callback.
+ * Provides WF site entity URI.
  */
 function wf_site_uri(WfSite $site) {
   return array(
@@ -548,7 +548,7 @@ function wf_site_page_title($site) {
 }
 
 /**
- * Fetches a list of workflow sites.
+ * Fetches a list of WF sites.
  *
  * @param bool $only_active
  *   Should the list only include active sites?

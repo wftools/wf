@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow site admin functions.
+ * WF site admin functions.
  */
 
 /**

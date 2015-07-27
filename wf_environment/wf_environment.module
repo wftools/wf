@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow Environment Management functions.
+ * WF Environment functions.
  */
 
 /**
@@ -12,7 +12,7 @@ function wf_environment_entity_info() {
   $info = array();
 
   $info['wf_environment'] = array(
-    'label' => t('Workflow Environment'),
+    'label' => t('WF Environment'),
     'entity class' => 'WfEnvironment',
     'controller class' => 'WfEntityAPIController',
     'extra fields controller class' => 'EntityPropertyExtraFieldsController',
@@ -570,7 +570,7 @@ function wf_environment_load_multiple($ids = array(), $conditions = array(), $re
 }
 
 /**
- * Provides workflow environment entity URI callback.
+ * Provides WF environment entity URI callback.
  */
 function wf_environment_uri($env) {
   return array(
@@ -638,7 +638,7 @@ function wf_environment_page_title($env) {
 }
 
 /**
- * Fetches a list of workflow environments.
+ * Fetches a list of WF environments.
  *
  * @param bool $only_active
  *   Should the list only include active environments?
@@ -656,7 +656,7 @@ function wf_environment_list_names($only_active = TRUE, $exclude_id = NULL) {
 }
 
 /**
- * Fetches a list of workflow environments.
+ * Fetches a list of WF environments.
  *
  * @param bool $only_active
  *   Should the list only include active environments?

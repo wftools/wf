@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Workflow Environment class.
+ * WF Environment class.
  */
 
 class WfEnvironment extends Entity {

@@ -5,7 +5,7 @@
  */
 
 /**
- * Workflow log Views Controller.
+ * WF log Views Controller.
  */
 class WfLogViewsController extends EntityDefaultViewsController {
 

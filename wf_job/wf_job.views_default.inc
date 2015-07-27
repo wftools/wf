@@ -97,22 +97,22 @@ function wf_job_views_default_views() {
       'empty_column' => 0,
     ),
   );
-  /* Relationship: Workflow Job: Assignee */
+  /* Relationship: WF Job: Assignee */
   $handler->display->display_options['relationships']['assigned']['id'] = 'assigned';
   $handler->display->display_options['relationships']['assigned']['table'] = 'wf_job';
   $handler->display->display_options['relationships']['assigned']['field'] = 'assigned';
   $handler->display->display_options['relationships']['assigned']['label'] = 'Assignee';
-  /* Relationship: Workflow Job: Owner */
+  /* Relationship: WF Job: Owner */
   $handler->display->display_options['relationships']['owner']['id'] = 'owner';
   $handler->display->display_options['relationships']['owner']['table'] = 'wf_job';
   $handler->display->display_options['relationships']['owner']['field'] = 'owner';
   $handler->display->display_options['relationships']['owner']['label'] = 'Owner';
-  /* Field: Workflow Job: ID */
+  /* Field: WF Job: ID */
   $handler->display->display_options['fields']['jid']['id'] = 'jid';
   $handler->display->display_options['fields']['jid']['table'] = 'wf_job';
   $handler->display->display_options['fields']['jid']['field'] = 'jid';
   $handler->display->display_options['fields']['jid']['element_label_colon'] = FALSE;
-  /* Field: Workflow Job: Title */
+  /* Field: WF Job: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'wf_job';
   $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -133,30 +133,30 @@ function wf_job_views_default_views() {
   $handler->display->display_options['fields']['realname_1']['field'] = 'realname';
   $handler->display->display_options['fields']['realname_1']['relationship'] = 'owner';
   $handler->display->display_options['fields']['realname_1']['label'] = 'Owner';
-  /* Field: Workflow Job: Status */
+  /* Field: WF Job: Status */
   $handler->display->display_options['fields']['jsid']['id'] = 'jsid';
   $handler->display->display_options['fields']['jsid']['table'] = 'wf_job';
   $handler->display->display_options['fields']['jsid']['field'] = 'jsid';
   $handler->display->display_options['fields']['jsid']['element_label_colon'] = FALSE;
-  /* Field: Workflow Job: Delete Link */
+  /* Field: WF Job: Delete Link */
   $handler->display->display_options['fields']['delete_wf_job']['id'] = 'delete_wf_job';
   $handler->display->display_options['fields']['delete_wf_job']['table'] = 'wf_job';
   $handler->display->display_options['fields']['delete_wf_job']['field'] = 'delete_wf_job';
   $handler->display->display_options['fields']['delete_wf_job']['label'] = 'Operations';
-  /* Field: Workflow Job: Edit Link */
+  /* Field: WF Job: Edit Link */
   $handler->display->display_options['fields']['edit_wf_job']['id'] = 'edit_wf_job';
   $handler->display->display_options['fields']['edit_wf_job']['table'] = 'wf_job';
   $handler->display->display_options['fields']['edit_wf_job']['field'] = 'edit_wf_job';
-  /* Field: Workflow Job: Login Link */
+  /* Field: WF Job: Login Link */
   $handler->display->display_options['fields']['login_wf_job']['id'] = 'login_wf_job';
   $handler->display->display_options['fields']['login_wf_job']['table'] = 'wf_job';
   $handler->display->display_options['fields']['login_wf_job']['field'] = 'login_wf_job';
-  /* Sort criterion: Workflow Job: ID */
+  /* Sort criterion: WF Job: ID */
   $handler->display->display_options['sorts']['jid']['id'] = 'jid';
   $handler->display->display_options['sorts']['jid']['table'] = 'wf_job';
   $handler->display->display_options['sorts']['jid']['field'] = 'jid';
   $handler->display->display_options['sorts']['jid']['order'] = 'DESC';
-  /* Filter criterion: Workflow Job: Title */
+  /* Filter criterion: WF Job: Title */
   $handler->display->display_options['filters']['title']['id'] = 'title';
   $handler->display->display_options['filters']['title']['table'] = 'wf_job';
   $handler->display->display_options['filters']['title']['field'] = 'title';
@@ -167,7 +167,7 @@ function wf_job_views_default_views() {
   $handler->display->display_options['filters']['title']['expose']['label'] = 'Title';
   $handler->display->display_options['filters']['title']['expose']['operator'] = 'title_op';
   $handler->display->display_options['filters']['title']['expose']['identifier'] = 'title';
-  /* Filter criterion: Workflow Job: Status */
+  /* Filter criterion: WF Job: Status */
   $handler->display->display_options['filters']['jsid']['id'] = 'jsid';
   $handler->display->display_options['filters']['jsid']['table'] = 'wf_job';
   $handler->display->display_options['filters']['jsid']['field'] = 'jsid';
