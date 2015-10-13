@@ -304,42 +304,6 @@ function wf_job_view($job) {
 }
 
 /**
- * Drush aliases export form.
- */
-function wf_job_export_drush_aliases_form($form, $form_state) {
-  $form = array(
-    'introduction' => array(
-      '#type' => 'item',
-      '#description' => t('Download wf.aliases.drushrc.php file for all existing jobs'),
-    ),
-    'download' => array(
-      '#type' => 'submit',
-      '#value' => t('Download File'),
-    ),
-  );
-  return $form;
-}
-
-/**
- * Submit handler for wf_job_export_drush_aliases_form().
- */
-function wf_job_export_drush_aliases_form_submit($form, &$form_state) {
-  $aliases = wf_job_drush_aliases();
-  $php = "<?php\n" . theme('wf_job_drush_aliases', array('aliases' => $aliases));
-
-  $file = new stdClass();
-  $file->filename = 'wf.aliases.drushrc.php';
-  $file->filemime = 'application/x-php';
-  $file->filesize = strlen($php);
-
-  $headers = file_get_content_headers($file);
-  drupal_send_headers($headers);
-
-  echo $php;
-  exit;
-}
-
-/**
  * Form for deleting jobs.
  */
 function wf_job_delete_form($form, $form_state, $job) {
@@ -365,3 +329,44 @@ function wf_job_delete_form_submit($form, &$form_state) {
   $form_state['redirect'] = url('admin/content/jobs');
 }
 
+/**
+ * Renders a form page containing the Drush integrations.
+ */
+function wf_job_export_drush_aliases_page($user) {
+  $output['drush_aliases'] = array(
+    array(
+      '#theme' => 'link',
+      '#text' => t('Download Drush aliases'),
+      '#path' => 'user/jobs/get-drush-aliases',
+      '#options' => array(
+        'attributes' => array(),
+        'html' => FALSE,
+      ),
+      '#suffix' => t("<p>Download Drush aliases for all of your Jobs's sandboxes and place this file at ~/.drush/  (~/ means your home path)</p>"),
+    ),
+  );
+  return $output;
+}
+
+/**
+ * Page for exporting drush aliases file.
+ */
+function wf_job_output_drush_aliases_file() {
+  $aliases = wf_job_drush_aliases();
+  if (!$aliases) {
+    global $user;
+    drupal_set_message(t('No jobs available'), 'warning');
+    drupal_goto("user/$user->uid/jobs/drush-aliases");
+  }
+  $php = "<?php\n" . theme('wf_job_drush_aliases', array('aliases' => $aliases));
+  $file = new stdClass();
+  $file->filename = 'wf.aliases.drushrc.php';
+  $file->filemime = 'application/x-php';
+  $file->filesize = strlen($php);
+  $headers = file_get_content_headers($file);
+  // Workaround for: https://www.drupal.org/node/1773032
+  $headers['Content-Disposition'] = 'attachment; filename="' . $file->filename . '"';
+  drupal_send_headers($headers);
+  print $php;
+  drupal_exit();
+}

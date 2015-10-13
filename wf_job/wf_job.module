@@ -242,15 +242,6 @@ function wf_job_menu() {
     'type' => MENU_LOCAL_ACTION,
     'weight' => 50,
   );
-  $items['admin/content/jobs/drush-aliases'] = array(
-    'title' => 'Download drush aliases',
-    'description' => 'Admin page for exporting drush wf.aliases.drushrc.php file',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('wf_job_export_drush_aliases_form'),
-    'access arguments' => array('export job aliases'),
-    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
-    'file' => 'includes/wf_job.pages.inc',
-  );
   $items['admin/structure/job-types/manage/%wf_job_type'] = array(
     'title' => 'Config job type',
     'access arguments' => array('administer jobs'),
@@ -273,6 +264,22 @@ function wf_job_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/wf_job.admin.inc',
   );
+  $items['user/%user/jobs/drush-aliases'] = array(
+    'title' => 'Drush aliases',
+    'page callback' => 'wf_job_export_drush_aliases_page',
+    'page arguments' => array(1),
+    'access callback' => 'wf_job_is_allowed_export_drush_aliases',
+    'access arguments' => array(1),
+    'file' => 'includes/wf_job.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['user/jobs/get-drush-aliases'] = array(
+    'page callback' => 'wf_job_output_drush_aliases_file',
+    'access arguments' => array('export job aliases'),
+    'file' => 'includes/wf_job.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+
   return $items;
 }
 
@@ -318,6 +325,10 @@ function wf_job_permission() {
 
   $perms['reallocate job'] = array(
     'title' => t('Reallocate job'),
+  );
+
+  $perms['export job aliases'] = array(
+    'title' => t('Export Job aliases'),
   );
 
   return $perms;
@@ -1100,6 +1111,11 @@ function wf_job_sandbox_uri($job, $path = '') {
   // TODO make this pluggable.
   $slug = wf_job_slug($job->jid);
   $dev_env = wf_environment_dev();
+
+  if (!$dev_env) {
+    return NULL;
+  }
+
   return wf_environment_app_uri($dev_env, $job);
 }
 
@@ -1110,20 +1126,19 @@ function wf_job_sandbox_uri($job, $path = '') {
  * An array of aliases
  */
 function wf_job_drush_aliases() {
-  $new_id = variable_get('wf_job_jsid_new');
-  $completed_id = variable_get('wf_job_jsid_completed');
+  $job_results = views_get_view_result('user_jobs', 'user_jobs');
 
-  $query = new EntityFieldQuery();
-  // Implement hook_entity_query_alter() if you need to change this.
-  $jids = $query->entityCondition('entity_type', 'wf_job')
-        ->propertyCondition('jsid', array($new_id, $completed_id), 'NOT IN')
-        ->propertyOrderBy('jid')
-        ->execute();
-
-  $jobs = array();
-  if (!empty($jids['wf_job'])) {
-    $jobs = entity_load('wf_job', array_keys($jids['wf_job']));
+  // No results.
+  if (!$job_results) {
+    return NULL;
   }
+
+  $jids = array();
+  foreach ($job_results as $job_result) {
+    $jids[] = $job_result->jid;
+  }
+
+  $jobs = entity_load('wf_job', $jids);
 
   $aliases = array(
     'job' => array(
@@ -1138,13 +1153,12 @@ function wf_job_drush_aliases() {
       'parent' => '@job',
       'uri' => preg_replace('#^https?://#', '', $job_uri['path']),
       'root' => variable_get('wf_sandbox_basepath', '/srv/www') . "/$slug/",
-    );
-    $aliases[$job->reference] = array(
-      'parent' => "@$slug",
+      'job' => $job->jid,
     );
   }
 
   drupal_alter('wf_job_drush_aliases', $aliases);
+
   return $aliases;
 }
 
@@ -1729,4 +1743,23 @@ function wf_job_attach_form_log_value_to_entity(&$entity, $form_state, $log_type
   if (isset($form_state['values']['log'])) {
     wf_job_attach_log_to_entity($entity, $form_state['values']['log'], $log_type);
   }
+}
+
+/**
+ * Checks if the user is allowed to export drush aliases.
+ *
+ * @param object $user
+ *   The user object to be checked.
+ *
+ * @return bool
+ *   Returns TRUE in case of success, FALSE otherwise.
+ */
+function wf_job_is_allowed_export_drush_aliases(stdClass $user) {
+  $current_user = $GLOBALS['user'];
+
+  if ($user->uid != $current_user->uid) {
+    return FALSE;
+  }
+
+  return user_access('export job aliases');
 }

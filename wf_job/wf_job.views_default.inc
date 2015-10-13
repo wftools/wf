@@ -267,5 +267,81 @@ function wf_job_views_default_views() {
   $handler = $view->new_display('block', 'Block', 'block');
   $export['job_users'] = $view;
 
+  $view = new view();
+  $view->name = 'user_jobs';
+  $view->description = '';
+  $view->tag = 'default';
+  $view->base_table = 'wf_job';
+  $view->human_name = 'User\'s Jobs';
+  $view->core = 7;
+  $view->api_version = '3.0';
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+  /* Display: Master */
+  $handler = $view->new_display('default', 'Master', 'default');
+  $handler->display->display_options['title'] = 'User\'s Jobs';
+  $handler->display->display_options['use_more_always'] = FALSE;
+  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['cache']['type'] = 'none';
+  $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['pager']['type'] = 'full';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '10';
+  $handler->display->display_options['style_plugin'] = 'table';
+  /* Field: Workflow Job: ID */
+  $handler->display->display_options['fields']['jid']['id'] = 'jid';
+  $handler->display->display_options['fields']['jid']['table'] = 'wf_job';
+  $handler->display->display_options['fields']['jid']['field'] = 'jid';
+
+  /* Display: User's Jobs */
+  $handler = $view->new_display('page', 'User\'s Jobs', 'user_jobs');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['title'] = 'Jobs';
+  $handler->display->display_options['defaults']['access'] = FALSE;
+  $handler->display->display_options['access']['type'] = 'perm';
+  $handler->display->display_options['access']['perm'] = 'view own job job';
+  $handler->display->display_options['defaults']['relationships'] = FALSE;
+  /* Relationship: Workflow Job: Owner */
+  $handler->display->display_options['relationships']['owner']['id'] = 'owner';
+  $handler->display->display_options['relationships']['owner']['table'] = 'wf_job';
+  $handler->display->display_options['relationships']['owner']['field'] = 'owner';
+  $handler->display->display_options['defaults']['fields'] = FALSE;
+  /* Field: Workflow Job: ID */
+  $handler->display->display_options['fields']['jid']['id'] = 'jid';
+  $handler->display->display_options['fields']['jid']['table'] = 'wf_job';
+  $handler->display->display_options['fields']['jid']['field'] = 'jid';
+  /* Field: Workflow Job: Title */
+  $handler->display->display_options['fields']['title']['id'] = 'title';
+  $handler->display->display_options['fields']['title']['table'] = 'wf_job';
+  $handler->display->display_options['fields']['title']['field'] = 'title';
+  $handler->display->display_options['fields']['title']['alter']['make_link'] = TRUE;
+  $handler->display->display_options['fields']['title']['alter']['path'] = 'job/[jid]';
+  $handler->display->display_options['defaults']['sorts'] = FALSE;
+  /* Sort criterion: Workflow Job: ID */
+  $handler->display->display_options['sorts']['jid']['id'] = 'jid';
+  $handler->display->display_options['sorts']['jid']['table'] = 'wf_job';
+  $handler->display->display_options['sorts']['jid']['field'] = 'jid';
+  $handler->display->display_options['sorts']['jid']['order'] = 'DESC';
+  $handler->display->display_options['defaults']['arguments'] = FALSE;
+  /* Contextual filter: User: Uid */
+  $handler->display->display_options['arguments']['uid']['id'] = 'uid';
+  $handler->display->display_options['arguments']['uid']['table'] = 'users';
+  $handler->display->display_options['arguments']['uid']['field'] = 'uid';
+  $handler->display->display_options['arguments']['uid']['relationship'] = 'owner';
+  $handler->display->display_options['arguments']['uid']['default_action'] = 'default';
+  $handler->display->display_options['arguments']['uid']['default_argument_type'] = 'current_user';
+  $handler->display->display_options['arguments']['uid']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['uid']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['uid']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['defaults']['filter_groups'] = FALSE;
+  $handler->display->display_options['filter_groups']['operator'] = 'OR';
+  $handler->display->display_options['filter_groups']['groups'] = array(
+    1 => 'AND',
+    2 => 'AND',
+  );
+  $handler->display->display_options['defaults']['filters'] = FALSE;
+  $handler->display->display_options['path'] = 'user/jobs';
+  $export['job_users'] = $view;
+
   return $export;
 }
