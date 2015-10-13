@@ -23,7 +23,7 @@ function wf_job_entity_info() {
       'bundle' => 'bundle',
       'id' => 'jid',
       'revision' => 'vid',
-      'label' => 'job',
+      'label' => 'title',
       'uuid' => 'uuid',
       'revision uuid' => 'vuuid',
     ),
