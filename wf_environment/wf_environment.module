@@ -872,6 +872,18 @@ function wf_environment_dev() {
 function wf_environment_delete_form($form, $form_state, $env) {
   $env_uri = entity_uri('wf_environment', $env);
   $title = entity_label('wf_environment', $env);
+  $job_count = wf_environment_get_job_count($env->id);
+
+  if ($job_count > 0) {
+    drupal_set_title(t("Delete <strong>@title</strong>", array('@title' => $title)), PASS_THROUGH);
+    drupal_set_message(t('Unable to delete environment'), 'error');
+    return array(
+      'disclaimer' => array(
+        '#markup' => t('Unable to delete environment because jobs are associated with it.'),
+      ),
+    );
+  }
+
   return confirm_form(
     $form,
     t("Are you sure you want to delete <strong>@title</strong>?", array('@title' => $title)),
@@ -890,4 +902,17 @@ function wf_environment_delete_form_submit($form, &$form_state) {
   entity_delete('wf_environment', $env->id);
   drupal_set_message(t("Environment '@title' was successfully deleted.", array('@title' => $title)));
   $form_state['redirect'] = url('admin/content/environments');
+}
+
+/**
+ * Gets related job count from a environment.
+ */
+function wf_environment_get_job_count($env_id) {
+  $results = db_select('wf_job', 'wf_job')
+    ->fields('wf_job')
+    ->condition('eid', $env_id)
+    ->countQuery()
+    ->execute()
+    ->fetchField();
+  return $results;
 }
