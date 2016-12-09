@@ -911,7 +911,8 @@ function wf_environment_get_job_count($env_id) {
   $results = db_select('wf_job', 'wf_job')
     ->fields('wf_job')
     ->condition('eid', $env_id)
+    ->countQuery()
     ->execute()
-    ->rowCount();
+    ->fetchField();
   return $results;
 }
